@@ -1,0 +1,168 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .badge-inside {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background-color: #ffaa16;
+        color: rgb(31, 29, 29);
+    }
+
+    .form-control {
+        padding-right: 80px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+
+    .hospital-image,
+    .hospital-logo {
+        max-width: 150px;
+        width: 150px;
+        height: 150px;
+        height: auto;
+        margin-right: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .image-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .image-label {
+        margin-right: 10px;
+        min-width: 120px;
+        text-align: right;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Edit Department</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Table</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Edit Department</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Edit Department</h4>
+                        <div>
+                            <a href="/admin/hospital/departments/">
+                                <button title="list" type="button" class="btn btn-rounded btn-outline-success">
+                                    <span><i class="fa fa-list"></i></span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Hospital</label>
+                                    <div class="col-sm-10">
+                                        <select id="hospital" class="form-control" name="hospital">
+                                            <option value="" disabled>Select a hospital</option>
+                                            {% for hospital in hospitals %}
+                                                <option value="{{ hospital.id }}" {% if hospital.id == department.hospital.id %}selected{% endif %}>{{ hospital.hospital_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Department Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" id="department_name" name="department_name" required value="{{ department.department_name }}" placeholder="Input Department Name">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Description</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="description" placeholder="Input Description">{{ department.description }}</textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Department Image -->
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Department Image</label>
+                                    <div class="col-sm-10">
+                                        {% if department.image %}
+                                            <img id="department-image-preview" src="{{ department.image.url }}" alt="Department Image" class="hospital-image">
+                                        {% else %}
+                                            <img id="department-image-preview" src="{% static 'images/default_image.png' %}" alt="Department Image" class="hospital-image">
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-sm-10 ml-auto">
+                                        <input type="file" class="form-control" id="department-image-input" name="image">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-sm-10 offset-sm-2">
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                        <a href="{% url 'hospital_department_list' %}" class="btn btn-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('department-image-input').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        const defaultImage = "{% static 'images/default_image.png' %}";
+
+        reader.onload = function(e) {
+            document.getElementById('department-image-preview').src = e.target.result;
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            document.getElementById('department-image-preview').src = defaultImage;
+        }
+    });
+</script>
+
+{% endblock content %}

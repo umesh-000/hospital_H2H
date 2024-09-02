@@ -1,0 +1,127 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .badge-inside {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background-color: #ffaa16;
+        color: rgb(31, 29, 29);
+    }
+
+    .form-control {
+        padding-right: 80px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Edit Doctor Assignment</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Table</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Edit Doctor Assignment</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Edit Doctor Assignment</h4>
+                        <div>
+                            <a href="{% url 'hospital_doctors_list' %}">
+                                <button title="list" type="button" class="btn btn-rounded btn-outline-success">
+                                    <span><i class="fa fa-list"></i></span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Hospital Name</label>
+                                    <div class="col-sm-10">
+                                        <select id="hospital" class="form-control" name="hospital">
+                                            <option selected>Choose...</option>
+                                            {% for hospital in hospitals %}
+                                                <option value="{{ hospital.id }}" {% if hospital.id == doctor_assignment.hospital.id %}selected{% endif %}>{{ hospital.hospital_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Doctor Name</label>
+                                    <div class="col-sm-10">
+                                        <select id="doctor" class="form-control" name="doctor">
+                                            <option selected>Choose...</option>
+                                            {% for doctor in doctors %}
+                                                <option value="{{ doctor.id }}" {% if doctor.id == doctor_assignment.doctor.id %}selected{% endif %}>{{ doctor.dr_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Join Date</label>
+                                    <div class="col-sm-10">
+                                        <input type="date" class="form-control" id="join_date" required name="join_date" 
+                                            value="{{ doctor_assignment.join_date|date:'Y-m-d' }}">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Status</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="status" required>
+                                            <option value="1" {% if doctor_assignment.status == "1" %}selected{% endif %}>Active</option>
+                                            <option value="0" {% if doctor_assignment.status == "0" %}selected{% endif %}>Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-sm-10 offset-sm-2">
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                        <a href="{% url 'hospital_doctors_list' %}" class="btn btn-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

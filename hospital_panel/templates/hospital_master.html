@@ -1,0 +1,208 @@
+{% extends 'master.html' %}
+{% load static %}
+
+    {% block header %}
+        <div class="nav-header">
+            <a href="/admin/" class="brand-logo">
+                <img class="logo-abbr" src="{% static './images/logo-color.png' %}" alt="">
+                <span class="brand-title"><b>Health2Home</b></span>
+            </a>
+
+            <div class="nav-control">
+                <div class="hamburger">
+                    <span class="line"></span><span class="line"></span><span class="line"></span>
+                </div>
+            </div>
+        </div>
+        <!--**********************************  Nav header end ***********************************-->
+
+        <!--********************************** Header start ***********************************-->
+        <div class="header">
+            <div class="header-content">
+                <nav class="navbar navbar-expand">
+                    <div class="collapse navbar-collapse justify-content-between">
+                        <div class="header-left">
+                            <div class="search_bar dropdown">
+                                <span class="search_icon p-3 c-pointer" data-toggle="dropdown">
+                                    <i class="mdi mdi-magnify"></i>
+                                </span>
+                                <div class="dropdown-menu p-0 m-0">
+                                    <form>
+                                        <input class="form-control" type="search" placeholder="Search"
+                                            aria-label="Search">
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="navbar-nav header-right">
+                            <li class="nav-item dropdown notification_dropdown">
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                    <i class="mdi mdi-bell"></i>
+                                    <div class="pulse-css"></div>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <ul class="list-unstyled">
+                                        <li class="media dropdown-item">
+                                            <span class="success"><i class="ti-user"></i></span>
+                                            <div class="media-body">
+                                                <a href="#">
+                                                    <p><strong>Martin</strong> has added a <strong>customer</strong> Successfully
+                                                    </p>
+                                                </a>
+                                            </div>
+                                            <span class="notify-time">3:20 am</span>
+                                        </li>
+                                        <li class="media dropdown-item">
+                                            <span class="primary"><i class="ti-shopping-cart"></i></span>
+                                            <div class="media-body">
+                                                <a href="#">
+                                                    <p><strong>Jennifer</strong> purchased Light Dashboard 2.0.</p>
+                                                </a>
+                                            </div>
+                                            <span class="notify-time">3:20 am</span>
+                                        </li>
+                                        <li class="media dropdown-item">
+                                            <span class="danger"><i class="ti-bookmark"></i></span>
+                                            <div class="media-body">
+                                                <a href="#">
+                                                    <p><strong>Robin</strong> marked a <strong>ticket</strong> as unsolved.
+                                                    </p>
+                                                </a>
+                                            </div>
+                                            <span class="notify-time">3:20 am</span>
+                                        </li>
+                                        <li class="media dropdown-item">
+                                            <span class="primary"><i class="ti-heart"></i></span>
+                                            <div class="media-body">
+                                                <a href="#">
+                                                    <p><strong>David</strong> purchased Light Dashboard 1.0.</p>
+                                                </a>
+                                            </div>
+                                            <span class="notify-time">3:20 am</span>
+                                        </li>
+                                        <li class="media dropdown-item">
+                                            <span class="success"><i class="ti-image"></i></span>
+                                            <div class="media-body">
+                                                <a href="#">
+                                                    <p><strong> James.</strong> has added a<strong>customer</strong> Successfully
+                                                    </p>
+                                                </a>
+                                            </div>
+                                            <span class="notify-time">3:20 am</span>
+                                        </li>
+                                    </ul>
+                                    <a class="all-notification" href="#">See all notifications <i
+                                            class="ti-arrow-right"></i></a>
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown header-profile">
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                    <i class="mdi mdi-account"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="./app-profile.html" class="dropdown-item">
+                                        <i class="icon-user"></i>
+                                        <span class="ml-2">Profile </span>
+                                    </a>
+                                    <a href="./email-inbox.html" class="dropdown-item">
+                                        <i class="icon-envelope-open"></i>
+                                        <span class="ml-2">Inbox </span>
+                                    </a>
+                                    <a href="/admin/login/" class="dropdown-item">
+                                        <i class="icon-key"></i>
+                                        <span class="ml-2">Logout </span>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        {% endblock header %}
+        <!--********************************** Header end ti-comment-alt ***********************************-->
+
+        {% block sidebar %}
+        <!--**********************************  Sidebar start ***********************************-->
+        <div class="quixnav">
+                
+            
+            <form>
+                <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+            </form>
+        
+            <div class="quixnav-scroll">
+                <ul class="metismenu" id="menu">
+                    <li class="nav-label first">Main Menu</li>
+
+                    <li><a href="/hospital_panel/" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="nav-text">Dashboard</span></a></li>
+                    <li><a href="/admin/bed-requests/" aria-expanded="false"><i class="fa fa-bars"></i><span class="nav-text">Bed Request</span></a></li>
+                    <li><a href="#" aria-expanded="false"><i class="fa fa-file-image-o"></i><span class="nav-text">Offer Banners</span></a></li>
+
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-stethoscope"></i><span class="nav-text">Hospitals</span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="/admin/hospital/"><i class="fa fa-align-right"></i>Hospitals</a></li>
+                            <li><a href="/admin/hospital/ward/"><i class="fa fa-hotel"></i>Hospital Wards</a></li>
+                            <li><a href="/admin/hospital/ward/beds/"><i class="fa fa-bed"></i>Hospital Bed</a></li>
+                            <li><a href="/admin/hospital/ward/bed/status/"><i class="fa fa-hospital-o"></i>Hospital Bed Status</a></li>
+                            <li><a href="/admin/hospital/fee_settings/"><i class="fa fa-bars"></i>Hospital Fee Settings</a></li>
+                            <li><a href="/admin/hospital/services/"><i class="fa fa-bars"></i>Hospital Services</a></li>
+                            <li><a href="/admin/hospital/departments/"><i class="fa fa-align-justify"></i>Hospital Department</a></li>
+                            <li><a href="/admin/hospital/facilities/"><i class="fa fa-bars"></i>Hospital Facilities</a></li>
+                            <li><a href="/admin/hospital_doctors/"><i class="fa fa-align-center"></i>Hospital Doctors</a></li>
+                            <li><a href="/admin/insurances/"><i class="fa fa-align-center"></i>Insurances</a></li>
+                            <li><a href="/admin/hospital_insurances/"><i class="fa fa-file-powerpoint-o"></i>Hospital Insurances</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Hospital Patients</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Hospital Pharmacies</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Hospital Laboratories</a></li>
+                            <li><a href="#"><i class="fa fa-file-photo-o"></i>Hospital Galleries</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Hospital Bank Details</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Hospital Earnings</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Hospital Wallet Histories</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-user-md"></i><span class="nav-text"> Doctor Module </span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="/admin/doctors/"><i class="fa fa-stethoscope"></i>Doctors</a></li>
+                            <li><a href="/admin/symptoms"><i class="fa fa-assistive-listening-systems"></i>Symptoms</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Doctor Documents</a></li>
+                            <li><a href="./index.html"><i class="fa fa-google-wallet"></i>Doctor Wallet Histories</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Doctor Bank Details</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bank"></i>Doctor Withdrawals</a></li>
+                            <li><a href="./index.html"><i class="fa fa-dollar"></i>Doctor Earnings</a></li>
+                            <li><a href="./index.html"><i class="fa fa-gears"></i>Doctor Booking Settings</a></li>
+                            <li><a href="/admin/specialists/"><i class="fa fa-certificate"></i>Doctor Specialist &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Categories</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Booking Requests</a></li>
+                            <li><a href="./index.html"><i class="fa fa-exclamation-circle"></i>Booking Request Statuses</a></li>
+                            <li><a href="./index.html"><i class="fa fa-hand-o-up"></i>Consultation Requests</a></li>
+                            <li><a href="./index.html"><i class="fa fa-times-circle"></i>Consultation Request &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Statuses</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-user"></i><span class="nav-text"> Pharmacies </span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="./index.html"><i class="fa fa-users"></i>Delivery Boys</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacies</a></li>
+                            <li><a href="./index.html"><i class="fa fa-reorder"></i>Pharmacy Orders</a></li>
+                            <li><a href="./index.html"><i class="fa fa-reorder"></i>Pharmacy Order Statuses</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Categories</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Products</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Documents</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Earnings</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Wallet Histories</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Withdrawals</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Sub Categories</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bookmark"></i>Promo Codes</a></li>
+                            <li><a href="./index.html"><i class="fa fa-align-center"></i>Promo Types</a></li>
+                        </ul>
+                    </li>
+
+                    <li><a href="widget-basic.html" aria-expanded="false"><i class="fa fa-feed"></i><span class="nav-text">Feedback</span></a></li>
+                </ul>
+            </div>
+        </div>
+        <!--**********************************  Sidebar end  ***********************************-->
+        {% endblock sidebar %}

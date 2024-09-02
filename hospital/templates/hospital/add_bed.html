@@ -1,0 +1,164 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .badge-inside {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background-color: #ffaa16;
+        color: rgb(31, 29, 29);
+    }
+
+    .form-control {
+        padding-right: 80px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Add Bed</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Form</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Add Bed</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Add Bed</h4>
+                        <div>
+                            <a href="/admin/hospital/ward/beds/">
+                                <button title="list" type="button" class="btn btn-rounded btn-outline-success">
+                                    <span><i class="fa fa-list"></i></span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <!-- Bed Details Form -->
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Hospital</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="hospital_id" required>
+                                            <option value="">Select Hospital</option>
+                                            {% for hospital in hospitals %}
+                                                <option value="{{ hospital.id }}">{{ hospital.hospital_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Ward</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="ward_id" required>
+                                            <option value="">Select Ward</option>
+                                            {% for ward in wards %}
+                                                <option value="{{ ward.id }}">{{ ward.ward_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Bed Type</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="bed_type" required>
+                                            <option value="">Select Bed Type</option>
+                                            <option value="General">General Ward Beds</option>
+                                            <option value="ICU">ICU Beds</option>
+                                            <option value="NICU">NICU Beds</option>
+                                            <option value="PICU">PICU Beds</option>
+                                            <option value="Maternity">Maternity Beds</option>
+                                            <option value="Emergency">Emergency Room Beds</option>
+                                            <option value="Surgical">Surgical Beds</option>
+                                            <option value="Isolation">Isolation Beds</option>
+                                            <option value="Psychiatric">Psychiatric Beds</option>
+                                            <option value="Hospice">Hospice Beds</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Bed Count</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" class="form-control" name="bed_count" placeholder="Enter bed count" min="0" oninput="validateBedCount(this)" required>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Bed Price</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="sale_bed_price" placeholder="Enter sale bed price" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Sale Price</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="sale_price" placeholder="Enter sale price" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Status</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="status" required>
+                                            <option value="1">Active</option>
+                                            <option value="0">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-10 offset-sm-0">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function validateBedCount(input) {
+        if (input.value < 0) {
+            input.value = 0;
+        }
+    }
+</script>
+
+{% endblock content %}

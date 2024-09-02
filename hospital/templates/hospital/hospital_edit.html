@@ -1,0 +1,247 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .badge-inside {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background-color: #ffaa16;
+        color: rgb(31, 29, 29);
+    }
+
+    .form-control {
+        padding-right: 80px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+
+    .hospital-image,
+    .hospital-logo {
+    max-width: 150px;
+    width: 150px;
+    height: 150px;
+    height: auto;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Adjust the shadow as needed */
+    }
+
+    .image-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .image-label {
+        margin-right: 10px;
+        min-width: 120px;
+        text-align: right;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Hospital Details</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Form</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Hospital Details</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Hospital Information</h4>
+                        <div>
+                            <a href="/admin/hospital/">
+                                <button title="list" type="button" class="btn btn-rounded btn-outline-success">
+                                    <span><i class="fa fa-list"></i></span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <!-- Hospital Details Form -->
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Hospital Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="hospital_name" value="{{ hospital.hospital_name }}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">User Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" readonly value="{{ hospital.user_name }}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Phone Number</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="phone_number" value="{{ hospital.phone_number }}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Email</label>
+                                    <div class="col-sm-10">
+                                        <input type="email" class="form-control" readonly value="{{ hospital.email }}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Website</label>
+                                    <div class="col-sm-10">
+                                        <input type="url" class="form-control" name="website_url" value="{{ hospital.website_url }}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Type</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="type">
+                                            {% for value, display in hospital.HOSPITAL_TYPE_CHOICES %}
+                                                <option value="{{ value }}" {% if value == hospital.type %}selected{% endif %}>
+                                                    {{ display }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Status</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="status">
+                                            {% for value, display in hospital.STATUS_CHOICES %}
+                                                <option value="{{ value }}" {% if value == hospital.status %}selected{% endif %}>
+                                                    {{ display }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Recommendation</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="is_recommended">
+                                            {% for value, display in hospital.RECOMMENDATION_CHOICES %}
+                                                <option value="{{ value }}" {% if value == hospital.is_recommended %}selected{% endif %}>
+                                                    {{ display }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Latitude</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="latitude" value="{{ hospital.latitude }}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Longitude</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="longitude" value="{{ hospital.longitude }}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Address</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" rows="3" name="address">{{ hospital.address }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Description</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" rows="3" name="description">{{ hospital.description }}</textarea>
+                                    </div>
+                                </div>
+                                
+                                <!-- Hospital Logo with Update -->
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Hospital Logo</label>
+                                    <div class="col-sm-2">
+                                        <img id="hospital-logo-preview" src="{{ hospital.hospital_logo.url }}" alt="Hospital Logo" class="hospital-logo">
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <input type="file" class="form-control" id="hospital-logo-input" name="hospital_logo">
+                                    </div>
+                                </div>
+                                
+                                <!-- Hospital Image with Update -->
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Hospital Image</label>
+                                    <div class="col-sm-2">
+                                        <img id="hospital-image-preview" src="{{ hospital.hospital_image.url }}" alt="Hospital Image" class="hospital-image">
+                                    </div>
+                                    <div class="col-sm-8 col-form-label">
+                                        <input type="file" class="form-control" id="hospital-image-input" name="hospital_image">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <div class="col-sm-10 offset-sm-0">
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('hospital-logo-input').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('hospital-logo-preview').src = e.target.result;
+        };
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('hospital-image-input').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('hospital-image-preview').src = e.target.result;
+        };
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
+{% endblock content %}

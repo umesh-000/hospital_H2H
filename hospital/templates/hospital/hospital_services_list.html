@@ -1,0 +1,97 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545;
+        /* Dark color for text, adjustable as needed */
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Hospital Services</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Table</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Hospital Services</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header dark-font">
+                        <h4 class="card-title">Hospital Services</h4>
+                        <a href="/admin/hospital/service/create/">
+                            <button type="button" class="btn btn-rounded btn-primary ml-auto">
+                                <span class="btn-icon-left text-primary">
+                                    <i class="fa fa-plus"></i>
+                                </span>
+                                New
+                            </button>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr class="dark-font">
+                                        <th>ID</th>
+                                        <th>Hospital</th>
+                                        <th>Service Name</th>
+                                        <th>Service Icon</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for service in hospital_service %}
+                                    <tr class="dark-font">
+                                        <td>{{ service.id }}</td>
+                                        <td>{{ service.hospital.hospital_name }}</td>
+                                        <td>{{ service.service_name }}</td>
+                                        <td>
+                                            {% if service.service_icon %}
+                                                <img src="{{ service.service_icon.url }}" alt="Service Icon" width="50">
+                                            {% else %}
+                                                No icon
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary" type="button"
+                                                    id="actionDropdown{{ service.id }}" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                    aria-labelledby="actionDropdown{{ service.id }}">
+                                                    <a class="dropdown-item" href="/admin/hospital/service/{{service.id}}/edit/">Edit</a>
+                                                    <a class="dropdown-item" href="/admin/hospital/service/{{service.id}}/delete/">Delete</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">No services found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

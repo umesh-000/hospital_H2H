@@ -1,0 +1,95 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545;
+        /* Dark color for text, adjustable as needed */
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Doctors List</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Admin</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Doctors List</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header dark-font">
+                        <h4 class="card-title">Doctors List</h4>
+                        <a href="{% url 'hospital_doctor_create' %}">
+                            <button type="button" class="btn btn-rounded btn-primary ml-auto">
+                                <span class="btn-icon-left text-primary">
+                                    <i class="fa fa-plus"></i>
+                                </span>
+                                New
+                            </button>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr class="dark-font">
+                                        <th>ID</th>
+                                        <th>Hospital</th>
+                                        <th>Doctor Unique Code</th>
+                                        <th>Join Date </th>
+                                        <th>Doctor</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for hospital_doctor in hospital_doctors %}
+                                    <tr class="dark-font">
+                                        <td>{{ hospital_doctor.id }}</td>
+                                        <td>{{ hospital_doctor.hospital.hospital_name }}</td>
+                                        <td>{{ hospital_doctor.doctor.dr_unique_code }}</td>
+                                        
+                                        <td>{{ hospital_doctor.join_date }}</td>
+                                        <td>{{ hospital_doctor.doctor.dr_name }}</td>
+                                        <td><span class="badge badge-success">{{ hospital_doctor.get_status_display|capfirst }}</span></td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary" type="button"
+                                                    id="actionDropdown{{ hospital_doctor.id }}" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                    aria-labelledby="actionDropdown{{ hospital_doctor.id }}">
+                                                    <a class="dropdown-item" href="/admin/hospital_doctor/{{hospital_doctor.id}}/edit/">Edit</a>
+                                                    <a class="dropdown-item" href="/admin/hospital_doctor/{{hospital_doctor.id}}/delete/">Delete</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="12" class="text-center">No doctors found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

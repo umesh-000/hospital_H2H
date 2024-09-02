@@ -1,0 +1,117 @@
+
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545; /* Dark color, you can adjust this as needed */
+    }
+    .form-group {
+        position: relative;
+    }
+    .badge-inside {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background-color: #ffaa16; /* Bootstrap primary color */
+        color: rgb(31, 29, 29);
+    }
+    .form-control {
+        padding-right: 80px; /* Adjust this padding to fit the badge */
+    }
+    .card-header {
+        display: flex;
+        justify-content: space-between; /* Align items to the edges */
+        align-items: center; /* Center items vertically */
+    }
+    .card-header .btn {
+        margin-left: 10px; 
+    }
+</style>
+
+<!--**********************************
+    Content body start
+***********************************-->
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Element</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Form</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Element</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- row -->
+        <div class="row">
+            <div class="col-xl-6 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Details</h4>
+                        <div>
+                            <!-- Buttons aligned to the right -->
+                            <a href="/admin/users/"><button title="list" type="button" class="btn btn-rounded btn-outline-success"><span ><i class="fa fa-list"></i></span></button></a>
+                            <a href="/admin/users/{{user.id}}/edit"><button title="edit" type="button" class="btn btn-rounded btn-outline-primary"><span ><i class="fa fa-pencil"></i></span></button></a>
+                            <!-- <a href="/admin/users/{{user.id}}/delete"><button title="delete" type="button" class="btn btn-rounded btn-outline-danger"><span ><i class="fa fa-trash"></i></span></button></a> -->
+                            <button title="delete" type="button" class="btn btn-rounded btn-outline-danger" id="delete-button"><span><i class="fa fa-trash"></i></span></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <form>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">ID</label>
+                                    <div class="col-sm-10">
+                                        <input type="email" class="form-control" readonly value="{{user.id}}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Username</label>
+                                    <div class="col-sm-10">
+                                        <input type="email" class="form-control" readonly value="{{user.username}}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Email</label>
+                                    <div class="col-sm-10">
+                                        <input type="email" class="form-control" readonly value="{{user.email}}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Role</label>
+                                    <div class="col-sm-10 position-relative">
+                                        <input type="text" class="form-control" readonly>
+                                        <span class="badge badge-inside">{{ user.username|capfirst }}</span>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Create</label>
+                                    <div class="col-sm-10">
+                                        <input type="email" class="form-control" readonly value="{{user.create_at}}">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Update</label>
+                                    <div class="col-sm-10">
+                                        <input type="email" class="form-control" readonly value="{{user.modified_at}}">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,104 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+        <!--********************************** Content body start  ***********************************-->
+        <div class="content-body">
+            <!-- row -->
+            <div class="container-fluid">
+                <div class="dashboard-header">Dashboard</div>
+                <div class="row">
+                    <div class="col-lg-3 col-sm-6">
+                        <div style="background-color: #0073b7;" class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">Total Customers </div>
+                                    <div class="stat-digit">59</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-6">
+                        <div style="background-color: #ff851b;" class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">Total Vendors</div>
+                                    <div class="stat-digit">2</div>
+                                </div>
+                                <!-- <div class="progress">
+                                    <div class="progress-bar progress-bar-primary w-75" role="progressbar" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-6">
+                        <div style="background-color: #001f3f;" class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">Total Doctors</div>
+                                    <div class="stat-digit"> {{ doctors_count }}</div>
+                                </div>
+                                <!-- <div class="progress">
+                                    <div class="progress-bar progress-bar-warning w-50" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-6">
+                        <div style="background-color: #3d9970;" class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">Total Doctor Bookings</div>
+                                    <div class="stat-digit">0</div>
+                                </div>
+                                <!-- <div class="progress">
+                                    <div class="progress-bar progress-bar-danger w-65" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div> -->
+                            </div>
+                        </div>
+                        <!-- /# card -->
+                    </div>
+                    <div class="col-lg-4 col-sm-6">
+                        <div style="background-color: #d81b60;" class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">Total Pharmacy Orders</div>
+                                    <div class="stat-digit">0</div>
+                                </div>
+                                <!-- <div class="progress">
+                                    <div class="progress-bar progress-bar-danger w-65" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div> -->
+                            </div>
+                        </div>
+                        <!-- /# card -->
+                    </div>
+                    <div class="col-lg-4 col-sm-6">
+                        <div style="background-color: #0073b7;" class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">Completed Pharmacy Orders</div>
+                                    <div class="stat-digit">0</div>
+                                </div>
+                                <!-- <div class="progress">
+                                    <div class="progress-bar progress-bar-danger w-65" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div> -->
+                            </div>
+                        </div>
+                        <!-- /# card -->
+                    </div>
+                    <div class="col-lg-4 col-sm-6">
+                        <div style="background-color: #ff851b;" class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">Pending Pharmacy Orders</div>
+                                    <div class="stat-digit">0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /# card -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--********************************** Content body end  ***********************************-->
+{% endblock content %}

@@ -1,0 +1,106 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .dark-font {
+        color: #454545;
+        /* Dark color for text, adjustable as needed */
+    }
+    .no-data-icon {
+        font-size: 2rem;
+        color: #d1d1d1;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Hospital Insurances List</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Table</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Hospital Insurances List</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header dark-font">
+                        <h4 class="card-title">Hospital Insurances List</h4>
+                        <a href="/admin/hospital_insurance/create/">
+                            <button type="button" class="btn btn-rounded btn-primary ml-auto">
+                                <span class="btn-icon-left text-primary">
+                                    <i class="fa fa-plus"></i>
+                                </span>
+                                New
+                            </button>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr class="dark-font">
+                                        <th>ID</th>
+                                        <th>Hospital Name</th>
+                                        <th>Insurance Name</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for association in hospital_insurances %}
+                                    <tr class="dark-font">
+                                        <td>{{ association.id }}</td>
+                                        <td>{{ association.hospital.hospital_name }}</td>
+                                        <td>{{ association.insurance.insurance_name }}</td>
+                                        <td>
+                                            {% if association.status == 1 %}
+                                                <span class="badge badge-success">Active</span>
+                                            {% else %}
+                                                <span class="badge badge-danger">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary" type="button"
+                                                    id="actionDropdown{{ association.id }}" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                    aria-labelledby="actionDropdown{{ association.id }}">
+                                                    <a class="dropdown-item" href="/admin/hospital_insurance/{{association.id}}/edit/">Edit</a>
+                                                    <a class="dropdown-item" href="/admin/hospital_insurance/{{association.id}}/delete/">Delete</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <i class="no-data-icon fa fa-info-circle"></i>
+                                            <div>Not Found</div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

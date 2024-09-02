@@ -1,0 +1,88 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545; /* Dark color for text, adjustable as needed */
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Hospital Fee Settings</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Table</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Hospital Fee Settings</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header dark-font">
+                        <h4 class="card-title">Hospital Fee Settings</h4>
+                        <a href="/admin/hospital/fee_settings/create/">
+                            <button type="button" class="btn btn-rounded btn-primary ml-auto">
+                                <span class="btn-icon-left text-primary">
+                                    <i class="fa fa-plus"></i>
+                                </span>
+                                New
+                            </button>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr class="dark-font">
+                                        <th>ID</th>
+                                        <th>Hospital</th>
+                                        <th>Appointment Fee</th>
+                                        <th>Consultation Fee</th>
+                                        <th>Waiting Time</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for fee_setting in fee_settings %}
+                                    <tr class="dark-font">
+                                        <td>{{ fee_setting.id }}</td>
+                                        <td>{{ fee_setting.hospital.hospital_name }}</td>
+                                        <td>{{ fee_setting.appointment_fee }}</td>
+                                        <td>{{ fee_setting.consultation_fee }}</td>
+                                        <td>{{ fee_setting.waiting_time }}</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary" type="button" id="actionDropdown{{ fee_setting.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actionDropdown{{ fee_setting.id }}">
+                                                    <a class="dropdown-item" href="#">Edit</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="8" class="text-center">No fee settings found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

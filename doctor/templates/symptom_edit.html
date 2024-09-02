@@ -1,0 +1,164 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .badge-inside {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background-color: #ffaa16;
+        color: rgb(31, 29, 29);
+    }
+
+    .form-control {
+        padding-right: 80px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+
+    .category-image {
+        max-width: 150px;
+        width: 150px;
+        height: 150px;
+        height: auto;
+        margin-right: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .image-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .image-label {
+        margin-right: 10px;
+        min-width: 120px;
+        text-align: right;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Edit Symptom</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Form</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Edit Symptom</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Edit Symptom</h4>
+                        <div>
+                            <a href="{% url 'symptoms_list' %}">
+                                <button title="list" type="button" class="btn btn-rounded btn-outline-success">
+                                    <span><i class="fa fa-list"></i></span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <!-- Symptom Edit Form -->
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Specialist</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="specialist" required>
+                                            {% for specialist in specialists %}
+                                                <option value="{{ specialist.id }}" {% if specialist.id == symptom.specialist_id %}selected{% endif %}>{{ specialist.category_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Symptom Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="symptom_name" value="{{ symptom.symptom_name }}" placeholder="Input Symptom Name" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Symptom Image</label>
+                                    <div class="col-sm-10">
+                                        <img id="symptom-image-preview" src="{{ symptom.symptom_image.url }}" alt="Symptom Image" class="category-image">
+                                    </div>
+                                    <div class="col-sm-10 ml-auto">
+                                        <input type="file" class="form-control" id="symptom-image-input" name="symptom_image">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Status</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="status">
+                                            <option value="1" {% if symptom.status == 1 %}selected{% endif %}>Active</option>
+                                            <option value="0" {% if symptom.status == 0 %}selected{% endif %}>Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="offset-sm-2">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                        <a href="{% url 'symptoms_list' %}" class="btn btn-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('symptom-image-input').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            document.getElementById('symptom-image-preview').src = e.target.result;
+        };
+        
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+
+{% endblock content %}
