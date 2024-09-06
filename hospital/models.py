@@ -146,6 +146,22 @@ class Bed(models.Model):
         return f'{self.bed_type} - {self.ward.ward_name}'
 
 
+class BedStatus(models.Model):
+    STATUS_CHOICES = [
+        (1, 'Assigned'),
+        (0, 'Empty'),
+    ]
+    
+    hospital = models.ForeignKey('Hospital', on_delete=models.SET_NULL, related_name='bed_statuses', null=True, blank=True)
+    bed = models.ForeignKey('Bed', on_delete=models.SET_NULL, related_name='bed_statuses', null=True, blank=True)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=0)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.bed.bed_type} - {self.get_status_display()}'
+
+
 class BedBooking(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),

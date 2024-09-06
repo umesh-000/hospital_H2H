@@ -35,6 +35,7 @@ urlpatterns = [
 
     # Bed Status 
     path('admin/hospital/ward/bed/status/', hospital_views.bed_status_list, name='bed_status_list'),
+    path('admin/hospital/ward/bed/status/create/', hospital_views.bed_status_create, name='bed_status_create'),
 
     path('admin/bed-requests/', hospital_views.bed_requests, name='bed_requests'),
     path('admin/update_booking_status/', hospital_views.update_booking_status, name='update_booking_status'),

@@ -38,6 +38,7 @@
                                 <thead>
                                     <tr class="dark-font">
                                         <th>ID</th>
+                                        <th>Hospital</th>
                                         <th>Ward Name</th>
                                         <th>Status</th>
                                         <th>Created At</th>
@@ -49,6 +50,7 @@
                                     {% for ward in ward_list %}
                                     <tr class="dark-font">
                                         <td>{{ ward.id }}</td>
+                                        <td>{{ ward.hospital.hospital_name }}</td>
                                         <td>{{ ward.ward_name|capfirst }}</td>
                                         <td><span class="badge badge-success">{{ ward.get_status_display|capfirst }}</span></td>
                                         <td>{{ ward.created_at }}</td>

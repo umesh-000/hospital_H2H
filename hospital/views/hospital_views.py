@@ -740,11 +740,28 @@ def hospital_insurance_delete(request, id):
 
 # Bed Status
 def bed_status_list(request):
-    bed_list = models.Bed.objects.all()
-    context ={
-            "bed_list":bed_list,
-        }
+    bed_statuses = models.BedStatus.objects.select_related('hospital', 'bed').all()
+    context = {
+        "bed_statuses": bed_statuses,
+    }
     return render(request, 'hospital/bed_status_list.html', context)
+
+
+# Bed Status Create
+def bed_status_create(request):
+    if request.method == "POST":
+        return redirect('bed_status_list')
+
+    if request.method == "GET":
+        hospitals = models.Hospital.objects.all()
+        wards = models.Ward.objects.all()
+
+        context = {
+            "hospitals": hospitals,
+            "wards": wards,
+        }
+        return render(request, 'hospital/create_bed_status.html', context)
+
 
 
 def bed_requests(request):

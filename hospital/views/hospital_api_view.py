@@ -131,7 +131,7 @@ def get_symptoms_api(request):
     print(specialist_id)
 
     if not specialist_id:
-        return Response({"error": "specialist_id query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "specialist_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
     symptoms = doctorModels.Symptom.objects.filter(specialist_id=specialist_id, status=1)
     serializer = serializers.SymptomSerializer(symptoms, many=True, context={'request': request})
@@ -142,6 +142,39 @@ def get_symptoms_api(request):
         "message": "Success",
         "status": 1
     }, status=status.HTTP_200_OK)
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_hospital_wards_api(request):
+    hospital_id = request.GET.get('hospital_id')
+    if not hospital_id:
+        return Response({"error": "hospital_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        hospital = models.Hospital.objects.get(id=hospital_id)
+        wards = models.Ward.objects.filter(hospital=hospital, status=1)
+        serializer = serializers.WardSerializer(wards, many=True)
+        return Response({
+            "result": serializer.data,
+            "count": wards.count(),
+            "message": "Success",
+            "status": 1
+        }, status=status.HTTP_200_OK)
+    except models.Hospital.DoesNotExist:
+        return Response({"error": "Hospital not found."}, status=status.HTTP_404_NOT_FOUND)
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+
+
 
 
 '''

@@ -1,4 +1,4 @@
-from hospital.models import Hospital,BedBooking,HospitalDoctors,HospitalFacility,Customer,HospitalService
+from hospital.models import Hospital,BedBooking,HospitalDoctors,HospitalFacility,Customer,HospitalService,Ward
 from doctor.models import DoctorDetails,DoctorSpecialistCategory,Symptom
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -138,7 +138,22 @@ class SymptomSerializer(serializers.ModelSerializer):
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------
 '''
+class WardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ward
+        fields = ['id', 'ward_name', 'status']
+'''
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+'''
 
+
+
+
+'''
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+'''
 # Bed Booking 
 class BedBookingSerializer(serializers.ModelSerializer):
     class Meta:
