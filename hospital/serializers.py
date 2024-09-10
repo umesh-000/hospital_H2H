@@ -1,49 +1,40 @@
 from hospital.models import Hospital,BedBooking,HospitalDoctors,HospitalFacility,Customer,HospitalService,Ward
 from doctor.models import DoctorDetails,DoctorSpecialistCategory,Symptom
 from django.contrib.auth import authenticate
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import serializers
 
-
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-
     class Meta:
         model = Customer
-        fields = ['customer_name', 'phone_number', 'email', 'password']
+        fields = ['phone_number', 'email', 'customer_name', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         customer = Customer.objects.create_user(
             phone_number=validated_data['phone_number'],
-            email=validated_data.get('email'),
+            email=validated_data['email'],
+            customer_name=validated_data.get('customer_name', ''),
             password=validated_data['password']
         )
         return customer
 
+
 class LoginSerializer(serializers.Serializer):
-    phone_number = serializers.CharField()
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        phone_number = data.get('phone_number')
+        print("Data in validate:", data)
+        email = data.get('email')
         password = data.get('password')
-        customer = authenticate(phone_number=phone_number, password=password)
 
-        if customer is None:
-            raise serializers.ValidationError('Invalid phone number or password')
-
-        data['customer'] = customer
-        return data
-
-    def get_token(self, customer):
-        refresh = RefreshToken.for_user(customer)
-        return {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }
-
-
-
+        if email and password:
+            user = authenticate(email=email, password=password)
+            if user:
+                return {'user': user}
+            else:
+                raise serializers.ValidationError('Invalid email or password')
+        raise serializers.ValidationError('Email and password are required')
 '''
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------

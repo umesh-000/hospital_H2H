@@ -245,6 +245,113 @@ def bed_delete(request, id):
     return redirect('/admin/hospital/ward/beds')
 
 
+
+# Bed Status
+def bed_status_list(request):
+    bed_statuses = models.BedStatus.objects.select_related('hospital', 'bed').all()
+    context = {
+        "bed_statuses": bed_statuses,
+    }
+    return render(request, 'hospital/bed_status_list.html', context)
+
+def bed_status_create(request):
+    if request.method == "POST":
+        hospital_id = request.POST.get('hospital_id')
+        bed_id = request.POST.get('bed_id')
+        status = request.POST.get('status')
+
+        hospital = models.Hospital.objects.get(id=hospital_id)
+        bed = models.Bed.objects.get(id=bed_id)
+
+        # Creating a new Bed object
+        bed_status = models.BedStatus(
+            hospital=hospital,
+            bed=bed,
+            status=status
+        )
+        bed_status.save()
+        messages.success(request, 'Bed Status Added Successfully!')
+        
+        return redirect('bed_status_list')
+
+    if request.method == "GET":
+        hospitals = models.Hospital.objects.all()
+        beds = models.Bed.objects.all()
+
+        context = {
+            "hospitals": hospitals,
+            "beds": beds,
+        }
+        return render(request, 'hospital/create_bed_status.html', context)
+
+def bed_status_edit(request, id):
+    bed_status = get_object_or_404(models.BedStatus, id=id)  # Fetch the bed status by ID
+
+    if request.method == "POST":
+        # Get form data
+        hospital_id = request.POST.get('hospital_id')
+        bed_id = request.POST.get('bed_id')
+        status = request.POST.get('status')
+
+        # Fetch the hospital and bed objects based on the selected IDs
+        hospital = models.Hospital.objects.get(id=hospital_id)
+        bed = models.Bed.objects.get(id=bed_id)
+
+        # Update the bed status object
+        bed_status.hospital = hospital
+        bed_status.bed = bed
+        bed_status.status = status
+        bed_status.save()  # Save the changes to the database
+
+        # Display a success message and redirect to the bed status list
+        messages.success(request, 'Bed Status Updated Successfully!')
+        return redirect('bed_status_list')
+
+    else:
+        # On GET request, retrieve the list of hospitals and beds to populate the form
+        hospitals = models.Hospital.objects.all()
+        beds = models.Bed.objects.all()
+
+        # Pass the data to the template for rendering the form
+        context = {
+            "hospitals": hospitals,
+            "beds": beds,
+            "bed_status": bed_status
+        }
+        return render(request, 'hospital/bed_status_update.html', context)
+
+def bed_status_delete(request, id):
+    bed_status = get_object_or_404(models.BedStatus, id=id)
+    bed_status.delete()
+    messages.success(request, 'Bed Status Deleted Successfully!')
+    return redirect('bed_status_list')
+
+
+
+# bed booking 
+def bed_requests(request):
+    bed_list = models.BedBooking.objects.all()
+    context = {
+        "bed_list": bed_list,
+    }
+    return render(request, 'hospital/bed_booking_requests_list.html', context)
+
+@require_POST
+def update_booking_status(request):
+    data = json.loads(request.body)
+    booking_id = data.get('booking_id')
+    new_status = data.get('status')
+    try:
+        booking = models.BedBooking.objects.get(id=booking_id)
+        booking.status = new_status
+        booking.save()
+        return JsonResponse({'success': True, 'message': 'Status updated successfully.'})
+    except models.BedBooking.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Booking not found.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+
+
 # Fee Setting
 def hospital_fee_setting_list(request):
     fee_settings = models.HospitalFeeSettings.objects.all()
@@ -738,53 +845,3 @@ def hospital_insurance_delete(request, id):
     messages.success(request, 'Deleted successfully!')
     return redirect('hospital_insurance_list')
 
-# Bed Status
-def bed_status_list(request):
-    bed_statuses = models.BedStatus.objects.select_related('hospital', 'bed').all()
-    context = {
-        "bed_statuses": bed_statuses,
-    }
-    return render(request, 'hospital/bed_status_list.html', context)
-
-
-# Bed Status Create
-def bed_status_create(request):
-    if request.method == "POST":
-        return redirect('bed_status_list')
-
-    if request.method == "GET":
-        hospitals = models.Hospital.objects.all()
-        wards = models.Ward.objects.all()
-
-        context = {
-            "hospitals": hospitals,
-            "wards": wards,
-        }
-        return render(request, 'hospital/create_bed_status.html', context)
-
-
-
-def bed_requests(request):
-    bed_list = models.BedBooking.objects.all()
-    context = {
-        "bed_list": bed_list,
-    }
-    return render(request, 'hospital/bed_booking_requests_list.html', context)
-
-
-@require_POST
-def update_booking_status(request):
-    data = json.loads(request.body)
-    booking_id = data.get('booking_id')
-    new_status = data.get('status')
-    print(booking_id,"\n",new_status)
-
-    try:
-        booking = models.BedBooking.objects.get(id=booking_id)
-        booking.status = new_status
-        booking.save()
-        return JsonResponse({'success': True, 'message': 'Status updated successfully.'})
-    except models.BedBooking.DoesNotExist:
-        return JsonResponse({'success': False, 'message': 'Booking not found.'})
-    except Exception as e:
-        return JsonResponse({'success': False, 'message': str(e)})

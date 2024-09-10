@@ -18,14 +18,14 @@ urlpatterns = [
     # Hospital
     path('admin/hospital/', hospital_views.hospital_list, name='hospital_list'),
     path('admin/hospital/create/', hospital_views.hospital_create, name='hospital_create'),
-    path('admin/hospital/<int:id>/delete/', hospital_views.hospital_delete, name='hospital_delete'),
     path('admin/hospital/<int:id>/edit/', hospital_views.hospital_edit, name='hospital_edit'),
+    path('admin/hospital/<int:id>/delete/', hospital_views.hospital_delete, name='hospital_delete'),
 
     # Ward
     path('admin/hospital/ward/', hospital_views.ward_list, name='ward_list'),
     path('admin/hospital/ward/create/', hospital_views.ward_create, name='ward_create'),
-    path('admin/hospital/ward/<int:id>/delete/', hospital_views.ward_delete, name='ward_delete'),
     path('admin/hospital/ward/<int:id>/edit/', hospital_views.ward_edit, name='ward_edit'),
+    path('admin/hospital/ward/<int:id>/delete/', hospital_views.ward_delete, name='ward_delete'),
 
     # Bed
     path('admin/hospital/ward/beds/', hospital_views.bed_list, name='bed_list'),
@@ -36,6 +36,8 @@ urlpatterns = [
     # Bed Status 
     path('admin/hospital/ward/bed/status/', hospital_views.bed_status_list, name='bed_status_list'),
     path('admin/hospital/ward/bed/status/create/', hospital_views.bed_status_create, name='bed_status_create'),
+    path('admin/hospital/ward/bed/status/<int:id>/edit/', hospital_views.bed_status_edit, name='bed_status_edit'),
+    path('admin/hospital/ward/bed/status/<int:id>/delete/', hospital_views.bed_status_delete, name='bed_status_delete'),
 
     path('admin/bed-requests/', hospital_views.bed_requests, name='bed_requests'),
     path('admin/update_booking_status/', hospital_views.update_booking_status, name='update_booking_status'),

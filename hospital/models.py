@@ -1,38 +1,49 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.hashers import make_password
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 from django.db import models
 
-class admin(models.Model):
+class Admin(models.Model):
     username = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
-    create_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
-
 class CustomerManager(BaseUserManager):
-    def create_user(self, phone_number, email=None, password=None, **extra_fields):
-        if not phone_number:
-            raise ValueError('The Phone Number must be set')
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('The Email field is required')
         email = self.normalize_email(email)
-        user = self.model(phone_number=phone_number, email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        customer = self.model(email=email, **extra_fields)
+        if password:
+            customer.set_password(password)  # Hash the password
+        else:
+            raise ValueError('The Password field is required')
+        customer.save(using=self._db)
+        return customer
 
-    def create_superuser(self, phone_number, email=None, password=None, **extra_fields):
+    def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        return self.create_user(phone_number, email, password, **extra_fields)
-    
-       
-class Customer(AbstractBaseUser):
-    email = models.EmailField(unique=True, null=True, blank=True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(email, password, **extra_fields)
+
+
+class Customer(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)  # Email field as unique
     customer_name = models.CharField(max_length=255, blank=True, null=True)
-    phone_number = models.CharField(max_length=100, unique=True)
+    phone_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
     remember_token = models.CharField(max_length=100, null=True, blank=True)
-    profile_picture = models.ImageField(default='hospital/customer_profile//avatar.png',upload_to='hospital/customer_profile/')
+    profile_picture = models.ImageField(default='hospital/customer_profile/avatar.png', upload_to='hospital/customer_profile/')
     pre_existing_disease = models.TextField(null=True, blank=True)
     blood_group = models.CharField(max_length=10, null=True, blank=True)
     gender = models.IntegerField(null=True, blank=True)
@@ -55,15 +66,27 @@ class Customer(AbstractBaseUser):
     provider_id = models.CharField(max_length=255, null=True, blank=True)
     firebase_user_id = models.CharField(max_length=100, null=True, blank=True)
 
-    USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = ['email']
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    USERNAME_FIELD = 'email'  # Use email for login
+    REQUIRED_FIELDS = ['phone_number']  # Include phone_number in required fields
 
     objects = CustomerManager()
 
     def __str__(self):
-        return self.phone_number
+        return self.email
 
+    def has_perm(self, perm, obj=None):
+        return self.is_superuser
 
+    def has_module_perms(self, app_label):
+        return self.is_superuser
+    
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+        self.save()
 
 
 class Hospital(models.Model):
@@ -199,6 +222,8 @@ class BedBooking(models.Model):
 
     def __str__(self):
         return f"Booking for {self.patient_name} at {self.hospital}"   
+
+
 
 class HospitalFeeSettings(models.Model):
     hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, related_name='fee_settings', null=True, blank=True)
