@@ -2,7 +2,6 @@
     "use strict"
 
     //basic bar chart
-
     const barChart_1 = document.getElementById("barChart_1").getContext('2d');
     
     barChart_1.height = 100;

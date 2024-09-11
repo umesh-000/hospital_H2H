@@ -1,0 +1,232 @@
+{% extends 'master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .hospital-image,
+    .hospital-logo {
+        width: 150px;
+        /* Adjust the size as needed */
+        height: auto;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        /* Adds shadow to the image */
+        border-radius: 8px;
+        /* Optional: Adds rounded corners */
+    }
+</style>
+<!--**********************************  Content body start  ***********************************-->
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Element</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Form</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Element</a></li>
+                </ol>
+            </div>
+        </div>
+        <!-- row -->
+        <div class="row">
+            <div class="col-xl-6 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Create</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <form method="post" action="" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Hospital Name</label>
+                                        <input type="text" class="form-control" name="hospital_name"
+                                            placeholder="Input Hospital Name">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>User Name</label>
+                                        <input type="text" class="form-control" name="user_name"
+                                            placeholder="Input Username">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Phone Number</label>
+                                        <input type="text" class="form-control" name="phone_number"
+                                            placeholder="Input Phone Number">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Email</label>
+                                        <input type="email" class="form-control" name="email" placeholder="Input Email">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Password</label>
+                                        <input type="password" class="form-control" name="password"
+                                            placeholder="Input Password">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>City</label>
+                                        <input type="text" class="form-control" name="city" placeholder="Input City">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Latitude</label>
+                                        <input type="text" class="form-control" name="latitude"
+                                            placeholder="Input Latitude">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Longitude</label>
+                                        <input type="text" class="form-control" name="longitude"
+                                            placeholder="Input Longitude">
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                        <label>Opening Time</label>
+                                        <div class="input-group clockpicker" data-placement="bottom" data-align="top"
+                                            data-autoclose="true">
+                                            <span class="input-group-append"><span class="input-group-text"><i
+                                                        class="fa fa-clock-o"></i></span></span>
+                                            <input type="text" class="form-control" name="open_time">
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Closing Time</label>
+                                        <div class="input-group clockpicker" data-placement="bottom" data-align="top"
+                                            data-autoclose="true">
+                                            <span class="input-group-append"><span class="input-group-text"><i
+                                                        class="fa fa-clock-o"></i></span></span>
+                                            <input type="text" class="form-control" name="close_time">
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Website</label>
+                                        <input type="text" class="form-control" name="website_url"
+                                            placeholder="Input Website">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Type</label>
+                                        <select id="inputState" class="form-control" name="type">
+                                            <option selected>Choose...</option>
+                                            <option value="hospital">Hospital</option>
+                                            <option value="clinic">Clinic</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Status</label>
+                                        <select id="inputState" class="form-control" name="status">
+                                            <option selected>Choose...</option>
+                                            <option value="1">Active</option>
+                                            <option value="0">InActive</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Is Recommended</label>
+                                        <select id="inputState" class="form-control" name="isRecommended">
+                                            <option selected>Choose...</option>
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Address</label>
+                                        <div class="form-group">
+                                            <textarea class="form-control" name="address" rows="3" id="comment"
+                                                placeholder="Input Address"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Description</label>
+                                        <div class="form-group">
+                                            <textarea class="form-control" name="description" rows="3" id="comment"
+                                                placeholder="Input Description"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Hospital Images</label>
+                                        <div class="input-group mb-3">
+                                            <div class="custom-file">
+                                                <input type="file" class="custom-file-input" id="hospital-image-input"
+                                                    name="hospital_images" multiple>
+                                                <label class="custom-file-label" for="hospital-image-input">Choose
+                                                    files</label>
+                                            </div>
+                                        </div>
+                                        <div id="hospital-image-previews" class="d-flex flex-wrap">
+                                            <img src="{% static 'images/default_image.png' %}"
+                                                alt="Hospital Image Preview" class="hospital-image"
+                                                style="display: none;">
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Hospital Logo</label>
+                                        <div class="input-group mb-3">
+                                            <div class="custom-file">
+                                                <input type="file" class="custom-file-input" id="hospital-logo-input"
+                                                    name="hospital_logo">
+                                                <label class="custom-file-label" for="hospital-logo-input">Choose
+                                                    file</label>
+                                            </div>
+                                        </div>
+                                        <img id="hospital-logo-preview" src="{% static 'images/default_image.png' %}"
+                                            alt="Hospital Logo Preview" class="hospital-logo">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--**********************************  Content body end    ***********************************-->
+
+<script>
+    document.getElementById('hospital-image-input').addEventListener('change', function (event) {
+        const files = event.target.files;
+        const previewContainer = document.getElementById('hospital-image-previews');
+        previewContainer.innerHTML = ''; // Clear previous previews
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            const defaultImage = "{% static 'images/default_image.png' %}";
+
+            reader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'hospital-image';
+                previewContainer.appendChild(img);
+            };
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+    });
+
+    document.getElementById('hospital-logo-input').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        const defaultLogo = "{% static 'images/default_image.png' %}";
+
+        reader.onload = function (e) {
+            document.getElementById('hospital-logo-preview').src = e.target.result;
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            document.getElementById('hospital-logo-preview').src = defaultLogo;
+        }
+    });
+</script>
+
+{% endblock content %}

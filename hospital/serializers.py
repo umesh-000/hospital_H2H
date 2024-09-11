@@ -1,4 +1,4 @@
-from hospital.models import Hospital,BedBooking,HospitalDoctors,HospitalFacility,Customer,HospitalService,Ward
+from hospital.models import Hospital,BedBooking,HospitalDoctors,HospitalFacility,Customer,HospitalService,Ward, HospitalImage
 from doctor.models import DoctorDetails,DoctorSpecialistCategory,Symptom
 from django.contrib.auth import authenticate
 from rest_framework import serializers
@@ -86,9 +86,15 @@ class HospitalServicesSerializer(serializers.ModelSerializer):
         model = HospitalService
         fields = ['hospital', 'service_name', 'service_icon', 'starting_from']
 
+class HospitalImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HospitalImage
+        fields = ['image']
+
 class HospitalDetailsSerializer(serializers.ModelSerializer):
     facilities = HospitalFacilitySerializer(many=True, read_only=True)
     services = HospitalServicesSerializer(many=True, read_only=True)
+    images = HospitalImageSerializer(source='images.all', many=True, read_only=True)
 
     class Meta:
         model = Hospital
@@ -96,7 +102,7 @@ class HospitalDetailsSerializer(serializers.ModelSerializer):
             'id', 'hospital_name', 'phone_number', 'email', 'website_url', 'user_name', 'address',
             'latitude', 'longitude', 'open_time', 'close_time', 'description', 'overall_ratings',
             'no_of_ratings', 'type', 'is_recommended', 'city', 'hospital_logo', 'hospital_image',
-            'facilities', 'services'
+            'facilities', 'services', 'images'
         ]
 '''
 ---------------------------------------------------------------------------------------------

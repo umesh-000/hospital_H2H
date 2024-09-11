@@ -15,7 +15,7 @@ def index(request):
     return render(request, "deshboard.html",context)
 
 def users(request):
-    users = models.admin.objects.all()
+    users = models.Admin.objects.all()
     context = {
         "users":users,
     }
@@ -27,8 +27,8 @@ def login(request):
         password = request.POST.get('password')
         hashed_password = make_password(password)
         try:
-            admin = models.admin.objects.get(email=email)
-        except models.admin.DoesNotExist:
+            admin = models.Admin.objects.get(email=email)
+        except models.Admin.DoesNotExist:
             admin = None
         if admin and check_password(password, admin.password):
             print("Login successful")
@@ -46,17 +46,17 @@ def register(request):
         hashed_password = make_password(password)
         create_at = datetime.datetime.now()
         modified_at = datetime.datetime.now()
-        admin = models.admin(username=username, password=hashed_password, email=email, create_at=create_at, modified_at=modified_at)
+        admin = models.Admin(username=username, password=hashed_password, email=email, create_at=create_at, modified_at=modified_at)
         admin.save()
         return redirect('/admin/login/')
     return render(request, "register.html")
 
 def show_user(request, id):
-    user = get_object_or_404(models.admin, id=id)
+    user = get_object_or_404(models.Admin, id=id)
     return render(request, 'admin/show_user.html', {'user': user})
 
 def edit_user(request, id):
-    user = get_object_or_404(models.admin, id=id)
+    user = get_object_or_404(models.Admin, id=id)
     if request.method=="GET":
         return render(request, 'admin/edit_user.html', {'user': user})
     if request.method=="POST":
@@ -68,6 +68,6 @@ def edit_user(request, id):
         return redirect('/admin/users/')
 
 def delete_user(request, id):
-    user = get_object_or_404(models.admin, id=id)
+    user = get_object_or_404(models.Admin, id=id)
     user.delete()
     return redirect('/admin/users/')

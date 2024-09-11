@@ -13,16 +13,16 @@ import datetime
 import json
 import os
 
-
 # Hospital
 def hospital_list(request):
     hospital_list = models.Hospital.objects.all()
     return render(request,"hospital/hospital_list.html",{"hospital_list":hospital_list})
 
 def hospital_create(request):
-   if request.method == "GET":
-       return render(request,"hospital/hospital_add.html")
-   if request.method == 'POST':
+    if request.method == "GET":
+        return render(request, "hospital/hospital_add.html")
+    
+    if request.method == 'POST':
         hospital_name = request.POST.get('hospital_name')
         user_name = request.POST.get('user_name')
         phone_number = request.POST.get('phone_number')
@@ -39,8 +39,12 @@ def hospital_create(request):
         is_recommended = request.POST.get('isRecommended')
         address = request.POST.get('address')
         description = request.POST.get('description')
-        hospital_image = request.FILES.get('hospital_image')
+
+        # Handle file uploads
+        hospital_image_files = request.FILES.getlist('hospital_images')
         hospital_logo = request.FILES.get('hospital_logo')
+
+        # Create the Hospital instance
         hospital = models.Hospital(
             hospital_name=hospital_name,
             user_name=user_name,
@@ -57,14 +61,19 @@ def hospital_create(request):
             is_recommended=is_recommended,
             address=address,
             description=description,
-            hospital_image=hospital_image,
+            hospital_image=hospital_image_files[0] if hospital_image_files else None,  # Handling only the first image for hospital_image
             hospital_logo=hospital_logo,
-            overall_ratings=0,  
-            no_of_ratings=0,    
-            wallet=0,   
-            city=city,      
+            overall_ratings=0,
+            no_of_ratings=0,
+            wallet=0,
+            city=city,
         )
         hospital.save()
+
+        # Save additional images
+        for image_file in hospital_image_files:
+            models.HospitalImage.objects.create(hospital=hospital, image=image_file)
+        
         return redirect('/admin/hospital/')
     
 def hospital_delete(request, id):
@@ -74,26 +83,45 @@ def hospital_delete(request, id):
 
 def hospital_edit(request, id):
     hospital = get_object_or_404(models.Hospital, id=id)
-    if request.method=="GET":
-        return render(request, 'hospital/hospital_edit.html', {'hospital': hospital})
+    
+    if request.method == "GET":
+        # Render the form with existing hospital details
+        context = {
+            'hospital': hospital,
+            'hospital_images': hospital.images.all(),
+        }
+        return render(request, 'hospital/hospital_edit.html', context)
     
     if request.method == "POST":
         hospital.hospital_name = request.POST.get('hospital_name')
+        hospital.user_name = request.POST.get('user_name')
         hospital.phone_number = request.POST.get('phone_number')
+        hospital.email = request.POST.get('email')
+        hospital.city = request.POST.get('city')
+        hospital.latitude = request.POST.get('latitude')
+        hospital.longitude = request.POST.get('longitude')
+        hospital.open_time = request.POST.get('open_time')
+        hospital.close_time = request.POST.get('close_time')
         hospital.website_url = request.POST.get('website_url')
         hospital.type = request.POST.get('type')
         hospital.status = request.POST.get('status')
-        hospital.is_recommended = request.POST.get('is_recommended')
-        hospital.latitude = request.POST.get('latitude')
-        hospital.longitude = request.POST.get('longitude')
+        hospital.is_recommended = request.POST.get('isRecommended')
         hospital.address = request.POST.get('address')
         hospital.description = request.POST.get('description')
-        if 'hospital_logo' in request.FILES:
-            hospital.hospital_logo = request.FILES['hospital_logo']
-        if 'hospital_image' in request.FILES:
-            hospital.hospital_image = request.FILES['hospital_image']
-        hospital.modified_at = datetime.datetime.now()
+
+        # Handle file uploads
+        hospital_image_files = request.FILES.getlist('hospital_images')
+        hospital_logo = request.FILES.get('hospital_logo')
+
+        # Update the main hospital instance
+        if hospital_logo:
+            hospital.hospital_logo = hospital_logo
         hospital.save()
+
+        # Save additional images
+        for image_file in hospital_image_files:
+            models.HospitalImage.objects.create(hospital=hospital, image=image_file)
+        
         return redirect('/admin/hospital/')
     
 

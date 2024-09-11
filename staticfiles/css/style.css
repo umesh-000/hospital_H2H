@@ -24765,7 +24765,7 @@ button:focus {
 .stat-widget-two .stat-digit {
   font-size: 1.75rem;
   font-weight: 500;
-  color: #373757;
+  color: #ffffff;
 }
 
 .stat-widget-two .stat-digit i {
@@ -24776,7 +24776,7 @@ button:focus {
 .stat-widget-two .stat-text {
   font-size: 16px;
   margin-bottom: 5px;
-  color: #868e96;
+  color: #ffffff;
 }
 
 .stat-widget-two .progress {

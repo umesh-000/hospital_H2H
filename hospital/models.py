@@ -3,6 +3,8 @@ from django.contrib.auth.hashers import make_password
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 from django.db import models
+from django.utils.text import slugify
+import os 
 
 class Admin(models.Model):
     username = models.CharField(max_length=255)
@@ -110,8 +112,8 @@ class Hospital(models.Model):
     phone_number = models.CharField(max_length=15)
     email = models.EmailField()
     password = models.CharField(max_length=255)
-    latitude = models.CharField(max_length=50)
-    longitude = models.CharField(max_length=50)
+    latitude = models.CharField(max_length=50,null=True, blank=True)
+    longitude = models.CharField(max_length=50,null=True, blank=True)
     open_time = models.TimeField(null=True, blank=True)  
     close_time = models.TimeField(null=True, blank=True) 
     website_url = models.URLField(null=True, blank=True) 
@@ -132,6 +134,21 @@ class Hospital(models.Model):
     def __str__(self):
         return self.hospital_name
 
+
+class HospitalImage(models.Model):
+    hospital = models.ForeignKey(Hospital, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='hospital/hospital_images/')
+
+    def get_upload_to(self, filename):
+        hospital_name_slug = slugify(self.hospital.hospital_name)
+        return os.path.join('hospital', 'hospital_images', hospital_name_slug)
+
+    def save(self, *args, **kwargs):
+        self._meta.get_field('image').upload_to = self.get_upload_to(self.image.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Image for {self.hospital.hospital_name}"
 
 class Ward(models.Model):
     STATUS_CHOICES = [
