@@ -113,6 +113,8 @@ def hospital_edit(request, id):
         hospital_image_files = request.FILES.getlist('hospital_images')
         hospital_logo = request.FILES.get('hospital_logo')
 
+        print(hospital.open_time)
+        print(hospital.close_time)
         # Update the main hospital instance
         if hospital_logo:
             hospital.hospital_logo = hospital_logo
