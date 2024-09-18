@@ -22,12 +22,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'rest_framework.authtoken',
-    'hospital_panel',
+    'rest_framework',
+    'corsheaders',
+    'H2H_admin',
     'hospital',
     'doctor',
-    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -46,7 +46,7 @@ ROOT_URLCONF = 'my_hospital.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -65,11 +65,17 @@ WSGI_APPLICATION = 'my_hospital.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME', 'my_hospital'),
-        'USER': os.getenv('DB_USER', 'root'),
-        'PASSWORD': os.getenv('DB_PASSWORD', '12345'),
-        'HOST': os.getenv('DB_HOST', 'localhost'),
-        'PORT': os.getenv('DB_PORT', '3306'),
+        'NAME': 'my_hospital',
+        'USER': 'root',
+        'PASSWORD': '12345',
+        'HOST': 'localhost',
+        # 'USER': 'admin',
+        # 'PASSWORD': 'Admin199377',
+        # 'HOST': 'h2hhospital.c3imaguk6ro4.ap-south-1.rds.amazonaws.com',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
 
@@ -117,7 +123,6 @@ SIMPLE_JWT = {
 }
 
 AUTH_USER_MODEL = 'hospital.Customer'
-
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'

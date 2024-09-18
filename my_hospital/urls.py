@@ -4,15 +4,21 @@ from django.contrib import admin
 from django.conf import settings
 
 urlpatterns = [
-    # path('admin/', admin.site.urls),
-    path('', include('hospital.urls')),
-    path('api/', include('hospital.urls_api')),
 
+    path('', include('H2H_admin.urls')),
+ 
     # Hospital Panel
-    path('hospital_panel/', include('hospital_panel.urls')),
+    path('hospital/', include('hospital.urls')),
 
     # Doctor
-    path('admin/', include('doctor.urls')),
+    # path('admin/', include('doctor.urls')),    
+    path('doctor/', include('doctor.urls')),  
+
+    # LAB Panel  
+    path('lab/', include('lab.urls')),    
+
+    # Bed Booking API's
+    path('api/', include('hospital.urls_api')),
 ]
 
 if settings.DEBUG:

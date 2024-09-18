@@ -1,0 +1,97 @@
+{% extends 'doctor/doctor_master.html' %}
+{% load static %}
+
+
+
+{% block content %}\
+
+// CSS to style the SweetAlert
+<style>
+    .small-swal-popup {
+        width: 300px;
+        padding: 15px;
+    }
+    .small-swal-title {
+        font-size: 16px; 
+    }
+    .small-swal-text {
+        font-size: 13px; 
+    }
+    .small-swal-button {
+        font-size: 12px; 
+        padding: 5px 10px;
+    }
+    .small-swal-icon {
+        font-size: 10px; 
+    }
+</style>
+
+        <!--********************************** Content body start  ***********************************-->
+        <div class="content-body">
+            <!-- row -->
+            <div class="container-fluid">
+                <div class="dashboard-header">Dashboard</div>
+                <div class="row">
+                    <div class="col-lg-3 col-sm-6">
+                        <div style="background-color: #0073b7;" class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">Total Orders </div>
+                                    <div class="stat-digit">59</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-6">
+                        <div style="background-color: #ff851b;" class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">Completed Orders</div>
+                                    <div class="stat-digit">2</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-6">
+                        <div style="background-color: #001f3f;" class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">Pending orders</div>
+                                    <div class="stat-digit"> 0 </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-sm-6">
+                        <div style="background-color: #3d9970;" class="card">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">New Orders</div>
+                                    <div class="stat-digit"> 0 </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /# card -->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-lg-12 col-sm-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Gradient Bar Chart</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="barChart_2"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--********************************** Content body end  ***********************************-->
+
+{% endblock content %}

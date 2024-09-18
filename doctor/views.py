@@ -8,19 +8,31 @@ import random
 import os
 
 
+# Doctor Auth
+def doctors_dashboard(request):
+    return render(request, "doctor/doctor_deshboard.html")
+
+
+def doctor_register(request):
+    return render(request, "doctor/doctor_register.html")
+
+def doctor_login(request):
+    return render(request, "doctor/doctor_login.html")
+
 # Doctors
 def doctors_list(request):
     doctors = models.DoctorDetails.objects.all()
-    return render(request, "doctors_list.html", {'doctors': doctors})
+    return render(request, "doctor/doctors_list.html", {'doctors': doctors})
 
 def generate_unique_code():
     prefix = 'Dr'
     unique_number = f"{random.randint(1, 99999):05d}"
     return f"{prefix}{unique_number}"
+
 def doctor_create(request):
     if request.method == "GET":
         specialist_categories = models.DoctorSpecialistCategory.objects.all()
-        return render(request, "doctor_create.html", {'specialist_categories': specialist_categories})
+        return render(request, "doctor/doctor_create.html", {'specialist_categories': specialist_categories})
 
     if request.method == 'POST':
         # Doctor details
@@ -57,29 +69,13 @@ def doctor_create(request):
         specialist_instance = get_object_or_404(models.DoctorSpecialistCategory, id=specialist_id)
         # Create DoctorDetails instance
         doctor = models.DoctorDetails(
-            dr_name=dr_name,
-            dr_username=dr_username,
-            password=hashed_password,
-            phone=phone,
-            email=email,
-            gender=gender,
-            dob=dob,
-            dr_unique_code=dr_unique_code,
-            profile_img=profile_img,
-            description=description,
-            consultation_fee=consultation_fee,
-            join_date=datetime.datetime.now(),
-            status=status,
-            is_recommended=recommendation,
-            qualification=qualification,
-            experience=experience,
-            specialist=specialist_instance, 
-            medical_license=medical_license,
-            institution=institution,
-            graduation_year=graduation_year,
-            additional_qualification=additional_qualification,
-            created_at=datetime.datetime.now(),
-            updated_at=datetime.datetime.now(),
+            dr_name=dr_name, dr_username=dr_username, password=hashed_password, phone=phone,
+            email=email, gender=gender, dob=dob, dr_unique_code=dr_unique_code, profile_img=profile_img,
+            description=description, consultation_fee=consultation_fee, join_date=datetime.datetime.now(),
+            status=status, is_recommended=recommendation, qualification=qualification, experience=experience,
+            specialist=specialist_instance, medical_license=medical_license, institution=institution,
+            graduation_year=graduation_year, additional_qualification=additional_qualification, 
+            created_at=datetime.datetime.now(), updated_at=datetime.datetime.now(),
         )
         doctor.save()
         return redirect('/admin/doctors/')
@@ -93,7 +89,7 @@ def doctor_edit(request, id):
             'doctor': doctor,
             'specialist_categories': specialist_categories,
         }
-        return render(request, "doctor_edit.html", context)
+        return render(request, "doctor/doctor_edit.html", context)
 
     if request.method == 'POST':
         # Extract form data
@@ -158,12 +154,12 @@ def doctor_edit(request, id):
 # Symptoms
 def symptoms_list(request):
     symptoms = models.Symptom.objects.all()
-    return render(request, "symptom_list.html", {'symptoms': symptoms})
+    return render(request, "doctor/symptom_list.html", {'symptoms': symptoms})
 
 def symptom_create(request):
     if request.method == "GET":
         specialists = models.DoctorSpecialistCategory.objects.all()
-        return render(request, "symptom_create.html", {'specialists': specialists})
+        return render(request, "doctor/symptom_create.html", {'specialists': specialists})
 
     if request.method == 'POST':
         specialist_id = request.POST.get('specialist')
@@ -196,7 +192,7 @@ def symptom_edit(request, id):
             'symptom': symptom,
             'specialists': specialists,
         }
-        return render(request, "symptom_edit.html", context)
+        return render(request, "doctor/symptom_edit.html", context)
 
     if request.method == 'POST':
         specialist_id = request.POST.get('specialist')
@@ -230,11 +226,11 @@ def symptom_delete(request, id):
 # Specialist
 def specialist_list(request):
     specialist_categories = models.DoctorSpecialistCategory.objects.all()
-    return render(request, "specialist_list.html", {'specialist_categories': specialist_categories})
+    return render(request, "doctor/specialist_list.html", {'specialist_categories': specialist_categories})
 
 def specialist_create(request):
     if request.method == "GET":
-        return render(request, "specialist_create.html")
+        return render(request, "doctor/specialist_create.html")
 
     if request.method == 'POST':
         category_name = request.POST.get('category_name')
@@ -262,7 +258,7 @@ def specialist_edit(request, id):
         context = {
             'specialist_category': specialist_category,
         }
-        return render(request, "specialist_edit.html", context)
+        return render(request, "doctor/specialist_edit.html", context)
 
     if request.method == 'POST':
         category_name = request.POST.get('category_name')

@@ -13,6 +13,11 @@ import datetime
 import json
 import os
 
+
+# Create your views here.
+def hospital_dashboard(request):
+    return render(request,'hospital/hospital_deshboard.html')
+
 # Hospital
 def hospital_list(request):
     hospital_list = models.Hospital.objects.all()
@@ -74,13 +79,9 @@ def hospital_create(request):
         for image_file in hospital_image_files:
             models.HospitalImage.objects.create(hospital=hospital, image=image_file)
         
+        messages.success(request, 'Created successfully!')
         return redirect('/admin/hospital/')
     
-def hospital_delete(request, id):
-    hospital = get_object_or_404(models.Hospital, id=id)
-    hospital.delete()
-    return redirect('/admin/hospital/')
-
 def hospital_edit(request, id):
     hospital = get_object_or_404(models.Hospital, id=id)
     
@@ -113,8 +114,6 @@ def hospital_edit(request, id):
         hospital_image_files = request.FILES.getlist('hospital_images')
         hospital_logo = request.FILES.get('hospital_logo')
 
-        print(hospital.open_time)
-        print(hospital.close_time)
         # Update the main hospital instance
         if hospital_logo:
             hospital.hospital_logo = hospital_logo
@@ -123,9 +122,21 @@ def hospital_edit(request, id):
         # Save additional images
         for image_file in hospital_image_files:
             models.HospitalImage.objects.create(hospital=hospital, image=image_file)
-        
+
+        messages.success(request, 'Updated successfully!')
         return redirect('/admin/hospital/')
-    
+
+
+def hospital_delete(request, id):
+    if request.method == 'POST':
+        try:
+            hospital = get_object_or_404(models.Hospital, id=id)
+            hospital.delete()
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 
 
 # Ward
@@ -164,13 +175,9 @@ def ward_create(request):
             updated_at = datetime.datetime.now(),
         )
         ward.save()
-        return redirect('/admin/hospital/ward/')
+        messages.success(request, 'Ward Created successfully!')
+        return redirect('ward_list')
 
-def ward_delete(request, id):
-    ward = get_object_or_404(models.Ward, id=id)
-    ward.delete()
-    return redirect('/admin/hospital/ward/')
-    
 def ward_edit(request,id):
     ward = get_object_or_404(models.Ward, id=id)
     hospitals = models.Hospital.objects.all()
@@ -185,8 +192,19 @@ def ward_edit(request,id):
         ward.ward_name = ward_name
         ward.status = int(status)
         ward.save()
-        return redirect('/admin/hospital/ward/')
+        messages.success(request, 'Ward Updated successfully!')
+        return redirect('ward_list')
     
+def ward_delete(request, id):
+    if request.method == 'POST':
+        try:
+            ward = get_object_or_404(models.Ward, id=id)
+            ward.delete()
+            return JsonResponse({'success': True, 'message': 'Ward deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 
 
 # Bed
@@ -232,7 +250,7 @@ def bed_create(request):
         )
         bed.save()
         messages.success(request, 'Bed added successfully!')
-        return redirect('/admin/hospital/ward/beds/')
+        return redirect('bed_list')
     
 def bed_edit(request, id):
     bed = get_object_or_404(models.Bed, id=id)
@@ -267,12 +285,17 @@ def bed_edit(request, id):
 
         bed.save()
         messages.success(request, 'Bed updated successfully!')
-        return redirect('/admin/hospital/ward/beds/')
+        return redirect('bed_list')
     
 def bed_delete(request, id):
-    bed = get_object_or_404(models.Bed, id=id)
-    bed.delete()
-    return redirect('/admin/hospital/ward/beds')
+    if request.method == 'POST':
+        try:
+            bed = get_object_or_404(models.Bed, id=id)
+            bed.delete()
+            return JsonResponse({'success': True, 'message': 'Bed deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
 
@@ -351,10 +374,14 @@ def bed_status_edit(request, id):
         return render(request, 'hospital/bed_status_update.html', context)
 
 def bed_status_delete(request, id):
-    bed_status = get_object_or_404(models.BedStatus, id=id)
-    bed_status.delete()
-    messages.success(request, 'Bed Status Deleted Successfully!')
-    return redirect('bed_status_list')
+    if request.method == 'POST':
+        try:
+            bed_status = get_object_or_404(models.BedStatus, id=id)
+            bed_status.delete()
+            return JsonResponse({'success': True, 'message': 'Bed Status deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
 
@@ -382,46 +409,46 @@ def update_booking_status(request):
         return JsonResponse({'success': False, 'message': str(e)})
 
 
-# Fee Setting
-def hospital_fee_setting_list(request):
-    fee_settings = models.HospitalFeeSettings.objects.all()
-    context = {
-        'fee_settings': fee_settings,
-    }
-    return render(request, 'hospital/hospital_fee_setting_list.html', context)
+# # Fee Setting
+# def hospital_fee_setting_list(request):
+#     fee_settings = models.HospitalFeeSettings.objects.all()
+#     context = {
+#         'fee_settings': fee_settings,
+#     }
+#     return render(request, 'hospital/hospital_fee_setting_list.html', context)
 
-def hospital_fee_setting_list_create(request):
-    if request.method == "GET":
-        hospitals = models.Hospital.objects.all()
-        fee_settings = models.HospitalFeeSettings.objects.all()
-        context = {
-            "hospitals": hospitals,
-            "fee_settings": fee_settings,
-        }
-        return render(request, "hospital/hospital_fee_setting_create.html", context)
+# def hospital_fee_setting_list_create(request):
+#     if request.method == "GET":
+#         hospitals = models.Hospital.objects.all()
+#         fee_settings = models.HospitalFeeSettings.objects.all()
+#         context = {
+#             "hospitals": hospitals,
+#             "fee_settings": fee_settings,
+#         }
+#         return render(request, "hospital/hospital_fee_setting_create.html", context)
     
-    if request.method == "POST":
-        hospital_id = request.POST.get('hospital_id')
-        appointment_fee = request.POST.get('appointment_fee')
-        consultation_fee = request.POST.get('consultation_fee')
-        waiting_time = request.POST.get('waiting_time')
-        # Fetch the hospital object
-        hospital = models.Hospital.objects.get(id=hospital_id)
-        print(hospital_id)
+#     if request.method == "POST":
+#         hospital_id = request.POST.get('hospital_id')
+#         appointment_fee = request.POST.get('appointment_fee')
+#         consultation_fee = request.POST.get('consultation_fee')
+#         waiting_time = request.POST.get('waiting_time')
+#         # Fetch the hospital object
+#         hospital = models.Hospital.objects.get(id=hospital_id)
+#         print(hospital_id)
 
-        # Create a new HospitalFeeSetting object
-        fee_setting = models.HospitalFeeSettings(
-            hospital=hospital,
-            appointment_fee=appointment_fee,
-            consultation_fee=consultation_fee,
-            waiting_time=waiting_time,
-            created_at= datetime.datetime.now(),
-            updated_at = datetime.datetime.now(),
-        )
-        print(fee_setting)
-        fee_setting.save()
-        messages.success(request, 'Hospital Fee Setting added successfully!')
-        return redirect('/admin/hospital/fee_settings/')
+#         # Create a new HospitalFeeSetting object
+#         fee_setting = models.HospitalFeeSettings(
+#             hospital=hospital,
+#             appointment_fee=appointment_fee,
+#             consultation_fee=consultation_fee,
+#             waiting_time=waiting_time,
+#             created_at= datetime.datetime.now(),
+#             updated_at = datetime.datetime.now(),
+#         )
+#         print(fee_setting)
+#         fee_setting.save()
+#         messages.success(request, 'Hospital Fee Setting added successfully!')
+#         return redirect('/admin/hospital/fee_settings/')
 
 
 # Hospital services
@@ -464,8 +491,8 @@ def hospital_service_create(request):
             updated_at = datetime.datetime.now(),
         )
         hospital_service.save()
-
-        return redirect('/admin/hospital/services/')
+        messages.success(request, 'Service Added Successfully!')
+        return redirect('hospital_service_list')
 
 def hospital_service_edit(request, id):
     service = get_object_or_404(models.HospitalService, id=id)
@@ -499,13 +526,18 @@ def hospital_service_edit(request, id):
         service.service_icon = service_icon
         service.updated_at = datetime.datetime.now()
         service.save()
-
-        return redirect('/admin/hospital/services/')
+        messages.success(request, 'Service Updated Successfully!')
+        return redirect('hospital_service_list')
 
 def hospital_service_delete(request, id):
-    service = get_object_or_404(models.HospitalService, id=id)
-    service.delete()
-    return redirect('/admin/hospital/services/')
+    if request.method == 'POST':
+        try:
+            service = get_object_or_404(models.HospitalService, id=id)
+            service.delete()
+            return JsonResponse({'success': True, 'message': 'Service Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
 # Hospital Department
@@ -544,8 +576,8 @@ def hospital_department_create(request):
             updated_at=datetime.datetime.now(),
         )
         hospital_department.save()
-
-        return redirect('/admin/hospital/departments/')
+        messages.success(request, 'Department Added Successfully!')
+        return redirect('hospital_department_list')
 
 def hospital_department_edit(request, id):
     department = get_object_or_404(models.HospitalDepartment, id=id)
@@ -574,7 +606,18 @@ def hospital_department_edit(request, id):
         department.image = image
         department.updated_at = datetime.datetime.now()
         department.save()
-        return redirect('/admin/hospital/departments/')
+        messages.success(request, 'Updated Successfully!')
+        return redirect('hospital_department_list')
+
+def hospital_department_delete(request, id):
+    if request.method == 'POST':
+        try:
+            department = get_object_or_404(models.HospitalDepartment, id=id)
+            department.delete()
+            return JsonResponse({'success': True, 'message': 'Department Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
 # Hospital Facilities
@@ -614,8 +657,8 @@ def hospital_facility_create(request):
             updated_at=datetime.datetime.now(),
         )
         hospital_facility.save()
-
-        return redirect('/admin/hospital/facilities/')
+        messages.success(request, 'Added Successfully!')
+        return redirect('hospital_facilities_list')
 
 def hospital_facility_edit(request, id):
     facility = get_object_or_404(models.HospitalFacility, id=id)
@@ -641,8 +684,19 @@ def hospital_facility_edit(request, id):
         facility.icon = icon
         facility.updated_at = datetime.datetime.now()
         facility.save()
+        messages.success(request, 'Updated Successfully!')
+        return redirect('hospital_facilities_list')   
 
-        return redirect('/admin/hospital/facilities/')   
+def hospital_facility_delete(request, id):
+    if request.method == 'POST':
+        try:
+            facility = get_object_or_404(models.HospitalFacility, id=id)
+            facility.delete()
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 
 
 # Hospital Doctors
@@ -679,8 +733,8 @@ def hospital_doctor_create(request):
             join_date=join_date,
             status=status,
         )
-        
-        return redirect('/admin/hospital_doctors/')
+        messages.success(request, 'Added Successfully!')
+        return redirect('hospital_doctors_list')
 
 def hospital_doctor_edit(request, id):
     doctor_assignment = get_object_or_404(models.HospitalDoctors, id=id)
@@ -710,13 +764,19 @@ def hospital_doctor_edit(request, id):
         doctor_assignment.status = status
         doctor_assignment.updated_at = datetime.datetime.now()
         doctor_assignment.save()
-
-        return redirect('/admin/hospital_doctors/')
+        
+        messages.success(request, 'Updated Successfully!')
+        return redirect('hospital_doctors_list')
 
 def hospital_doctor_delete(request, id):
-    hospital_doctor = get_object_or_404(models.HospitalDoctors, id=id)
-    hospital_doctor.delete()
-    return redirect('/admin/hospital_doctors/')
+    if request.method == 'POST':
+        try:
+            hospital_doctor = get_object_or_404(models.HospitalDoctors, id=id)
+            hospital_doctor.delete()
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
 # Insurances

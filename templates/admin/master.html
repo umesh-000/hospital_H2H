@@ -1,0 +1,442 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>H2H Dashboard </title>
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static './images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static './vendor/owl-carousel/css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" href="{% static './vendor/owl-carousel/css/owl.theme.default.min.css' %}">
+    <link href="{% static './vendor/jqvmap/css/jqvmap.min.css' %}" rel="stylesheet">
+    <link href="{% static './css/style.css' %}" rel="stylesheet">
+
+    <link href="{% static './vendor/datatables/css/jquery.dataTables.min.css' %}" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.2.3/css/bootstrap.min.css">
+
+
+    <!-- Daterange picker -->
+    <link href="{% static './vendor/bootstrap-daterangepicker/daterangepicker.css' %}" rel="stylesheet">
+    <!-- Clockpicker -->
+    <link href="{% static './vendor/clockpicker/css/bootstrap-clockpicker.min.css' %}" rel="stylesheet">
+    <!-- asColorpicker -->
+    <link href="{% static './vendor/jquery-asColorPicker/css/asColorPicker.min.css' %}" rel="stylesheet">
+    <!-- Material color picker -->
+    <link href="{% static './vendor/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css' %}" rel="stylesheet">
+    <!-- Pick date -->
+    <link rel="stylesheet" href="{% static './vendor/pickadate/themes/default.css' %}">
+    <link rel="stylesheet" href="{% static './vendor/pickadate/themes/default.date.css' %}">
+
+    <!-- Toastr -->
+    <link rel="stylesheet" href="{% static './vendor/toastr/css/toastr.min.css' %}">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    
+
+        <style>
+            body
+            {
+                background: #ecf0f5;
+            }
+            /* =============
+               Background Animation
+            ============= */
+            
+        </style>
+</head>
+
+<body>
+   
+    <!--*******************  Preloader start   ********************-->
+    <div id="preloader">
+        <div class="sk-three-bounce">
+            <div class="sk-child sk-bounce1"></div>
+            <div class="sk-child sk-bounce2"></div>
+            <div class="sk-child sk-bounce3"></div>
+        </div>
+    </div>
+    <!--******************* Preloader end ********************-->
+
+
+    <!--********************************** Main wrapper start ***********************************-->
+    <div id="main-wrapper">
+
+        <!--********************************** Nav header start ***********************************-->
+        {% block header %}
+        <div class="nav-header">
+            <a href="/admin/" class="brand-logo">
+                <img class="logo-abbr" src="{% static './images/logo-color.png' %}" alt="">
+                <span class="brand-title"><b>Health2Home</b></span>
+            </a>
+
+            <div class="nav-control">
+                <div class="hamburger">
+                    <span class="line"></span><span class="line"></span><span class="line"></span>
+                </div>
+            </div>
+        </div>
+        <!--**********************************  Nav header end ***********************************-->
+
+        <!--********************************** Header start ***********************************-->
+        <div class="header">
+            <div class="header-content">
+                <nav class="navbar navbar-expand">
+                    <div class="collapse navbar-collapse justify-content-between">
+                        <div class="header-left">
+                            <div class="search_bar dropdown">
+                                <span class="search_icon p-3 c-pointer" data-toggle="dropdown">
+                                    <i class="mdi mdi-magnify"></i>
+                                </span>
+                                <div class="dropdown-menu p-0 m-0">
+                                    <form>
+                                        <input class="form-control" type="search" placeholder="Search"
+                                            aria-label="Search">
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="navbar-nav header-right">
+                            <li class="nav-item dropdown header-profile">
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                    <i class="mdi mdi-account"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="./app-profile.html" class="dropdown-item">
+                                        <i class="icon-user"></i>
+                                        <span class="ml-2">Profile </span>
+                                    </a>
+                                    <a href="./email-inbox.html" class="dropdown-item">
+                                        <i class="icon-envelope-open"></i>
+                                        <span class="ml-2">Inbox </span>
+                                    </a>
+                                    <a href="/admin/login/" class="dropdown-item">
+                                        <i class="icon-key"></i>
+                                        <span class="ml-2">Logout </span>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        {% endblock header %}
+        <!--********************************** Header end ti-comment-alt ***********************************-->
+
+        {% block sidebar %}
+        <!--**********************************  Sidebar start ***********************************-->
+        <div class="quixnav">
+            <div class="quixnav-scroll">
+                <ul class="metismenu" id="menu">
+                    <li class="nav-label first">Main Menu</li>
+                    <li><a href="/admin/" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="nav-text">Dashboard</span></a></li>
+                    
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-stethoscope"></i><span class="nav-text">Hospitals</span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="/admin/hospital/"><i class="fa fa-align-right"></i>Hospitals</a></li>
+                            <li><a href="/admin/hospital_wards/"><i class="fa fa-hotel"></i>Hospital Wards</a></li>
+                            <li><a href="/admin/hospital_beds/"><i class="fa fa-bed"></i>Hospital Bed</a></li>
+                            <li><a href="/admin/hospital_bed_status/"><i class="fa fa-hospital-o"></i>Hospital Bed Status</a></li>
+                            <!-- <li><a href="/admin/hospital/fee_settings/"><i class="fa fa-bars"></i>Hospital Fee Settings</a></li> -->
+                            <li><a href="/admin/hospital_services/"><i class="fa fa-bars"></i>Hospital Services</a></li>
+                            
+                            <li><a href="/admin/hospital_departments/"><i class="fa fa-align-justify"></i>Hospital Department</a></li>
+                            <li><a href="/admin/hospital_facilities/"><i class="fa fa-bars"></i>Hospital Facilities</a></li>
+                            <li><a href="/admin/hospital_doctors/"><i class="fa fa-align-center"></i>Hospital Doctors</a></li>
+                            <!-- <li><a href="/admin/insurances/"><i class="fa fa-align-center"></i>Insurances</a></li> -->
+                            <!-- <li><a href="/admin/hospital_insurances/"><i class="fa fa-file-powerpoint-o"></i>Hospital Insurances</a></li> -->
+                            <!-- <li><a href="#"><i class="fa fa-bars"></i>Hospital Patients</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Hospital Pharmacies</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Hospital Laboratories</a></li>
+                            <li><a href="#"><i class="fa fa-file-photo-o"></i>Hospital Galleries</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Hospital Bank Details</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Hospital Earnings</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Hospital Wallet Histories</a></li> -->
+                        </ul>
+                    </li>
+
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-user-md"></i><span class="nav-text"> Doctor Module </span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="/admin/doctors/"><i class="fa fa-stethoscope"></i>Doctors</a></li>
+                            <li><a href="/admin/symptoms"><i class="fa fa-assistive-listening-systems"></i>Symptoms</a></li>
+                            <li><a href="/admin/specialists/"><i class="fa fa-certificate"></i>Doctor Specialist &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Categories</a></li>
+                            <!-- <li><a href="#"><i class="fa fa-bars"></i>Doctor Documents</a></li>
+                            <li><a href="#"><i class="fa fa-google-wallet"></i>Doctor Wallet Histories</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Doctor Bank Details</a></li>
+                            <li><a href="#"><i class="fa fa-bank"></i>Doctor Withdrawals</a></li>
+                            <li><a href="#"><i class="fa fa-dollar"></i>Doctor Earnings</a></li>
+                            <li><a href="#"><i class="fa fa-gears"></i>Doctor Booking Settings</a></li>
+                            <li><a href="#"><i class="fa fa-bars"></i>Booking Requests</a></li>
+                            <li><a href="#"><i class="fa fa-exclamation-circle"></i>Booking Request Statuses</a></li>
+                            <li><a href="#"><i class="fa fa-hand-o-up"></i>Consultation Requests</a></li>
+                            <li><a href="#"><i class="fa fa-times-circle"></i>Consultation Request &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Statuses</a></li> -->
+                        </ul>
+                    </li>
+
+                    <!-- <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-users"></i><span class="nav-text"> Customers </span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="./index.html"><i class="fa fa-user"></i>Customers</a></li>
+                            <li><a href="./index.html"><i class="fa fa-google-wallet"></i>Customer Wallet History</a></li>
+                        </ul>
+                    </li> -->
+
+                    <!-- <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-user"></i><span class="nav-text"> Pharmacies </span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="./index.html"><i class="fa fa-users"></i>Delivery Boys</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacies</a></li>
+                            <li><a href="./index.html"><i class="fa fa-reorder"></i>Pharmacy Orders</a></li>
+                            <li><a href="./index.html"><i class="fa fa-reorder"></i>Pharmacy Order Statuses</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Categories</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Products</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Documents</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Earnings</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Wallet Histories</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Withdrawals</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Pharmacy Sub Categories</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bookmark"></i>Promo Codes</a></li>
+                            <li><a href="./index.html"><i class="fa fa-align-center"></i>Promo Types</a></li>
+                        </ul>
+                    </li> -->
+                
+                    <!-- <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-bars"></i><span class="nav-text"> Laboratories </span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Laboratories</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Lab Earnings</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Lab Packages</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Lab Process Steps</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Lab Relevances</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Lab Wallet Histories</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Lab Withdrawals</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Lab Services</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Lab Tags</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Lab Collective People</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Lab Orders</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Lab Promo Codes</a></li>
+                        </ul>
+                    </li> -->
+
+                    <!-- <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-align-right"></i><span class="nav-text">Settings</span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Commission Settings</a></li>
+                            <li><a href="./index.html"><i class="fa fa-server"></i>Services</a></li>
+                            <li><a href="./index.html"><i class="fa fa-newspaper-o"></i>App Modules</a></li>
+                            <li><a href="./index.html"><i class="fa fa-file-image-o"></i>Banners</a></li>
+                            <li><a href="./index.html"><i class="fa fa-file-image-o"></i>Module Banners</a></li>
+                            <li><a href="./index.html"><i class="fa fa-arrow-circle-right"></i>User Types</a></li>
+                            <li><a href="./index.html"><i class="fa fa-language"></i>Languages</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Unit Measurements</a></li>
+                            <li><a href="./index.html"><i class="fa fa-angle-double-right"></i>Taxes</a></li>
+                            <li><a href="./index.html"><i class="fa fa-angellist"></i>Statuses</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Fcm Notifications</a></li>
+                        </ul>
+                    </li> -->
+
+
+                    <!-- <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-gears"></i><span class="nav-text">App Configuation</span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Delivery Boy App Settings</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Vendor App Settings</a></li>
+                            <li><a href="./index.html"><i class="fa fa-gear"></i>Customer App Settings</a></li>
+                            <li><a href="./index.html"><i class="fa fa-asterisk"></i>Doctor App Settings</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Laboratory App Settings</a></li>
+                        </ul>
+                    </li> -->
+
+                    <!-- <li><a href="#" aria-expanded="false"><i class="fa fa-bars"></i><span class="nav-text">Experts Talk</span></a></li> -->
+
+                    <li><a href="/admin/bed-requests/" aria-expanded="false"><i class="fa fa-bars"></i><span class="nav-text">Bed Request</span></a></li>
+
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-tasks"></i><span class="nav-text">Admin</span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="/admin/users/"><i class="fa fa-users"></i>Users</a></li>
+                            <li><a href="#"><i class="fa fa-user"></i>Roles</a></li>
+                            <li><a href="#"><i class="fa fa-ban"></i>Permission</a></li>
+                            <!-- <li><a href="#"><i class="fa fa-bars"></i>Menu</a></li>
+                            <li><a href="#"><i class="fa fa-history"></i>Operation log</a></li> -->
+                        </ul>
+                    </li>
+                    
+                    <!-- <li><a href="#" aria-expanded="false"><i class="fa fa-file-image-o"></i><span class="nav-text">Offer Banners</span></a></li> -->
+
+                    <!-- <li><a href="widget-basic.html" aria-expanded="false"><i class="fa fa-bars"></i><span class="nav-text">Blog</span></a></li> -->
+
+
+                    <!-- <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-wechat"></i><span class="nav-text"> Forum </span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="./index.html"><i class="fa fa-question-circle"></i>Forum Questions</a></li>
+                            <li><a href="./index.html"><i class="fa fa-reply"></i>Forum Answers</a></li>
+                        </ul>
+                    </li> -->
+
+                    <!-- <li><a href="widget-basic.html" aria-expanded="false"><i class="fa fa-bell"></i><span class="nav-text">Notification</span></a></li> -->
+
+                    <!-- <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-bars"></i><span class="nav-text"> Payments </span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="./index.html"><i class="fa fa-paypal"></i>Payment Types</a></li>
+                            <li><a href="./index.html"><i class="fa fa-align-right"></i>Payment Modes</a></li>
+                        </ul>
+                    </li> -->
+
+                    <!-- <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-question"></i><span class="nav-text"> Faqs </span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="./index.html"><i class="fa fa-android"></i>Faqs</a></li>
+                            <li><a href="./index.html"><i class="fa fa-bars"></i>Faq Categories</a></li>
+                        </ul>
+                    </li> -->
+
+                    <!-- <li><a href="widget-basic.html" aria-expanded="false"><i class="fa fa-feed"></i><span class="nav-text">Feedback</span></a></li> -->
+                    <!-- <li><a href="widget-basic.html" aria-expanded="false"><i class="fa fa-product-hunt"></i><span class="nav-text">Privacy Policies</span></a></li> -->
+
+                </ul>
+            </div>
+        </div>
+        <!--**********************************  Sidebar end  ***********************************-->
+        {% endblock sidebar %}
+
+        
+        <!--********************************** Content body start  ***********************************-->
+        {% block content %}
+
+        {% endblock content %}
+        <!--********************************** Content body end  ***********************************-->
+
+
+
+
+        <!--**********************************  Footer start  ***********************************-->
+        <div class="footer">
+            <div class="copyright">
+                <p>Copyright © Health2Home &amp; Developed by <a href="#" target="_blank">Geega Technologies</a> 2024
+                </p>
+            </div>
+        </div>
+        <!--**********************************  Footer end   ***********************************-->
+
+
+    </div>
+    <!--**********************************  Main wrapper end  ***********************************-->
+
+
+
+<!-- Include SweetAlert2 library -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    document.getElementById('delete-button').addEventListener('click', function(event) {
+        event.preventDefault();
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Delete'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/admin/users/{{user.id}}/delete";
+            }
+        });
+    });
+</script>
+    <!--**********************************  Scripts  ***********************************-->
+    <!-- Required vendors -->
+    <script src="{% static './vendor/global/global.min.js' %}"></script>
+    <script src="{% static './js/quixnav-init.js' %}"></script>
+    <script src="{% static './js/custom.min.js' %}"></script>
+
+    
+    <!-- Vectormap -->
+    <script src="{% static './vendor/raphael/raphael.min.js' %}"></script>
+    <script src="{% static './vendor/morris/morris.min.js' %}"></script>
+    
+    
+    <!-- Chart ChartJS plugin files -->
+    <script src="{% static './js/plugins-init/chartjs-init.js' %}"></script>
+    <script src="{% static './vendor/circle-progress/circle-progress.min.js' %}"></script>
+    <script src="{% static './vendor/chart.js/Chart.bundle.min.js' %}"></script>
+
+    <script src="{% static './vendor/gaugeJS/dist/gauge.min.js' %}"></script>
+
+    <!--  flot-chart js -->
+    <script src="{% static './vendor/flot/jquery.flot.js' %}"></script>
+    <script src="{% static './vendor/flot/jquery.flot.resize.js' %}"></script>
+
+    <!-- Owl Carousel -->
+    <script src="{% static './vendor/owl-carousel/js/owl.carousel.min.js' %}"></script>
+
+    <!-- Counter Up -->
+    <script src="{% static './vendor/jqvmap/js/jquery.vmap.min.js' %}"></script>
+    <script src="{% static './vendor/jqvmap/js/jquery.vmap.usa.js' %}"></script>
+    <script src="{% static './vendor/jquery.counterup/jquery.counterup.min.js' %}"></script>
+
+
+    <script src="{% static './js/dashboard/dashboard-1.js' %}"></script>
+
+
+     <!-- jQuery -->
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+     <!-- Bootstrap JS -->
+     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.2.3/js/bootstrap.bundle.min.js"></script>
+
+
+    <!-- Datatable -->
+    <script src="{% static './vendor/datatables/js/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static './js/plugins-init/datatables.init.js' %}"></script>
+
+
+     <!-- Daterangepicker -->
+    <!-- momment js is must -->
+    <script src="{% static './vendor/moment/moment.min.js' %}"></script>
+    <script src="{% static './vendor/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
+    <!-- clockpicker -->
+    <script src="{% static './vendor/clockpicker/js/bootstrap-clockpicker.min.js' %}"></script>
+    <!-- asColorPicker -->
+    <script src="{% static './vendor/jquery-asColor/jquery-asColor.min.js' %}"></script>
+    <script src="{% static './vendor/jquery-asGradient/jquery-asGradient.min.js' %}"></script>
+    <script src="{% static './vendor/jquery-asColorPicker/js/jquery-asColorPicker.min.js' %}"></script>
+    <!-- Material color picker -->
+    <script src="{% static './vendor/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js' %}"></script>
+    <!-- pickdate -->
+    <script src="{% static './vendor/pickadate/picker.js' %}"></script>
+    <script src="{% static './vendor/pickadate/picker.time.js' %}"></script>
+    <script src="{% static './vendor/pickadate/picker.date.js' %}"></script>
+
+
+
+    <!-- Daterangepicker -->
+    <script src="{% static './js/plugins-init/bs-daterange-picker-init.js' %}"></script>
+    <!-- Clockpicker init -->
+    <script src="{% static './js/plugins-init/clock-picker-init.js' %}"></script>
+    <!-- asColorPicker init -->
+    <script src="{% static './js/plugins-init/jquery-asColorPicker.init.js' %}"></script>
+    <!-- Material color picker init -->
+    <script src="{% static './js/plugins-init/material-date-picker-init.js' %}"></script>
+    <!-- Pickdate -->
+    <script src="{% static './js/plugins-init/pickadate-init.js' %}"></script>
+
+     <!-- Toastr -->
+    <script src="{% static './vendor/toastr/js/toastr.min.js' %}"></script>
+
+    <!-- Toastr integration with Django messages -->
+    {% if messages %}
+        <script type="text/javascript">
+            {% for message in messages %}
+                toastr.{{ message.tags }}("{{ message|escapejs }}");
+            {% endfor %}
+        </script>
+    {% endif %}
+
+    <!-- All init script -->
+    <script src="{% static './js/plugins-init/toastr-init.js' %}"></script>
+
+</body>
+
+</html>

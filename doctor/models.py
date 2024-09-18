@@ -99,3 +99,49 @@ class DoctorDetails(models.Model):
 
     def __str__(self):
         return self.dr_name
+
+
+
+class DoctorBankDetails(models.Model):
+    doctor = models.ForeignKey('DoctorDetails', on_delete=models.CASCADE, related_name='bank_details')
+    bank_name = models.CharField(max_length=50, null=True, blank=True)
+    bank_account_number = models.CharField(max_length=50, null=True, blank=True)
+    beneficiary_name = models.CharField(max_length=100, null=True, blank=True)
+    swift_code = models.CharField(max_length=50, null=True, blank=True)
+    status = models.IntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.doctor.dr_name} - {self.bank_name}'
+
+
+class DoctorClinics(models.Model):
+    doctor = models.ForeignKey('DoctorDetails', on_delete=models.CASCADE, related_name='clinics')
+    clinic_category = models.ForeignKey('ClinicCategory', on_delete=models.SET_NULL, null=True, blank=True)
+    clinic_name = models.CharField(max_length=50, null=True, blank=True)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    consultation_minutes = models.CharField(max_length=10, default='20')
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    status = models.IntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.clinic_name} - {self.doctor.dr_name}'
+
+
+
+class DoctorDocuments(models.Model):
+    doctor = models.ForeignKey('DoctorDetails', on_delete=models.CASCADE, related_name='documents')
+    document_name = models.CharField(max_length=150)
+    document_path = models.CharField(max_length=150)
+    status = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.document_name} - {self.doctor.dr_name}'

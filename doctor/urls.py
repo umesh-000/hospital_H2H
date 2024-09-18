@@ -1,7 +1,14 @@
 from django.urls import path
-from . import views
+from doctor import views
+
 
 urlpatterns = [
+    path('', views.doctors_dashboard, name='doctors_dashboard'),
+
+    path('register/', views.doctor_register, name='doctor_register'),
+    path('login/', views.doctor_login, name='doctor_login'),
+
+
 
     # Doctors
     path('doctors/', views.doctors_list, name='doctors_list'),
