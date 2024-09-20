@@ -1,0 +1,128 @@
+{% extends 'doctor/doctor_master.html' %}
+{% load static %}
+
+{% block content %}
+<!--**********************************  Content body start  ***********************************-->
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Edit Doctor Clinic</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Doctor Clinic</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Edit</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- row -->
+        <div class="row">
+            <div class="col-xl-6 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Edit Clinic</h4>
+                        <div>
+                            <a href="{% url 'doctor_clinic_list' %}">
+                                <button title="list" type="button" class="btn btn-rounded btn-outline-success">
+                                    <span><i class="fa fa-list"></i></span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <form method="post" action="" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="form-row">
+                                    <div class="form-group col-12">
+                                        <label>Doctor</label>
+                                        <select class="form-control" name="doctor">
+                                            <option disabled>Choose Doctor</option>
+                                            {% for doctor in doctors %}
+                                            <option value="{{ doctor.id }}" {% if doctor.id == clinic.doctor.id %}selected{% endif %}>{{ doctor.dr_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-12">
+                                        <label>Clinic Category</label>
+                                        <select class="form-control" name="clinic_category">
+                                            <option disabled>Choose Category</option>
+                                            {% for category in clinic_categories %}
+                                            <option value="{{ category.id }}" {% if category.id == clinic.clinic_category.id %}selected{% endif %}>{{ category.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-12">
+                                        <label>Clinic Name</label>
+                                        <input type="text" class="form-control" name="clinic_name" value="{{ clinic.clinic_name }}" placeholder="Enter Clinic Name">
+                                    </div>
+
+                                    <div class="form-group col-12">
+                                        <label>Phone</label>
+                                        <input type="text" class="form-control" name="phone" value="{{ clinic.phone }}" placeholder="Enter Phone Number">
+                                    </div>
+
+                                    <div class="form-group col-12">
+                                        <label>Email</label>
+                                        <input type="email" class="form-control" name="email" value="{{ clinic.email }}" placeholder="Enter Email">
+                                    </div>
+
+                                    <div class="form-group col-12">
+                                        <label>Address</label>
+                                        <textarea class="form-control" name="address" rows="3" placeholder="Enter Clinic Address">{{ clinic.address }}</textarea>
+                                    </div>
+
+                                    <div class="form-group col-6">
+                                        <label>Consultation Minutes</label>
+                                        <input type="text" class="form-control" name="consultation_minutes" value="{{ clinic.consultation_minutes }}" placeholder="Enter Consultation Duration">
+                                    </div>
+
+                                    <div class="form-group col-6">
+                                        <label>Status</label>
+                                        <select class="form-control" name="status">
+                                            <option disabled>Choose Status</option>
+                                            <option value="1" {% if clinic.status == 1 %}selected{% endif %}>Active</option>
+                                            <option value="0" {% if clinic.status == 0 %}selected{% endif %}>Inactive</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-6">
+                                        <label>Start Time</label>
+                                        <input type="time" class="form-control" name="start_time" value="{{ clinic.start_time|time:"H:i" }}">
+                                    </div>
+
+                                    <div class="form-group col-6">
+                                        <label>End Time</label>
+                                        <input type="time" class="form-control" name="end_time" value="{{ clinic.end_time|time:"H:i" }}">
+                                    </div>
+
+                                    <div class="form-group col-6">
+                                        <label>Latitude</label>
+                                        <input type="text" class="form-control" name="latitude" value="{{ clinic.latitude }}" placeholder="Enter Latitude">
+                                    </div>
+
+                                    <div class="form-group col-6">
+                                        <label>Longitude</label>
+                                        <input type="text" class="form-control" name="longitude" value="{{ clinic.longitude }}" placeholder="Enter Longitude">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Update</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--**********************************  Content body end  ***********************************-->
+
+{% endblock %}

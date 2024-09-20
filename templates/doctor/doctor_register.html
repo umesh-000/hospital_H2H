@@ -26,6 +26,45 @@
         body {
             color: black;
         }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+    
+        .shake-error {
+            animation: shake 1s;
+        }
+
+        /* Custom Scrollbar Styles */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #ffffff;
+            border: 1px solid #76d5cb;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #76d5cb;
+            border-radius: 10px;
+            border: 1px solid black;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1fdac7;
+            padding: 10px
+        }
+        
+        .password-toggle {
+            cursor: pointer;
+        }
+        
+        .text-danger {
+            color: #ff4942 !important;
+        }
     </style>
 
 </head>
@@ -53,21 +92,21 @@
                                                       <label class="col-form-label" for="val-name">Full Name
                                                           <span class="text-danger">*</span>
                                                       </label>
-                                                      <input type="text" class="form-control" id="val-name" name="val-name" placeholder="Enter a full name..">
+                                                      <input type="text" class="form-control" id="val-name" name="dr_name" placeholder="Enter a full name..">
                                                   </div>
                                                     <div class="col-lg-6">
                                                         <label class="col-form-label" for="val-username">Username
                                                             <span class="text-danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control" id="val-username" name="val-username" placeholder="Enter a username..">
+                                                        <input type="text" class="form-control" id="val-username" name="dr_username" placeholder="Enter a username..">
                                                     </div>
                                                     <div class="col-lg-6">
                                                       <label class="col-form-label" for="val-gender">Gender
                                                           <span class="text-danger">*</span>
                                                       </label>
-                                                      <select class="form-control" id="val-gender" name="val-gender">
-                                                          <option value="">Please select</option>
-                                                          <option value="Male">Male</option>
+                                                      <select class="form-control" id="val-gender" name="dr_gender">
+                                                          <option disabled selected value="">Please select</option>
+                                                          <option value="male">Male</option>
                                                           <option value="female">Female</option>
                                                           <option value="other">Other</option>
                                                       </select>
@@ -76,35 +115,36 @@
                                                     <label class="col-form-label" for="val-dob">Date of Birthday
                                                         <span class="text-danger">*</span>
                                                     </label>
-                                                    <input type="date" class="form-control" id="val-dob" name="val-dob">
+                                                    <input type="date" class="form-control" id="val-dob" name="dr_dob">
                                                   </div>
                                                     <div class="col-lg-6">
                                                       <label class="col-form-label" for="val-phoneus">Phone
                                                           <span class="text-danger">*</span>
                                                       </label>
-                                                      <input type="text" class="form-control" id="val-phone" name="val-phone" placeholder="Enter phone number">
+                                                      <input type="text" class="form-control" id="val-phone" name="dr_phone" placeholder="Enter phone number">
                                                     </div>
                                                     <div class="col-lg-6">
                                                         <label class="col-form-label" for="val-email">Email
                                                             <span class="text-danger">*</span>
                                                         </label>
                                                         <input type="text" class="form-control" id="val-email"
-                                                            name="val-email" placeholder="Your valid email..">
+                                                            name="dr_email" placeholder="Your valid email..">
                                                     </div>
 
                                                     <div class="col-lg-6">
-                                                      <label class="col-form-label" for="val-password">Password
-                                                          <span class="text-danger">*</span>
-                                                      </label>
-                                                      <input type="password" class="form-control" id="val-password"
-                                                          name="val-password" placeholder="Choose a safe one..">
+                                                      <label class="col-form-label" for="password">Password <span class="text-danger">*</span></label>
+                                                      <input type="password" class="form-control" id="password" required name="dr_password" placeholder="Password">
+                                                      <span class="position-absolute password-toggle" style="right: 15px; top: 40px;">
+                                                        <i class="fa fa-eye-slash" id="toggle-password"></i>
+                                                    </span>
                                                   </div>
+
                                                   <div class="col-lg-6">
                                                     <label class="col-form-label" for="val-currency">Consultation Fees
                                                         <span class="text-danger">*</span>
                                                     </label>
                                                     <input type="text" class="form-control" id="val-currency"
-                                                        name="val-currency" placeholder="Enter consultation fees">
+                                                        name="dr_consultation_fees" placeholder="Enter consultation fees">
                                                 </div>
                                                 </div>
 
@@ -115,32 +155,24 @@
                                                     <label class="col-form-label" for="val_med_license_no">Medical License Number
                                                         <span class="text-danger">*</span>
                                                     </label>
-                                                    <input type="text" class="form-control" id="val_med_license_no" name="val_med_license_no" placeholder="Medical License Number..">
+                                                    <input type="text" class="form-control" id="val_med_license_no" name="dr_val_med_license_no" placeholder="Medical License Number..">
                                                   </div>
                                                   <div class="col-lg-6">
                                                     <label class="col-form-label" for="val-specialization">Specialization
                                                         <span class="text-danger">*</span>
                                                     </label>
-                                                    <select class="form-control" id="val-specialization" name="val-specialization">
-                                                      <option value="">Please select</option>
-                                                      <option value="1" >General</option>
-                                                      <option value="2" >Respiratory</option>
-                                                      <option value="3" >Gastrointestinal</option>
-                                                      <option value="4" >Cardiovascular</option>
-                                                      <option value="5" >Neurological</option>
-                                                      <option value="6" >Musculoskeletal</option>
-                                                      <option value="7" >Dermatological</option>
-                                                      <option value="8" >Urinary</option>
-                                                      <option value="9" >Reproductive</option>
-                                                      <option value="10" >Psychological</option>
-                                                      <option value="11" >Other</option>
+                                                    <select class="form-control" id="val-specialization" name="dr_specialization">
+                                                      <option selected disabled>Please select</option>
+                                                      {% for speciality in specialist_category %}
+                                                      <option value="{{ speciality.id }}">{{ speciality.category_name }}</option>
+                                                      {% endfor %}
                                                     </select>
                                                   </div>
                                                   <div class="col-lg-6">
                                                     <label class="col-form-label" for="experience">Experience
                                                         <span class="text-danger">*</span>
                                                     </label>
-                                                    <input type="text" class="form-control" id="experience" name="experience" placeholder="Experience">
+                                                    <input type="text" class="form-control" id="experience" name="dr_experience" placeholder="Experience">
                                                 </div>
                                                 </div>
 
@@ -151,28 +183,28 @@
                                                       <label class="col-form-label" for="degrees">Degrees
                                                           <span class="text-danger">*</span>
                                                       </label>
-                                                      <input type="text" class="form-control" id="degrees" name="degrees" placeholder="Degrees">
+                                                      <input type="text" class="form-control" id="degrees" name="dr_degrees" placeholder="Degrees">
                                                     </div>
 
                                                     <div class="col-lg-6">
                                                       <label class="col-form-label" for="institutions">Institutions
                                                           <span class="text-danger">*</span>
                                                       </label>
-                                                      <input type="text" class="form-control" id="institutions" name="institutions" placeholder="Institutions">
+                                                      <input type="text" class="form-control" id="institutions" name="dr_institutions" placeholder="Institutions">
                                                     </div>
 
                                                     <div class="col-lg-6">
                                                         <label class="col-form-label" for="graduation_years">Graduation Years
                                                             <span class="text-danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control" id="graduation_years" name="graduation_years" placeholder="Graduation Years">
+                                                        <input type="text" class="form-control" id="graduation_years" name="dr_graduation_years" placeholder="Graduation Years">
                                                     </div>
 
                                                     <div class="col-lg-6">
                                                       <label class="col-form-label" for="certification_fellowship">Certifications and Fellowships
                                                           <span class="text-danger">*</span>
                                                       </label>
-                                                      <input type="text" class="form-control" id="certification_fellowship" name="certification_fellowship" placeholder="Certifications and Fellowships">
+                                                      <input type="text" class="form-control" id="certification_fellowship" name="dr_certification_fellowship" placeholder="Certifications and Fellowships">
                                                     </div>
                                                 </div>
 
@@ -183,36 +215,36 @@
                                                       <label class="col-form-label" for="clinic_type">Clinic Type
                                                           <span class="text-danger">*</span>
                                                       </label>
-                                                      <select class="form-control" id="clinic_type" name="clinic_type">
-                                                          <option value="">Select Clinic Type</option>
-                                                          <option value="1" >Vet care</option>
-                                                          <option value="2" >Infertility clinic</option>
-                                                          <option value="3" >Primary Care Clinic</option>
-                                                      </select>
+                                                        <select class="form-control" id="clinic_type" name="dr_clinic_type">
+                                                          <option selected disabled>Select Clinic Type</option>
+                                                          {% for clinic in clinics_type %}
+                                                          <option value="{{ clinic.id }}">{{ clinic.name }}</option>
+                                                          {% endfor %}
+                                                        </select>
                                                     </div>
                                                     <div class="col-lg-6">
                                                         <label class="col-form-label" for="current_work_address">Current Work Address
                                                             <span class="text-danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control" id="current_work_address" name="current_work_address" placeholder="Current Work Address">
+                                                        <input type="text" class="form-control" id="current_work_address" name="dr_current_work_address" placeholder="Current Work Address">
                                                     </div>
                                                     <div class="col-lg-6">
                                                       <label class="col-form-label" for="clinic_name">Clinic/s Name
                                                           <span class="text-danger">*</span>
                                                       </label>
-                                                      <input type="text" class="form-control" id="clinic_name" name="clinic_name" placeholder="Clinic/s Name">
+                                                      <input type="text" class="form-control" id="clinic_name" name="dr_clinic_name" placeholder="Clinic/s Name">
                                                     </div>
                                                     <div class="col-lg-6">
                                                       <label class="col-form-label" for="work_number">Work Number
                                                           <span class="text-danger">*</span>
                                                       </label>
-                                                      <input type="text" class="form-control" id="work_number" name="work_number" placeholder="Work Number">
+                                                      <input type="text" class="form-control" id="work_number" name="dr_work_number" placeholder="Work Number">
                                                     </div>
                                                     <div class="col-lg-6">
                                                       <label class="col-form-label" for="work_email_address">Work Email Address
                                                           <span class="text-danger">*</span>
                                                       </label>
-                                                      <input type="text" class="form-control" id="work_email_address" name="work_email_address" placeholder="Work Email Address">
+                                                      <input type="text" class="form-control" id="work_email_address" name="dr_work_email_address" placeholder="Work Email Address">
                                                     </div>
                                                     <div class="col-lg-6">
                                                       <label class="col-form-label" for="open_time">Open Time
@@ -240,7 +272,7 @@
                                                       <label class="col-form-label" for="short_biography">Short Biography or Professional Statement
                                                         <span class="text-danger">*</span>
                                                       </label>
-                                                      <textarea class="form-control" id="short_biography" name="short_biography" rows="3" cols="12" placeholder="Short Biography or Professional Statement"></textarea>
+                                                      <textarea class="form-control" id="short_biography" name="dr_short_biography" rows="3" cols="12" placeholder="Short Biography or Professional Statement"></textarea>
                                                     </div>
                                                 </div>
 
@@ -251,25 +283,25 @@
                                                         <label class="col-form-label" for="beneficiary_name">Beneficiary Name
                                                             <span class="text-danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control" id="beneficiary_name" name="beneficiary_name" placeholder="Beneficiary Name..">
+                                                        <input type="text" class="form-control" id="beneficiary_name" name="dr_beneficiary_name" placeholder="Beneficiary Name..">
                                                     </div>
                                                     <div class="col-lg-6">
                                                         <label class="col-form-label" for="bank_name">Bank Name
                                                             <span class="text-danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control" id="bank_name" name="bank_name" placeholder="Bank Name">
+                                                        <input type="text" class="form-control" id="bank_name" name="dr_bank_name" placeholder="Bank Name">
                                                     </div>
                                                     <div class="col-lg-6">
                                                       <label class="col-form-label" for="bank_account_number">Bank Account Number
                                                           <span class="text-danger">*</span>
                                                       </label>
-                                                      <input type="text" class="form-control" id="bank_account_number" name="bank_account_number" placeholder="Bank Account Number">
+                                                      <input type="text" class="form-control" id="bank_account_number" name="dr_bank_account_number" placeholder="Bank Account Number">
                                                   </div>
                                                   <div class="col-lg-6">
                                                     <label class="col-form-label" for="IFSC_code">IFSC Code
                                                         <span class="text-danger">*</span>
                                                     </label>
-                                                    <input type="text" class="form-control" id="IFSC_code" name="IFSC_code" placeholder="IFSC Code">
+                                                    <input type="text" class="form-control" id="IFSC_code" name="dr_IFSC_code" placeholder="IFSC Code">
                                                 </div>
                                                 </div>
 
@@ -342,6 +374,15 @@
     <script src="{% static './js/plugins-init/jquery.validate-init.js' %}"></script>
     <script src="{% static './vendor/jquery-steps/build/jquery.steps.min.js' %}"></script>
     <script src="{% static './js/plugins-init/jquery-steps-init.js' %}"></script>
+    <script>
+        document.getElementById('toggle-password').addEventListener('click', function () {
+            const passwordField = document.getElementById('password');
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
 </body>
 
 </html>

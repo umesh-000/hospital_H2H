@@ -71,7 +71,6 @@ class DoctorDetails(models.Model):
     dr_username = models.CharField(max_length=100, unique=True)
     experience = models.PositiveIntegerField(default=1)
     specialist = models.ForeignKey(DoctorSpecialistCategory, on_delete=models.SET_NULL, related_name='doctors', null=True, blank=True)
-    sub_specialist = models.CharField(max_length=100, null=True, blank=True)
     additional_qualification = models.TextField(blank=True, null=True)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
     overall_ratings = models.FloatField(default=0)
@@ -79,32 +78,46 @@ class DoctorDetails(models.Model):
     document_approve_status = models.CharField(max_length=1, choices=PROFILE_STATUS_CHOICES, default='P')
     profile_status = models.CharField(max_length=1, choices=PROFILE_STATUS_CHOICES, default='P')
     online_status = models.CharField(max_length=1, choices=ONLINE_STATUS_CHOICES, default='F')
-    medical_license = models.CharField(max_length=100, unique=True)
+    medical_license_no = models.CharField(max_length=100, unique=True)
     institution = models.CharField(max_length=255)
     graduation_year = models.PositiveIntegerField()
     dob = models.DateField()
     join_date = models.DateField(auto_now_add=True)
     c_id = models.IntegerField(default=0)
     c_stat = models.IntegerField(default=0)
-    wallet = models.FloatField(default=0)
-    earnings = models.FloatField(default=0)
     description = models.TextField(blank=True, null=True)
     fcm_token = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A')
     is_recommended = models.CharField(max_length=1, choices=RECOMMENDATION_CHOICES, default='N')
     consultation_fee = models.DecimalField(max_digits=10, decimal_places=2)
+
     profile_img = models.ImageField(upload_to='doctors/doctor_profiles/', blank=True, null=True)
     resume = models.FileField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
-    medical_license_doc = models.FileField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
-    certification = models.FileField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
-    other = models.FileField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
-
+    medical_license = models.FileField(upload_to='doctors/doctor_documents/', blank=True, null=True )
+    certification = models.FileField(upload_to='doctors/doctor_documents/', blank=True, null=True) 
+    other = models.FileField(upload_to='doctors/doctor_documents/', blank=True, null=True) 
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.dr_name
+
+
+
+# class DoctorBankDetails(models.Model):
+#     doctor = models.ForeignKey(DoctorDetails, on_delete=models.CASCADE, related_name='bank_details')
+#     beneficiary_name = models.CharField(max_length=100, null=True, blank=True)
+#     bank_name = models.CharField(max_length=50, null=True, blank=True) 
+#     bank_account_number = models.CharField(max_length=50, null=True, blank=True)
+#     ifsc_code = models.CharField(max_length=50, null=True, blank=True)  
+#     status = models.IntegerField(default=1)  
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     def __str__(self):
+#         return f'{self.doctor.dr_name} - {self.bank_name}'
+
 
 
 class ClinicCategory(models.Model):

@@ -73,9 +73,6 @@ DATABASES = {
         # 'PASSWORD': 'Admin199377',
         # 'HOST': 'h2hhospital.c3imaguk6ro4.ap-south-1.rds.amazonaws.com',
         'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-        }
     }
 }
 

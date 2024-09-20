@@ -34,35 +34,9 @@ class CustomerManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
-# class CustomerManager(BaseUserManager):
-#     def create_user(self, email, password=None, **extra_fields):
-#         if not email:
-#             raise ValueError('The Email field is required')
-#         email = self.normalize_email(email)
-#         extra_fields.setdefault('is_staff', False)
-#         extra_fields.setdefault('is_superuser', False)
-#         customer = self.model(email=email, **extra_fields)
-#         if password:
-#             customer.set_password(password)  # Hash the password
-#         else:
-#             raise ValueError('The Password field is required')
-#         customer.save(using=self._db)
-#         return customer
-
-#     def create_superuser(self, email, password=None, **extra_fields):
-#         extra_fields.setdefault('is_staff', True)
-#         extra_fields.setdefault('is_superuser', True)
-
-#         if extra_fields.get('is_staff') is not True:
-#             raise ValueError('Superuser must have is_staff=True.')
-#         if extra_fields.get('is_superuser') is not True:
-#             raise ValueError('Superuser must have is_superuser=True.')
-
-#         return self.create_user(email, password, **extra_fields)
-
 
 class Customer(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)  # Email field as unique
+    email = models.EmailField(unique=True)
     customer_name = models.CharField(max_length=255, blank=True, null=True)
     phone_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
     remember_token = models.CharField(max_length=100, null=True, blank=True)
@@ -93,8 +67,8 @@ class Customer(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
-    USERNAME_FIELD = 'email'  # Use email for login
-    REQUIRED_FIELDS = ['phone_number']  # Include phone_number in required fields
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['phone_number']
 
     objects = CustomerManager()
 
@@ -213,7 +187,7 @@ class BedStatus(models.Model):
         (0, 'Empty'),
     ]
     
-    hospital = models.ForeignKey('Hospital', on_delete=models.SET_NULL, related_name='bed_statuses', null=True, blank=True)
+    hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, related_name='bed_statuses', null=True, blank=True)
     bed = models.ForeignKey('Bed', on_delete=models.SET_NULL, related_name='bed_statuses', null=True, blank=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     created_at = models.DateTimeField(default=timezone.now)
@@ -230,8 +204,8 @@ class BedBooking(models.Model):
         ('accepted', 'Accepted'),
     ]
 
-    customer = models.IntegerField(default=1)
-    hospital = models.ForeignKey('Hospital', on_delete=models.SET_NULL, null=True, blank=True, related_name='bed_bookings')
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='customer')
+    hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, null=True, blank=True, related_name='bed_bookings')
     ward_type = models.CharField(max_length=255)
     bed_type = models.CharField(max_length=255)
     booking_type = models.CharField(max_length=255)
@@ -299,7 +273,7 @@ class HospitalDepartment(models.Model):
 
 
 class HospitalFacility(models.Model):
-    hospital = models.ForeignKey('Hospital', on_delete=models.SET_NULL, null=True, blank=True, related_name='facilities')
+    hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, null=True, blank=True, related_name='facilities')
     icon = models.ImageField(upload_to='hospital/facility_icons/', blank=True, null=True)
     facility = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)

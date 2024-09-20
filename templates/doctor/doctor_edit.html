@@ -3,58 +3,7 @@
 
 {% block content %}
 <style>
-    .dark-font {
-        color: #454545;
-    }
-
-    .form-group {
-        position: relative;
-    }
-
-    .badge-inside {
-        position: absolute;
-        top: 50%;
-        left: 30px;
-        transform: translateY(-50%);
-        background-color: #ffaa16;
-        color: rgb(31, 29, 29);
-    }
-
-    .form-control {
-        padding-right: 80px;
-    }
-
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .card-header .btn {
-        margin-left: 10px;
-    }
-
-    .category-image {
-        max-width: 150px;
-        width: 150px;
-        height: 150px;
-        height: auto;
-        margin-right: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    .image-container {
-        display: flex;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .image-label {
-        margin-right: 10px;
-        min-width: 120px;
-        text-align: right;
-    }
+    /* Include any necessary styles here */
 </style>
 
 <div class="content-body">
@@ -68,7 +17,7 @@
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'doctors_list' %}">Doctors List</a></li>
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Form</a></li>
                     <li class="breadcrumb-item active"><a href="javascript:void(0)">Edit Doctor Details</a></li>
                 </ol>
             </div>
@@ -87,176 +36,135 @@
                             </a>
                         </div>
                     </div>
-                    <div class="card-body dark-font" >
+                    <div class="card-body">
                         <div class="basic-form">
-                            <form method="POST" enctype="multipart/form-data">
+                            <form class="form-valide" action="" method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
-
-                                <!-- Doctor Details Form -->
-                                <h5>Doctor Details</h5>
-
+                                
+                                <!-- Personal Information -->
+                                <h3 class="mb-1">Personal Information</h3>
                                 <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Name</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" name="dr_name" value="{{ doctor.dr_name }}" placeholder="Doctor Name" required>
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="val-name">Full Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="val-name" name="dr_name" value="{{ doctor.dr_name }}" placeholder="Enter a full name..">
                                     </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Username</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" name="dr_username" value="{{ doctor.dr_username }}" placeholder="Doctor Username" required>
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="val-username">Username <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="val-username" name="dr_username" value="{{ doctor.dr_username }}" placeholder="Enter a username..">
                                     </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Password</label>
-                                    <div class="col-sm-10">
-                                        <input type="password" class="form-control" name="password" placeholder="Password" required value="{{ doctor.password }}">
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Phone</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" name="phone" value="{{ doctor.phone }}" placeholder="Phone Number" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Email</label>
-                                    <div class="col-sm-10">
-                                        <input type="email" class="form-control" name="email" value="{{ doctor.email }}" placeholder="Email Address" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Gender</label>
-                                    <div class="col-sm-10">
-                                        <select class="form-control" name="gender" required>
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="val-gender">Gender <span class="text-danger">*</span></label>
+                                        <select class="form-control" id="val-gender" name="dr_gender">
+                                            <option value="" disabled {% if not doctor.dr_gender %}selected{% endif %}>Please select</option>
                                             <option value="M" {% if doctor.gender == 'M' %}selected{% endif %}>Male</option>
                                             <option value="F" {% if doctor.gender == 'F' %}selected{% endif %}>Female</option>
                                             <option value="O" {% if doctor.gender == 'O' %}selected{% endif %}>Other</option>
                                         </select>
                                     </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Date of Birth</label>
-                                    <div class="col-sm-10">
-                                        <input type="date" class="form-control" name="dob" value="{{ doctor.dob|date:'Y-m-d' }}" required>
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="val-dob">Date of Birthday <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control" id="val-dob" name="dr_dob" value="{{ doctor.dob|date:'Y-m-d' }}">
                                     </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Profile Image</label>
-                                    <div class="col-sm-10">
-                                        <img id="profile-image-preview" src="{{ doctor.profile_img.url }}" alt="Profile Image" class="category-image">
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="val-phone">Phone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="val-phone" name="dr_phone" value="{{ doctor.phone }}" placeholder="Enter phone number">
                                     </div>
-                                    <div class="col-sm-10 ml-auto">
-                                        <input type="file" class="form-control" id="profile-image-input" name="profile_img">
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="val-email">Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="val-email" name="dr_email" value="{{ doctor.email }}" placeholder="Your valid email..">
                                     </div>
-                                </div>
 
-                                
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Description</label>
-                                    <div class="col-sm-10">
-                                        <textarea class="form-control" name="description" placeholder="Description" rows="3">{{ doctor.description }}</textarea>
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="password">Password <span class="text-danger">*</span></label>
+                                        <input type="password" class="form-control" id="password" name="dr_password" value="{{doctor.password}}" placeholder="Password">
+                                        <span class="position-absolute password-toggle" style="right: 15px; top: 40px;">
+                                            <i class="fa fa-eye-slash" id="toggle-password"></i>
+                                        </span>
                                     </div>
-                                </div>
 
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Consultation Fee</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" step="0.01" class="form-control" name="consultation_fee" value="{{ doctor.consultation_fee }}" placeholder="Consultation Fee" required>
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="val-currency">Consultation Fees <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="val-currency" name="dr_consultation_fees" value="{{ doctor.consultation_fee }}" placeholder="Enter consultation fees">
                                     </div>
-                                </div>
 
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Recommendation</label>
-                                    <div class="col-sm-10">
-                                        <select class="form-control" name="recommendation">
-                                            <option value="Y" {% if doctor.is_recommended == 'Y' %}selected{% endif %}>Yes</option>
-                                            <option value="N" {% if doctor.is_recommended == 'N' %}selected{% endif %}>No</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Status</label>
-                                    <div class="col-sm-10">
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="status">Status <span class="text-danger">*</span></label>
                                         <select class="form-control" name="status">
                                             <option value="A" {% if doctor.status == 'A' %}selected{% endif %}>Active</option>
                                             <option value="I" {% if doctor.status == 'I' %}selected{% endif %}>Inactive</option>
                                         </select>
                                     </div>
-                                </div>
 
-                                <!-- Doctor Qualifications Form -->
-                                <h5>Qualifications</h5>
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="is_recommended">Recommended <span class="text-danger">*</span></label>
+                                        <select class="form-control" name="is_recommended">
+                                            <option value="Y" {% if doctor.is_recommended == 'Y' %}selected{% endif %}>Yes</option>
+                                            <option value="N" {% if doctor.is_recommended == 'N' %}selected{% endif %}>No</option>
+                                        </select>
+                                    </div>
 
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Qualification</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" name="qualification" placeholder="Qualification" value="{{ doctor.qualification }}" required>
+                                    <div class="form-group col-12">
+                                        <label>Description</label>
+                                        <textarea class="form-control" name="description" rows="3" placeholder="Description">{{ doctor.description }}</textarea>
                                     </div>
                                 </div>
 
+                                <!-- Professional Information -->
+                                <h3 class="mb-1 mt-5">Professional Information</h3>
                                 <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Experience (years)</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" class="form-control" name="experience" placeholder="Years of Experience" value="{{ doctor.experience }}" required>
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="val_med_license_no">Medical License Number <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="val_med_license_no" name="dr_val_med_license_no" value="{{ doctor.medical_license }}" placeholder="Medical License Number..">
                                     </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Specialist Category</label>
-                                    <div class="col-sm-10">
-                                        <select class="form-control" name="specialist">
-                                            {% for category in specialist_categories %}
-                                            <option value="{{ category.id }}" {% if category.id == doctor.specialist.id %}selected{% endif %}>{{ category.category_name }}</option>
+                                    
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="val-specialization">Specialization <span class="text-danger">*</span></label>
+                                        <select class="form-control" id="val-specialization" name="dr_specialization">
+                                            <option selected disabled>Please select</option>
+                                            {% for speciality in specialist_categories %}
+                                                <option value="{{ speciality.id }}" {% if speciality.id == doctor.specialist.id %}selected{% endif %}>{{ speciality.category_name }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
+
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="experience">Experience <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="experience" name="dr_experience" value="{{ doctor.experience }}" placeholder="Experience">
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="join_date">Join Date <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control" id="join_date" name="join_date" value="{{ doctor.join_date|date:'Y-m-d' }}">
+                                    </div>
                                 </div>
 
+                                <!-- Educational Background -->
+                                <h3 class="mb-1 mt-5">Educational Background</h3>
                                 <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Medical License</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" name="medical_license" value="{{ doctor.medical_license }}" placeholder="Medical License Number" required>
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="degrees">Degrees <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="degrees" name="dr_degrees" value="{{ doctor.qualification }}" placeholder="Degrees">
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="institutions">Institutions <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="institutions" name="dr_institutions" value="{{ doctor.institution }}" placeholder="Institutions">
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <label class="col-form-label" for="dr_image">Profile Image</label>
+                                        <input type="file" class="form-control" id="dr_image" name="dr_image">
+                                    </div>
+
+                                    <div class="col-lg-6">
+                                        <img src="{{ doctor.profile_img.url }}" alt="Profile Image" style="max-width: 100%; height: 50px;">
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Institution</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" name="institution" value="{{ doctor.institution }}" placeholder="Institution" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Graduation Year</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" class="form-control" name="graduation_year" value="{{ doctor.graduation_year }}" placeholder="Graduation Year" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Additional Qualification</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" class="form-control" name="additional_qualification" value="{{ doctor.additional_qualification }}" placeholder="Additional Qualification">
-                                    </div>
-                                </div>
-
-                                <!-- Submit Button -->
-                                <div class="form-group row">
-                                    <div class="col-sm-10 offset-sm-2">
+                                    <div class="col-lg-12">
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </div>
                                 </div>
-
                             </form>
                         </div>
                     </div>
@@ -267,14 +175,15 @@
 </div>
 
 <script>
-    document.getElementById('profile-image-input').addEventListener('change', function () {
-        var input = this;
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            document.getElementById('profile-image-preview').src = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
+    // Password toggle functionality
+    const togglePassword = document.getElementById('toggle-password');
+    const passwordField = document.getElementById('password');
+
+    togglePassword.addEventListener('click', function () {
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
     });
 </script>
-
 {% endblock %}
