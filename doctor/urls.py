@@ -14,6 +14,7 @@ urlpatterns = [
     path('doctors/', views.doctors_list, name='doctors_list'),
     path('doctor/create/', views.doctor_create, name='doctor_create'),
     path('doctor/<int:id>/edit/', views.doctor_edit, name='doctor_edit'),
+    path('doctor/<int:id>/delete/', views.doctor_delete, name='doctor_delete'),
 
 
     # Doctor Clinics Category
@@ -29,6 +30,16 @@ urlpatterns = [
     path('doctor_clinic/<int:id>/edit/', views.doctor_clinics_edit, name='doctor_clinics_edit'),
     path('doctor_clinic/<int:id>/delete/', views.doctor_clinics_delete, name='doctor_clinics_delete'),
 
+    # Doctor Banner Category
+    path('doctor_banner/', views.dr_banner_list, name='dr_banner_list'),
+    path('doctor_banner/create/', views.doctor_banner_create, name='doctor_banner_create'),
+    path('doctor_banner/<int:id>/edit/', views.doctor_banner_edit, name='doctor_banner_edit'),
+    path('doctor_banner/<int:id>/delete/', views.doctor_banner_delete, name='doctor_banner_delete'),
+
+    # Doctor Document
+    path('doctor_documents/', views.doctor_documents, name='doctor_documents_list'),
+    path('change_doc_status/', views.change_doc_status, name='change_doc_status'),
+    
 
     # Symptoms
     path('symptoms/', views.symptoms_list, name='symptoms_list'),

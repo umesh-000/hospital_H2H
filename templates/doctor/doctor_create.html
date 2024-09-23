@@ -55,6 +55,21 @@
         min-width: 120px;
         text-align: right;
     }
+
+    .img-thumbnail {
+        width: 100px;     /* Set the width of the image */
+        height: 100px;    /* Set the height of the image */
+        padding: 10px;
+        object-fit: fill;    /* Maintain aspect ratio and fill the space */
+    }
+
+    .shadow-box {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);  /* Add a subtle shadow */
+        border-radius: 8px;    /* Rounded corners for the image */
+        padding: 5px;
+        background-color: #fff;
+    }
+
     /* Custom Scrollbar Styles */
     ::-webkit-scrollbar {
             width: 8px;
@@ -275,39 +290,48 @@
                                     </div>
                                 </div>
 
-                                <!-- Document Upload -->
+                                <!-- Upload Document  -->
                                 <h3 class="mb-1 mt-5">Document Upload</h3>
                                 <div class="form-group row">
-                                  <div class="col-lg-6">
+                                <div class="col-lg-6">
                                     <label class="col-form-label" for="profile_picture">Profile Picture
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="file" class="form-control" id="profile_picture" name="profile_picture">
-                                  </div>
-                                  <div class="col-lg-6">
+                                    <span class="text-danger">*</span>
+                                    </label></br>
+                                    <img id="profile_picture_preview" class="img-thumbnail mt-2 mb-2 shadow-box" />
+                                    <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*" onchange="previewImage(event, 'profile_picture_preview')">
+                                </div>
+
+                                <div class="col-lg-6">
                                     <label class="col-form-label" for="resume">Resume
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="file" class="form-control" id="resume" name="resume">
-                                  </div>
-                                  <div class="col-lg-6">
+                                    <span class="text-danger">*</span>
+                                    </label></br>
+                                    <img id="resume_preview" class="img-thumbnail mt-2 mb-2 shadow-box" />
+                                    <input type="file" class="form-control" id="resume" name="resume" accept="image/*" onchange="previewImage(event, 'resume_preview')">
+                                </div>
+
+                                <div class="col-lg-6">
                                     <label class="col-form-label" for="medical_license_document">Medical License Document
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="file" class="form-control" id="medical_license_document" name="medical_license_document">
-                                  </div>
-                                  <div class="col-lg-6">
+                                    <span class="text-danger">*</span>
+                                    </label></br>
+                                    <img id="medical_license_preview" class="img-thumbnail mt-2 mb-2 shadow-box" />
+                                    <input type="file" class="form-control" id="medical_license_document" name="medical_license_document" accept="image/*" onchange="previewImage(event, 'medical_license_preview')">
+                                </div>
+
+                                <div class="col-lg-6">
                                     <label class="col-form-label" for="certification_documents">Certification Documents
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="file" class="form-control" id="certification_documents" name="certification_documents">
-                                  </div>
-                                  <div class="col-lg-6">
-                                    <label class="col-form-label" for="other_relevant_rocuments">Other Relevant Documents
-                                        <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="file" class="form-control" id="other_relevant_rocuments" name="other_relevant_rocuments">
-                                  </div>
+                                    <span class="text-danger">*</span>
+                                    </label></br>
+                                    <img id="certification_documents_preview" class="img-thumbnail mt-2 mb-2 shadow-box" />
+                                    <input type="file" class="form-control" id="certification_documents" name="certification_documents" accept="image/*" onchange="previewImage(event, 'certification_documents_preview')">
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <label class="col-form-label" for="other_relevant_documents">Other Relevant Documents
+                                    <span class="text-danger">*</span>
+                                    </label></br>
+                                    <img id="other_documents_preview" class="img-thumbnail mt-2 mb-2 shadow-box" />
+                                    <input type="file" class="form-control" id="other_relevant_documents" name="other_relevant_documents" accept="image/*" onchange="previewImage(event, 'other_documents_preview')">
+                                </div>
                                 </div>
 
                                 <!-- Terms & Conditions -->
@@ -333,21 +357,27 @@
 </div>
 
 <script>
-    document.getElementById('toggle-password').addEventListener('click', function () {
+    document.getElementById('toggle-password').addEventListener('click', function () 
+    {
         const passwordField = document.getElementById('password');
         const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordField.setAttribute('type', type);
         this.classList.toggle('fa-eye');
         this.classList.toggle('fa-eye-slash');
-        });
-    document.getElementById('profile-image-input').addEventListener('change', function () {
-        var input = this;
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            document.getElementById('profile-image-preview').src = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
     });
+
+    function previewImage(event, previewId) 
+    {
+        var input = event.target;
+        var reader = new FileReader();
+        reader.onload = function()
+        {
+            var preview = document.getElementById(previewId);
+            preview.src = reader.result;
+            preview.style.display = 'block'; 
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
 </script>
 
 {% endblock %}

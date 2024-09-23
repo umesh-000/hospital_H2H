@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class DoctorSpecialistCategory(models.Model):
     STATUS_CHOICES = [
         (1, 'Active'),
@@ -94,10 +95,10 @@ class DoctorDetails(models.Model):
     is_recommended = models.CharField(max_length=1, choices=RECOMMENDATION_CHOICES, default='N')
     consultation_fee = models.DecimalField(max_digits=10, decimal_places=2)
     profile_img = models.ImageField(upload_to='doctors/doctor_profiles/', blank=True, null=True)
-    resume = models.FileField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
-    medical_license_doc = models.FileField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
-    certification = models.FileField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
-    other = models.FileField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
+    resume = models.ImageField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
+    medical_license_doc = models.ImageField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
+    certification = models.ImageField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
+    other = models.ImageField(upload_to='doctors/doctor_documents/', blank=True, null=True)  
 
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -105,6 +106,29 @@ class DoctorDetails(models.Model):
 
     def __str__(self):
         return self.dr_name
+
+class DoctorBanner(models.Model):
+    POSITION_CHOICES = [
+        ('T', 'Top'),
+        ('B', 'Bottom'),
+    ]
+
+    STATUS_CHOICES = [
+        (0, 'Inactive'),
+        (1, 'Active'),
+    ]
+
+    doctor = models.ForeignKey(DoctorDetails, on_delete=models.CASCADE, related_name='banners')
+    link = models.URLField(max_length=255, null=True, blank=True)
+    banner = models.ImageField(upload_to='doctors/banners/')
+    position = models.CharField(max_length=50, choices=POSITION_CHOICES, default='B')
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.doctor.dr_name} - {self.position}"
+
 
 
 class ClinicCategory(models.Model):

@@ -1,0 +1,215 @@
+{% extends 'doctor/doctor_master.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-body dark-font">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Doctor Documents</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Admin</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Doctor Documents</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Documents List</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Doctor Name</th>
+                                        <th>Profile Image</th>
+                                        <th>Resume</th>
+                                        <th>Medical License</th>
+                                        <th>Certification</th>
+                                        <th>Other Documents</th>
+                                        <th>Documents Approve Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for doctor in doctor_doc_list %}
+                                    <tr>
+                                        <td>{{ doctor.id }}</td>
+                                        <td>{{ doctor.dr_name }}</td>
+                                        
+                                        <!-- Profile Image -->
+                                        <td>
+                                            {% if doctor.profile_img %}
+                                                <img src="{{ doctor.profile_img.url }}" alt="Profile Image" width="70" height="70">
+                                            {% else %}
+                                                No Image
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- Resume -->
+                                        <td>
+                                            {% if doctor.resume %}
+                                                <a class="btn btn-outline-primary" href="{{ doctor.resume.url }}" target="_blank">View</a>
+                                            {% else %}
+                                                No Resume
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- Medical License -->
+                                        <td>
+                                            {% if doctor.medical_license_doc %}
+                                                <a class="btn btn-outline-primary" href="{{ doctor.medical_license_doc.url }}" target="_blank">View</a>
+                                            {% else %}
+                                                No License
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- Certification -->
+                                        <td>
+                                            {% if doctor.certification %}
+                                                <a class="btn btn-outline-primary" href="{{ doctor.certification.url }}" target="_blank">View</a>
+                                            {% else %}
+                                                No Certification
+                                            {% endif %}
+                                        </td>
+
+                                        <!-- Other Documents -->
+                                        <td>
+                                            {% if doctor.other %}
+                                                <a class="btn btn-outline-primary" href="{{ doctor.other.url }}" target="_blank">View</a>
+                                            {% else %}
+                                                No Documents
+                                            {% endif %}
+                                        </td>
+
+                                        
+                                        <td>
+                                            {% if doctor.document_approve_status == "P" %}
+                                                <span class="badge badge-info">Pending</span>
+                                            {% elif doctor.document_approve_status == "A" %}
+                                                <span class="badge badge-success">Approved</span>
+                                            {% elif doctor.document_approve_status == "R" %}
+                                                <span class="badge badge-danger">Rejected</span>
+                                            {% else %}
+                                                <span class="badge badge-warning">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary" type="button" id="actionDropdown{{ doctor.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actionDropdown{{ doctor.id }}">
+                                                    <a class="dropdown-item" href="javascript:void(0);" onclick="changeDocStatus({{ doctor.id }}, 'A')">Approve</a>
+                                                    <div class="dropdown-divider"></div>
+                                                    <a class="dropdown-item" href="javascript:void(0);" onclick="changeDocStatus({{ doctor.id }}, 'P')">Pending</a>
+                                                    <div class="dropdown-divider"></div>
+                                                    <a class="dropdown-item" href="javascript:void(0);" onclick="changeDocStatus({{ doctor.id }}, 'R')">Reject</a>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+function changeDocStatus(doctorId, status) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you really want to change the document status?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, change it!',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            popup: 'small-swal-popup',
+            title: 'small-swal-title',
+            content: 'small-swal-text',
+            confirmButton: 'small-swal-button',
+            cancelButton: 'small-swal-button',
+            icon: 'small-swal-icon'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{% url "change_doc_status" %}',  // Make sure the URL is correct
+                type: 'POST',
+                data: {
+                    'doctor_id': doctorId,
+                    'status': status,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Updated!',
+                            text: "Document status has been changed.",
+                            icon: 'success',
+                            customClass: {
+                                popup: 'small-swal-popup',
+                                title: 'small-swal-title',
+                                content: 'small-swal-text',
+                                confirmButton: 'small-swal-button',
+                                icon: 'small-swal-icon'
+                            }
+                        }).then(() => {
+                            location.reload();  // Reload the page to reflect changes
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Failed to change the status.',
+                            icon: 'error',
+                            customClass: {
+                                popup: 'small-swal-popup',
+                                title: 'small-swal-title',
+                                content: 'small-swal-text',
+                                confirmButton: 'small-swal-button',
+                                icon: 'small-swal-icon'
+                            }
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'There was an error processing your request.',
+                        icon: 'error',
+                        customClass: {
+                            popup: 'small-swal-popup',
+                            title: 'small-swal-title',
+                            content: 'small-swal-text',
+                            confirmButton: 'small-swal-button',
+                            icon: 'small-swal-icon'
+                        }
+                    });
+                }
+            });
+        }
+    });
+}
+
+</script>
+{% endblock content %}

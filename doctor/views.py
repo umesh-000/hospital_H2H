@@ -220,61 +220,84 @@ def doctor_edit(request, id):
         return render(request, "doctor/doctor_edit.html", context)
 
     if request.method == 'POST':
-        # Extract form data
+        # Basic Information
         dr_name = request.POST.get('dr_name')
         dr_username = request.POST.get('dr_username')
-        phone = request.POST.get('phone')
-        email = request.POST.get('email')
-        gender = request.POST.get('gender')
-        dob = request.POST.get('dob')
+        
+        phone = request.POST.get('dr_phone')
+        email = request.POST.get('dr_email')
+        gender = request.POST.get('dr_gender')
+        dob = request.POST.get('dr_dob')
+        consultation_fee = request.POST.get('dr_consultation_fees')
         description = request.POST.get('description')
-        consultation_fee = request.POST.get('consultation_fee')
-        recommendation = request.POST.get('recommendation')
         status = request.POST.get('status')
-        profile_img = request.FILES.get('profile_img')
+        is_recommended = request.POST.get('is_recommended')
 
-        specialist_id = request.POST.get('specialist')
-         # Update qualifications if provided
-        qualification = request.POST.get('qualification')
-        experience = request.POST.get('experience')
-        medical_license = request.POST.get('medical_license')
-        institution = request.POST.get('institution')
-        graduation_year = request.POST.get('graduation_year')
-        additional_qualification = request.POST.get('additional_qualification')
+        # Professional Information
+        medical_license = request.POST.get('dr_val_med_license_no')
+        specialist_id = request.POST.get('dr_specialization')
+        experience = request.POST.get('dr_experience')
+        join_date = request.POST.get('join_date')
 
+        # Educational Background
+        dr_degrees = request.POST.get('dr_degrees')
+        dr_institutions = request.POST.get('dr_institutions')
+        dr_graduation_years = request.POST.get('dr_graduation_years')
+        dr_certification_fellowship = request.POST.get('dr_certification_fellowship')
 
-        # Handle profile image
-        if not profile_img:
-            if doctor.profile_img:
-                profile_img = doctor.profile_img
-            else:
-                default_image_path = os.path.join(settings.STATIC_ROOT, 'images', 'default_profile.png')
-                with open(default_image_path, 'rb') as f:
-                    profile_img = default_storage.save('doctor_images/default_profile.png', f)
+        # Document Uploads
+        profile_img = request.FILES.get('profile_picture')  # updated field name
+        resume = request.FILES.get('resume')  # new field
+        medical_license_document = request.FILES.get('medical_license_document')  # new field
+        certification_documents = request.FILES.get('certification_documents')  # new field
+        other_relevant_documents = request.FILES.get('other_relevant_documents')  # new field
 
-        # Update doctor details
+        specialist_instance = get_object_or_404(models.DoctorSpecialistCategory, id=specialist_id)
+
+       # Update the fields of the existing doctor instance
         doctor.dr_name = dr_name
         doctor.dr_username = dr_username
         doctor.phone = phone
         doctor.email = email
         doctor.gender = gender
         doctor.dob = dob
+        doctor.profile_img = profile_img if profile_img else doctor.profile_img  # Update only if new image is uploaded
         doctor.description = description
         doctor.consultation_fee = consultation_fee
-        doctor.is_recommended = recommendation
+        doctor.join_date = join_date
         doctor.status = status
-        doctor.profile_img = profile_img
+        doctor.is_recommended = is_recommended
+        doctor.qualification = dr_degrees
+        doctor.experience = experience
+        doctor.specialist = specialist_instance
+        doctor.medical_license = medical_license
+        doctor.institution = dr_institutions
+        doctor.graduation_year = dr_graduation_years
+        doctor.additional_qualification = dr_certification_fellowship
+        doctor.resume = resume if resume else doctor.resume  # Update only if new resume is uploaded
+        doctor.medical_license_doc = medical_license_document if medical_license_document else doctor.medical_license_doc
+        doctor.certification = certification_documents if certification_documents else doctor.certification
+        doctor.other = other_relevant_documents if other_relevant_documents else doctor.other
 
-        doctor.qualification=qualification
-        doctor.experience=experience
-        doctor.medical_license=medical_license
-        doctor.institution=institution
-        doctor.graduation_year=graduation_year
-        doctor.additional_qualification=additional_qualification
-        doctor.updated_at = datetime.datetime.now()
-        doctor.save()
-        messages.success(request, 'Update successfully!')
-        return redirect('doctors_list')
+        try:
+            doctor.save()
+            messages.success(request, 'Updated successfully!')
+            return redirect('doctors_list')
+        except Exception as e:
+            messages.error(request, f'Error updating doctor: {e}')
+            print(e)
+
+def doctor_delete(request, id):
+    if request.method == 'POST':
+        try:
+            DoctorDetails = get_object_or_404(models.DoctorDetails, id=id)
+            DoctorDetails.delete()
+            messages.success(request, 'Deleted Successfully!')
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
 
 
 def doctor_clinic_categories(request):
@@ -320,6 +343,7 @@ def clinic_category_delete(request, id):
         try:
             ClinicCategory = get_object_or_404(models.ClinicCategory, id=id)
             ClinicCategory.delete()
+            messages.success(request, 'Deleted Successfully!')
             return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
@@ -416,6 +440,7 @@ def doctor_clinics_delete(request, id):
         try:
             DoctorClinics = get_object_or_404(models.DoctorClinics, id=id)
             DoctorClinics.delete()
+            messages.success(request, 'Deleted Successfully!')
             return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
@@ -489,11 +514,15 @@ def symptom_edit(request, id):
         return redirect('symptoms_list')
     
 def symptom_delete(request, id):
-    symptom = get_object_or_404(models.Symptom, id=id)
-    symptom.delete()
-    messages.success(request, 'Deleted Successfully!')
-    return redirect('symptoms_list')
-
+    if request.method == 'POST':
+        try:
+            symptom = get_object_or_404(models.Symptom, id=id)
+            symptom.delete()
+            messages.success(request, 'Deleted Successfully!')
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 # Specialist
 def specialist_list(request):
@@ -555,8 +584,129 @@ def specialist_edit(request, id):
         messages.success(request, 'Updated Successfully!')
         return redirect('specialist_list')
 
+
 def specialist_delete(request, id):
-    specialist_category = get_object_or_404(models.DoctorSpecialistCategory, id=id)
-    specialist_category.delete()
-    messages.success(request, 'Deleted Successfully!')
-    return redirect('specialist_list')
+    if request.method == 'POST':
+        try:
+            specialist_category = get_object_or_404(models.DoctorSpecialistCategory, id=id)
+            specialist_category.delete()
+            messages.success(request, 'Deleted Successfully!')
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+# Doctor Banner
+def dr_banner_list(request):
+    dr_banner_list = models.DoctorBanner.objects.all()
+    context = {
+        'dr_banner_list': dr_banner_list,
+    }
+    return render(request, "doctor/dr_banner_list.html", context)
+
+def doctor_banner_create(request):
+    if request.method == "GET":
+        doctors_list = models.DoctorDetails.objects.all()
+        return render(request, "doctor/dr_banner_create.html", {'doctors_list': doctors_list})
+
+    if request.method == "POST":
+        doctor_id = request.POST.get('doctor')
+        banner_image = request.FILES.get('banner')
+        banner_link = request.POST.get('link', '')
+        position = request.POST.get('position', 'B')
+        status = request.POST.get('status', 1) 
+
+        if not banner_image:
+            default_image_path = os.path.join(settings.STATIC_ROOT, 'images', 'default_image.png')
+            with open(default_image_path, 'rb') as f:
+                banner_image = default_storage.save('doctors/banners/default_image.png', f)
+
+        try:
+            doctor = models.DoctorDetails.objects.get(id=doctor_id)
+        except models.DoctorDetails.DoesNotExist:
+            messages.error(request, "Selected doctor does not exist.")
+            return redirect('doctor_banner_create')
+
+        doctor_banner = models.DoctorBanner(
+            doctor=doctor,
+            banner=banner_image,
+            link=banner_link,
+            position=position,
+            status=status,
+        )
+        doctor_banner.save()
+        messages.success(request, "Created successfully!")
+        return redirect('dr_banner_list') 
+    
+def doctor_banner_edit(request, id):
+    banner = get_object_or_404(models.DoctorBanner, id=id)
+
+    if request.method == 'GET':
+        doctors_list = models.DoctorDetails.objects.all()
+        context = {
+            'banner': banner,
+            'doctors_list': doctors_list,
+        }
+        return render(request, "doctor/dr_banner_edit.html", context)
+
+    if request.method == 'POST':
+        doctor_id = request.POST.get('doctor')
+        banner_image = request.FILES.get('banner')
+        link = request.POST.get('link')
+        position = request.POST.get('position')
+        status = request.POST.get('status')
+
+        # Find the selected doctor
+        try:
+            doctor = models.DoctorDetails.objects.get(id=doctor_id)
+        except models.DoctorDetails.DoesNotExist:
+            messages.error(request, "Selected doctor does not exist.")
+            return redirect('doctor_banner_edit', id=id)
+
+        # Update banner details
+        banner.doctor = doctor
+        if banner_image:
+            banner.banner = banner_image
+        banner.link = link
+        banner.position = position
+        banner.status = status
+        banner.updated_at = datetime.datetime.now()
+        banner.save()
+
+        messages.success(request, 'Banner Updated successfully!')
+        return redirect('dr_banner_list')
+
+def doctor_banner_delete(request, id):
+    if request.method == 'POST':
+        try:
+            doctor_banner = get_object_or_404(models.DoctorBanner, id=id)
+            doctor_banner.delete()
+            messages.success(request, 'Deleted Successfully!')
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+def doctor_documents(request):
+    doctor_doc_list = models.DoctorDetails.objects.all()
+    context = {
+        'doctor_doc_list': doctor_doc_list,
+    }
+    return render(request, "doctor/doctor_doc_list.html", context)
+
+def change_doc_status(request):
+    if request.method == 'POST':
+        doctor_id = request.POST.get('doctor_id')
+        status = request.POST.get('status')
+
+        try:
+            doctor = models.DoctorDetails.objects.get(id=doctor_id)
+            doctor.document_approve_status = status
+            doctor.save()
+            return JsonResponse({'success': True})
+        except models.DoctorDetails.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Doctor not found'})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'})

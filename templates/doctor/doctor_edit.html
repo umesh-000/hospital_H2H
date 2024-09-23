@@ -3,7 +3,19 @@
 
 {% block content %}
 <style>
-    /* Include any necessary styles here */
+    .img-thumbnail {
+        width: 100px;     /* Set the width of the image */
+        height: 100px;    /* Set the height of the image */
+        padding: 10px;
+        object-fit: fill;    /* Maintain aspect ratio and fill the space */
+    }
+
+    .shadow-box {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);  /* Add a subtle shadow */
+        border-radius: 8px;    /* Rounded corners for the image */
+        padding: 5px;
+        background-color: #fff;
+    }
 </style>
 
 <div class="content-body">
@@ -74,13 +86,6 @@
                                         <input type="email" class="form-control" id="val-email" name="dr_email" value="{{ doctor.email }}" placeholder="Your valid email..">
                                     </div>
 
-                                    <div class="col-lg-6">
-                                        <label class="col-form-label" for="password">Password <span class="text-danger">*</span></label>
-                                        <input type="password" class="form-control" id="password" name="dr_password" value="{{doctor.password}}" placeholder="Password">
-                                        <span class="position-absolute password-toggle" style="right: 15px; top: 40px;">
-                                            <i class="fa fa-eye-slash" id="toggle-password"></i>
-                                        </span>
-                                    </div>
 
                                     <div class="col-lg-6">
                                         <label class="col-form-label" for="val-currency">Consultation Fees <span class="text-danger">*</span></label>
@@ -150,14 +155,61 @@
                                         <input type="text" class="form-control" id="institutions" name="dr_institutions" value="{{ doctor.institution }}" placeholder="Institutions">
                                     </div>
 
+
                                     <div class="col-lg-6">
-                                        <label class="col-form-label" for="dr_image">Profile Image</label>
-                                        <input type="file" class="form-control" id="dr_image" name="dr_image">
+                                        <label class="col-form-label" for="graduation_years">Graduation Years <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="graduation_years" value="{{ doctor.graduation_year }}" name="dr_graduation_years" placeholder="Graduation Years">
                                     </div>
 
                                     <div class="col-lg-6">
-                                        <img src="{{ doctor.profile_img.url }}" alt="Profile Image" style="max-width: 100%; height: 50px;">
+                                      <label class="col-form-label" for="certification_fellowship">Certifications and Fellowships<span class="text-danger">*</span></label>
+                                      <input type="text" class="form-control" id="certification_fellowship" value="{{ doctor.additional_qualification }}" name="dr_certification_fellowship" placeholder="Certifications and Fellowships">
                                     </div>
+                                    
+                                </div>
+
+                                <!-- Upload Document  -->
+                                <h3 class="mb-1 mt-5">Document Upload</h3>
+                                <div class="form-group row">
+                                <div class="col-lg-6">
+                                    <label class="col-form-label" for="profile_picture">Profile Picture
+                                    <span class="text-danger">*</span>
+                                    </label></br>
+                                    <img src="{% if doctor.profile_img %}{{ doctor.profile_img.url }}{% else %}{% static 'images/default_image.png' %}{% endif %}"  id="profile_picture_preview" class="img-thumbnail mt-2 mb-2 shadow-box" />
+                                    <input type="file" class="form-control" id="profile_picture" name="profile_picture" accept="image/*"  onchange="previewImage(event, 'profile_picture_preview')">
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <label class="col-form-label" for="resume">Resume
+                                        <span class="text-danger">*</span>
+                                    </label><br/>
+                                    <img src="{% if doctor.resume %}{{ doctor.resume.url }}{% else %}{% static 'images/default_image.png' %}{% endif %}" id="resume_preview" class="img-thumbnail mt-2 mb-2 shadow-box" />
+                                    <input type="file" class="form-control" id="resume" name="resume" accept="image/*" onchange="previewImage(event, 'resume_preview')">
+                                </div>
+                                
+                                <div class="col-lg-6">
+                                    <label class="col-form-label" for="medical_license_document">Medical License Document
+                                        <span class="text-danger">*</span>
+                                    </label><br/>
+                                    <img src="{% if doctor.medical_license_doc %}{{ doctor.medical_license_doc.url }}{% else %}{% static 'images/default_image.png' %}{% endif %}" id="medical_license_preview" class="img-thumbnail mt-2 mb-2 shadow-box" />
+                                    <input type="file" class="form-control" id="medical_license_document" name="medical_license_document" accept="image/*" onchange="previewImage(event, 'medical_license_preview')">
+                                </div>
+                                
+                                <div class="col-lg-6">
+                                    <label class="col-form-label" for="certification_documents">Certification Documents
+                                        <span class="text-danger">*</span>
+                                    </label><br/>
+                                    <img src="{% if doctor.certification %}{{ doctor.certification.url }}{% else %}{% static 'images/default_image.png' %}{% endif %}" id="certification_documents_preview" class="img-thumbnail mt-2 mb-2 shadow-box" />
+                                    <input type="file" class="form-control" id="certification_documents" name="certification_documents" accept="image/*" onchange="previewImage(event, 'certification_documents_preview')">
+                                </div>
+                                
+                                <div class="col-lg-6">
+                                    <label class="col-form-label" for="other_relevant_documents">Other Relevant Documents
+                                        <span class="text-danger">*</span>
+                                    </label><br/>
+                                    <img src="{% if doctor.other %}{{ doctor.other.url }}{% else %}{% static 'images/default_image.png' %}{% endif %}" id="other_documents_preview" class="img-thumbnail mt-2 mb-2 shadow-box" />
+                                    <input type="file" class="form-control" id="other_relevant_documents" name="other_relevant_documents" accept="image/*" onchange="previewImage(event, 'other_documents_preview')">
+                                </div>
                                 </div>
 
                                 <div class="form-group row">
@@ -185,5 +237,23 @@
         this.classList.toggle('fa-eye');
         this.classList.toggle('fa-eye-slash');
     });
+
+    function previewImage(event, previewId) {
+        var output = document.getElementById(previewId);
+        output.src = URL.createObjectURL(event.target.files[0]);
+        output.onload = function() {
+            URL.revokeObjectURL(output.src); 
+        }
+    }
+
+
+    // function previewImage(event, previewId) {
+    //     const reader = new FileReader();
+    //     reader.onload = function() {
+    //         const output = document.getElementById(previewId);
+    //         output.src = reader.result;
+    //     };
+    //     reader.readAsDataURL(event.target.files[0]);
+    // }
 </script>
 {% endblock %}

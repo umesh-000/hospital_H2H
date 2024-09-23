@@ -188,7 +188,7 @@ class BedStatus(models.Model):
     ]
     
     hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, related_name='bed_statuses', null=True, blank=True)
-    bed = models.ForeignKey('Bed', on_delete=models.SET_NULL, related_name='bed_statuses', null=True, blank=True)
+    bed = models.ForeignKey(Bed, on_delete=models.SET_NULL, related_name='bed_statuses', null=True, blank=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=0)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -221,7 +221,7 @@ class BedBooking(models.Model):
     insurance_info = models.TextField(null=True, blank=True)
     admission_date = models.DateField()
     discharge_date = models.DateField(null=True, blank=True)
-    doctor_assigned = models.ForeignKey("doctor.DoctorDetails", on_delete=models.SET_NULL, null=True, blank=True, related_name='bed_bookings')
+    doctor_assigned = models.ForeignKey('doctor.DoctorDetails', on_delete=models.SET_NULL, null=True, blank=True, related_name='bed_bookings')
     booking_date = models.DateTimeField(default=timezone.now)
     time_slot = models.TimeField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
@@ -288,7 +288,7 @@ class HospitalDoctors(models.Model):
         (0, 'Inactive'),
     ]
     hospital = models.ForeignKey(Hospital, on_delete=models.SET_NULL, null=True, blank=True, related_name='hospital_doctors')
-    doctor = models.ForeignKey("doctor.DoctorDetails", on_delete=models.SET_NULL, null=True, blank=True, related_name='doctor_hospitals')
+    doctor = models.ForeignKey('doctor.DoctorDetails', on_delete=models.SET_NULL, null=True, blank=True, related_name='doctor_hospitals')
     unique_code = models.CharField(max_length=100)
     join_date = models.DateField()
     status = models.IntegerField(choices=STATUS_CHOICES, default=1)
