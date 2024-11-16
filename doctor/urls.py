@@ -53,5 +53,9 @@ urlpatterns = [
     path('specialist/create/', views.specialist_create, name='specialist_create'),
     path('specialist/<int:id>/edit/', views.specialist_edit, name='specialist_edit'),
     path('specialist/<int:id>/delete/', views.specialist_delete, name='specialist_delete'),
+
+    # Doctor Booking 
+    path('doctor-bookings/', views.doctor_booking_requests, name='doctor_booking_requests'),
+    path('update_doctor_booking_status/', views.update_doctor_booking_status, name='update_doctor_booking_status'),
     
 ]

@@ -105,12 +105,16 @@
 
                                     <div class="form-group col-6">
                                         <label>Latitude</label>
-                                        <input type="text" class="form-control" name="latitude" placeholder="Enter Latitude">
+                                        <input id="latitude" type="text" class="form-control" name="latitude" placeholder="Enter Latitude">
                                     </div>
 
                                     <div class="form-group col-6">
                                         <label>Longitude</label>
-                                        <input type="text" class="form-control" name="longitude" placeholder="Enter Longitude">
+                                        <input id="longitude" type="text" class="form-control" name="longitude" placeholder="Enter Longitude">
+                                    </div>
+
+                                    <div class="form-group col-12 d-flex justify-content-center">
+                                        <div id="map" style="width: 90%; height: 400px; position: relative;"></div>
                                     </div>
                                 </div>
 
@@ -125,4 +129,31 @@
 </div>
 <!--**********************************  Content body end  ***********************************-->
 
+<!-- Leaflet.js CSS and JavaScript -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<script>
+    var map = L.map('map').setView([22.7196, 75.8577], 13); // Indore coordinates
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var marker;
+
+    
+    // Optionally, handle clicking on the map
+    map.on('click', function(e) {
+        var latlng = e.latlng;
+        document.getElementById('latitude').value = latlng.lat;
+        document.getElementById('longitude').value = latlng.lng;
+
+        if (marker) {
+            map.removeLayer(marker);
+        }
+
+        marker = L.marker([latlng.lat, latlng.lng]).addTo(map);
+    });
+</script>
 {% endblock %}

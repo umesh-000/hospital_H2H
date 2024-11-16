@@ -85,4 +85,37 @@ urlpatterns = [
     path('admin/hospital_insurance/create/', hospital_views.hospital_insurance_create, name='hospital_insurance_create'),
     path('admin/hospital_insurance/<int:id>/edit/', hospital_views.hospital_insurance_edit, name='hospital_insurance_edit'),
     path('admin/hospital_insurance/<int:id>/delete/', hospital_views.hospital_insurance_delete, name='hospital_insurance_delete'),
+
+
+
+    # LAB 
+    path('admin/laboratories/', hospital_views.laboratories, name='laboratories_list'),
+    path('admin/laboratories/create/', hospital_views.laboratories_create, name='laboratories_create'),
+    path('admin/laboratories/<int:id>/edit/', hospital_views.laboratories_edit, name='laboratories_edit'),
+    path('admin/laboratories/<int:id>/delete/', hospital_views.laboratories_delete, name='laboratories_delete'),
+
+
+    # LAB Tags
+    path('admin/lab_tags/', hospital_views.lab_tags, name='lab_tags_list'),
+    path('admin/lab_tags/create/', hospital_views.lab_tags_create, name='lab_tags_create'),
+    path('admin/lab_tags/<int:id>/edit/', hospital_views.lab_tags_edit, name='lab_tags_edit'),
+    path('admin/lab_tags/<int:id>/delete/', hospital_views.lab_tags_delete, name='lab_tags_delete'),
+
+    #Service
+    path('admin/services/', hospital_views.services_list, name='services_list'),
+    path('admin/services/create/', hospital_views.services_create, name='services_create'),
+    path('admin/services/<int:id>/edit/', hospital_views.services_edit, name='services_edit'),
+    path('admin/services/<int:id>/delete/', hospital_views.services_delete, name='services_delete'),
+
+    #Lab Service
+    path('admin/lab_services/', hospital_views.lab_services_list, name='lab_services_list'),
+    path('admin/lab_services/create/', hospital_views.lab_services_create, name='lab_services_create'),
+    path('admin/lab_services/<int:id>/edit/', hospital_views.lab_services_edit, name='lab_services_edit'),
+    path('admin/lab_services/<int:id>/delete/', hospital_views.lab_services_delete, name='lab_services_delete'),
+
+    #Lab Banners
+    path('admin/lab_banners/', hospital_views.lab_banners_list, name='lab_banners_list'),
+    path('admin/lab_banners/create/', hospital_views.lab_banners_create, name='lab_banners_create'),
+    path('admin/lab_banners/<int:id>/edit/', hospital_views.lab_banners_edit, name='lab_banners_edit'),
+    path('admin/lab_banners/<int:id>/delete/', hospital_views.lab_banners_delete, name='lab_banners_delete'),
 ]

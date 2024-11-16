@@ -138,15 +138,7 @@
                                         <label>City</label>
                                         <input type="text" class="form-control" name="city" placeholder="Input City">
                                     </div>
-                                    <div class="form-group col-12">
-                                        <label>Latitude</label>
-                                        <input type="text" class="form-control" name="latitude" placeholder="Input Latitude">
-                                    </div>
-                                    <div class="form-group col-12">
-                                        <label>Longitude</label>
-                                        <input type="text" class="form-control" name="longitude" placeholder="Input Longitude">
-                                    </div>
-
+                                    
                                     <div class="form-group col-12">
                                         <label>Opening Time</label>
                                         <span class="input-group-append">
@@ -169,15 +161,17 @@
                                             <option value="clinic">Clinic</option>
                                         </select>
                                     </div>
-                                    <div class="form-group col-12">
+
+                                    <div class="form-group col-6">
                                         <label>Status</label>
-                                        <select id="inputState" class="form-control" name="status">
-                                            <option selected>Choose...</option>
-                                            <option value="1">Active</option>
-                                            <option value="0">InActive</option>
+                                        <select class="form-control" name="status">
+                                            <option selected disabled>Choose Status</option>
+                                            <option value="1" selected>Active</option>
+                                            <option value="0">Inactive</option>
                                         </select>
                                     </div>
-                                    <div class="form-group col-12">
+                                   
+                                    <div class="form-group col-6">
                                         <label>Is Recommended</label>
                                         <select id="inputState" class="form-control" name="isRecommended">
                                             <option selected>Choose...</option>
@@ -220,6 +214,21 @@
                                             </div>
                                         </div>
                                         <img id="hospital-logo-preview" src="{% static 'images/default_image.png' %}" alt="Hospital Logo Preview" class="hospital-logo">
+                                    </div>
+
+
+                                    <div class="form-group col-6">
+                                        <label>Latitude</label>
+                                        <input id="latitude" type="text" class="form-control" name="latitude" placeholder="Enter Latitude">
+                                    </div>
+
+                                    <div class="form-group col-6">
+                                        <label>Longitude</label>
+                                        <input id="longitude" type="text" class="form-control" name="longitude" placeholder="Enter Longitude">
+                                    </div>
+
+                                    <div class="form-group col-12 d-flex justify-content-center">
+                                        <div id="map" style="width: 90%; height: 400px; position: relative;"></div>
                                     </div>
                                 </div>
                                 

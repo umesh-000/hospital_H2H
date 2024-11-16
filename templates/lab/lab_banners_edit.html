@@ -1,0 +1,172 @@
+{% extends 'admin/master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #000000;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .badge-inside {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background-color: #ffaa16;
+        color: rgb(31, 29, 29);
+    }
+
+    .form-control {
+        padding-right: 80px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+
+    /* Custom styles for image preview */
+    .image-preview {
+        width: 300px; /* Customize width */
+        height: 200px; /* Customize height */
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f9f9f9;
+        margin-top: 10px;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover; /* Keeps aspect ratio while fitting */
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Edit Lab Banner</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="javascript:void(0)">Form</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Edit Lab Banner</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-6 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Edit Lab Banner</h4>
+                        <div>
+                            <a href="{% url 'lab_banners_list' %}">
+                                <button title="List" type="button" class="btn btn-rounded btn-outline-success">
+                                    <span><i class="fa fa-list"></i></span>
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <!-- Lab Banner Form -->
+                            <form action="{% url 'lab_banners_edit' lab_banner.id %}" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Laboratory</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="laboratory_id" required>
+                                            <option disabled value="">Select Laboratory</option>
+                                            {% for lab in laboratories %}
+                                                <option value="{{ lab.id }}" {% if lab.id == lab_banner.laboratory.id %}selected{% endif %}>
+                                                    {{ lab.lab_name }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Link</label>
+                                    <div class="col-sm-10">
+                                        <input type="url" class="form-control" name="link" value="{{ lab_banner.link }}" placeholder="Enter URL (optional)">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Banner Image</label>
+                                    <div class="col-sm-10">
+                                        <div class="image-preview mb-3" id="imagePreview">
+                                            {% if lab_banner.banner %}
+                                                <img src="{{ lab_banner.banner.url }}" alt="Current Banner Image" />
+                                            {% else %}
+                                                <span>No Image Selected</span>
+                                            {% endif %}
+                                        </div>
+                                        <input type="file" class="form-control" name="banner" accept="image/*" id="bannerImageInput">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Status</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="status" required>
+                                            <option disabled value="">Select Status</option>
+                                            <option value="1" {% if lab_banner.status == 1 %}selected{% endif %}>Active</option>
+                                            <option value="0" {% if lab_banner.status == 0 %}selected{% endif %}>Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="offset-sm-2">
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                        <a href="{% url 'lab_banners_list' %}" class="btn btn-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JavaScript for image preview
+    document.getElementById('bannerImageInput').addEventListener('change', function (event) {
+        const previewContainer = document.getElementById('imagePreview');
+        const file = event.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewContainer.innerHTML = `<img src="${e.target.result}" alt="Image Preview" />`;
+            }
+            reader.readAsDataURL(file);
+        } 
+    });
+</script>
+
+{% endblock content %}

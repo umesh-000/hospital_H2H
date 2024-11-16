@@ -38,7 +38,7 @@ def login(request):
             return redirect('/admin/')
         else:
             messages.error(request, 'Invalid email or password')
-            return render(request, "admin_login.html")
+            return render(request, "admin/admin_login.html")
     return render(request, "admin/admin_login.html")
 
 def register(request):

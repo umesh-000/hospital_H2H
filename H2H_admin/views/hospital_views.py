@@ -1,11 +1,12 @@
 from django.contrib.auth.hashers import make_password,check_password
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import require_POST
+from django.core.files.storage import FileSystemStorage
 from django.core.files.storage import default_storage
+from django.views.decorators.http import require_POST
 from django.core.files.base import ContentFile
+from H2H_admin import models as adminModel
 import doctor.models as doctor_module
-from django.http import HttpResponse
-from django.http import JsonResponse
+from django.http import HttpResponse,JsonResponse
 from django.contrib import messages
 from django.conf import settings
 from hospital import models
@@ -923,10 +924,365 @@ def hospital_insurance_edit(request, id):
         messages.success(request, 'Updated successfully!')
         return redirect("hospital_insurance_list")
 
-
 def hospital_insurance_delete(request, id):
     hospital_insurance = get_object_or_404(models.HospitalInsurance, id=id)
     hospital_insurance.delete()
     messages.success(request, 'Deleted successfully!')
     return redirect('hospital_insurance_list')
+
+
+# Lab 
+def laboratories(request):
+    laboratories = adminModel.Laboratory.objects.all()
+    context = {
+        "laboratories": laboratories,
+    }
+    return render(request, "lab/laboratories_list.html", context)
+
+def laboratories_create(request):
+    if request.method == "GET":
+        return render(request, "lab/laboratories_create.html")
+
+    if request.method == "POST":
+        lab_name = request.POST.get('lab_name')
+        username = request.POST.get('username')
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        state_province = request.POST.get('state_province')
+        postal_code = request.POST.get('postal_code')
+        contact_number = request.POST.get('contact_number')
+        alternate_number = request.POST.get('alternate_number')
+        email = request.POST.get('email')
+        website = request.POST.get('website')
+        operating_hours = request.POST.get('operating_hours')
+        password = request.POST.get('password')
+        specializations = request.POST.get('specializations')
+        lab_commission = request.POST.get('lab_commission')
+        description = request.POST.get('description')
+        insurance_accepted = request.POST.get('insurance_accepted')
+        payment_methods = request.POST.get('payment_methods')
+        emergency_services = request.POST.get('emergency_services')
+        home_sample_collection = request.POST.get('home_sample_collection')
+        report_delivery_options = request.POST.get('report_delivery_options')
+        promote = request.POST.get('promote')
+        status = request.POST.get('status')
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+
+        # Handle file upload
+        lab_image = request.FILES.get('lab_image')
+        print(lab_image)
+        lab_image_url = None
+        if lab_image:
+            fs = FileSystemStorage()
+            lab_image_url = fs.save(lab_image.name, lab_image)
+
+        # Create a laboratory object (assuming you have a model defined)
+        adminModel.Laboratory.objects.create(
+            lab_name=lab_name, username=username, address=address, city=city,
+            state_province=state_province, postal_code=postal_code, contact_number=contact_number,
+            alternate_number=alternate_number, email=email, website=website, operating_hours=operating_hours,
+            password=make_password(password), specializations=specializations, lab_commission=lab_commission,
+            description=description, insurance_accepted=insurance_accepted, payment_methods=payment_methods,
+            emergency_services=emergency_services, home_sample_collection=home_sample_collection,
+            report_delivery_options=report_delivery_options, promote=promote, status=status,
+            latitude=latitude, longitude=longitude, lab_image=lab_image_url 
+        )
+        messages.success(request, 'Create Successfully!')
+        return redirect('laboratories_list')
+
+    return render(request, "lab/laboratories_create.html")
+    
+def laboratories_delete(request, id):
+    if request.method == 'POST':
+        try:
+            laboratory = get_object_or_404(adminModel.Laboratory, id=id)
+            laboratory.delete()
+            messages.success(request, 'Deleted Successfully!')
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+def laboratories_edit(request, id):
+    try:
+        lab = adminModel.Laboratory.objects.get(id=id)
+    except adminModel.Laboratory.DoesNotExist:
+        return HttpResponse("Laboratory not found.", status=404)
+
+    if request.method == "GET":
+        context = {
+            'lab': lab,
+        }
+        return render(request, "lab/laboratories_edit.html", context)
+
+    if request.method == "POST":
+        lab.lab_name = request.POST.get('lab_name')
+        lab.description = request.POST.get('description')
+        lab.address = request.POST.get('address')
+        lab.city = request.POST.get('city')  # New field
+        lab.state_province = request.POST.get('state_province')  # New field
+        lab.postal_code = request.POST.get('postal_code')  # New field
+        lab.contact_number = request.POST.get('contact_number')  # New field
+        lab.alternate_number = request.POST.get('alternate_number')  # New field
+        
+        lab.website = request.POST.get('website')  # New field
+        lab.operating_hours = request.POST.get('operating_hours')  # New field
+        lab.specializations = request.POST.get('specializations')  # New field
+        lab.lab_commission = request.POST.get('lab_commission')
+        lab.insurance_accepted = request.POST.get('insurance_accepted')  # New field
+        lab.payment_methods = request.POST.get('payment_methods')  # New field
+        lab.emergency_services = request.POST.get('emergency_services')  # New field
+        lab.home_sample_collection = request.POST.get('home_sample_collection')  # New field
+        lab.report_delivery_options = request.POST.get('report_delivery_options')  # New field
+        lab.promote = request.POST.get('promote')  # New field
+        lab.latitude = request.POST.get('latitude')
+        lab.longitude = request.POST.get('longitude')
+        lab.status = request.POST.get('status')
+
+        if 'lab_image' in request.FILES:
+            lab.lab_image = request.FILES.get('lab_image')
+        
+        if lab.lab_name and lab.email and lab.contact_number:
+            try:
+                lab.save()
+                messages.success(request, 'Updated successfully!')
+                return redirect('laboratories_list')
+            except Exception as e:
+                messages.error(request,f"An error occurred: {str(e)}", status=500)
+                return redirect('laboratories_list')
+        else:
+            messages.error(request,"Invalid data submitted.", status=400)
+            return redirect('laboratories_list')
+        
+
+def lab_tags(request):
+    lab_tags = adminModel.LabTag.objects.all()
+    context = {
+        "lab_tags": lab_tags,
+    }
+    return render(request, "lab/lab_tags_list.html", context)
+
+
+def lab_tags_create(request):
+    if request.method == 'POST':
+        tag_name = request.POST.get('tag_name')
+        status = request.POST.get('status')
+
+        # Create a new LabTag object and save it
+        adminModel.LabTag.objects.create(tag_name=tag_name, status=status)
+        messages.success(request, 'Lab Tag created successfully!')
+        return redirect('lab_tags_list')
+    return render(request, 'lab/lab_tags_create.html')
+
+
+def lab_tags_delete(request, id):
+    if request.method == 'POST':
+        try:
+            LabTag = get_object_or_404(adminModel.LabTag, id=id)
+            LabTag.delete()
+            messages.success(request, 'Deleted Successfully!')
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+        
+def lab_tags_edit(request, id):
+    lab_tag = get_object_or_404(adminModel.LabTag, id=id)
+    
+    if request.method == 'POST':
+        tag_name = request.POST.get('tag_name')
+        status = request.POST.get('status')
+
+        # Update the LabTag object with the new data
+        lab_tag.tag_name = tag_name
+        lab_tag.status = status
+        lab_tag.save()
+
+        messages.success(request, 'Lab Tag updated successfully!')
+        return redirect('lab_tags_list')
+    return render(request, 'lab/lab_tags_edit.html', {'lab_tag': lab_tag})
+
+
+def services_list(request):
+    services = adminModel.Service.objects.all()
+    context = {
+        'services':services,
+    }
+    return render(request, "lab/services_list.html", context)
+
+def services_create(request):
+    if request.method == 'POST':
+        service_name = request.POST.get('service_name')
+        status = request.POST.get('status')
+
+        # Create a new Service object and save it
+        adminModel.Service.objects.create(service_name=service_name, status=status)
+        messages.success(request, 'Service created successfully!')
+        return redirect('services_list')
+
+    return render(request, 'lab/services_create.html')
+
+
+def services_edit(request, id):
+    service = get_object_or_404(adminModel.Service, id=id)
+
+    if request.method == 'POST':
+        service_name = request.POST.get('service_name')
+        status = request.POST.get('status')
+        service.service_name = service_name
+        service.status = status
+        service.save()
+
+        messages.success(request, 'Service updated successfully!')
+        return redirect('services_list')
+
+    return render(request, 'lab/services_edit.html', {'service': service})
+
+
+def services_delete(request, id):
+    if request.method == 'POST':
+        try:
+            service = get_object_or_404(adminModel.Service, id=id)
+            service.delete()
+            messages.success(request, 'Deleted Successfully!')
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+        
+# Lab Service List
+def lab_services_list(request):
+    lab_services = adminModel.LabService.objects.all()
+    context = {
+        'lab_services': lab_services,
+    }
+    return render(request, "lab/lab_services_list.html", context)
+
+# Lab Service Create
+def lab_services_create(request):
+    if request.method == 'POST':
+        lab_id = request.POST.get('lab_id')
+        service_id = request.POST.get('service_id')
+        status = request.POST.get('status')
+
+        lab = get_object_or_404(adminModel.Laboratory, id=lab_id)
+        service = get_object_or_404(adminModel.Service, id=service_id)
+
+        # Create a new LabService object and save it
+        adminModel.LabService.objects.create(
+            laboratory=lab,
+            service=service,
+            status=status
+        )
+        messages.success(request, 'Lab service created successfully!')
+        return redirect('lab_services_list')
+
+    # Get labs and services to display in the form
+    labs = adminModel.Laboratory.objects.all()
+    services = adminModel.Service.objects.all()
+    context = {
+        'labs': labs,
+        'services': services,
+    }
+    return render(request, 'lab/lab_services_create.html', context)
+
+# Lab Service Edit
+def lab_services_edit(request, id):
+    lab_service = get_object_or_404(adminModel.LabService, id=id)
+
+    if request.method == 'POST':
+        lab_service.laboratory_id = request.POST.get('lab_id')
+        lab_service.service_id = request.POST.get('service_id')
+        lab_service.is_emergency_service = request.POST.get('is_emergency_service') == 'on'  # Correctly handle boolean
+        lab_service.status = request.POST.get('status')
+        lab_service.save()
+
+        messages.success(request, 'Lab service updated successfully!')
+        return redirect('lab_services_list')
+
+    # Get labs and services to display in the form
+    labs = adminModel.Laboratory.objects.all()
+    services = adminModel.Service.objects.all()
+    context = {
+        'lab_service': lab_service,
+        'labs': labs,
+        'services': services,
+    }
+    return render(request, 'lab/lab_services_edit.html', context)
+
+# Lab Service Delete
+def lab_services_delete(request, id):
+    if request.method == 'POST':
+        try:
+            lab_service = get_object_or_404(adminModel.LabService, id=id)
+            lab_service.delete()
+            messages.success(request, 'Lab service deleted successfully!')
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+        
+# List Lab Banners
+def lab_banners_list(request):
+    lab_banners = adminModel.LabBanner.objects.all()
+    context = {
+        'lab_banners': lab_banners,
+    }
+    return render(request, 'lab/lab_banners_list.html', context)
+
+# Create Lab Banner
+def lab_banners_create(request):
+    if request.method == 'POST':
+        lab_id = request.POST.get('laboratory_id')
+        link = request.POST.get('link')
+        banner = request.FILES.get('banner')
+        status = request.POST.get('status')
+        lab = get_object_or_404(adminModel.Laboratory, id=lab_id)
+        lab_banner = adminModel.LabBanner(
+            laboratory=lab,
+            link=link,
+            banner=banner,
+            status=status,
+        )
+        lab_banner.save()
+        messages.success(request, 'Lab banner created successfully!')
+        return redirect('lab_banners_list')
+    laboratories = adminModel.Laboratory.objects.all()
+    context = {
+        'laboratories': laboratories,
+    }
+    return render(request, 'lab/lab_banners_create.html', context)
+
+# Edit Lab Banner
+def lab_banners_edit(request, id):
+    lab_banner = get_object_or_404(adminModel.LabBanner, id=id)
+
+    if request.method == 'POST':
+        lab_banner.laboratory_id = request.POST.get('laboratory_id')
+        lab_banner.link = request.POST.get('link')
+        if request.FILES.get('banner'):
+            lab_banner.banner = request.FILES['banner']
+        lab_banner.status = request.POST.get('status')
+        lab_banner.save()
+
+        messages.success(request, 'Lab banner updated successfully!')
+        return redirect('lab_banners_list')
+
+    laboratories = adminModel.Laboratory.objects.all()
+    context = {
+        'lab_banner': lab_banner,
+        'laboratories': laboratories,
+    }
+    return render(request, 'lab/lab_banners_edit.html', context)
+
+# Delete Lab Banner
+def lab_banners_delete(request, id):
+    if request.method == 'POST':
+        try:
+            lab_banner = get_object_or_404(adminModel.LabBanner, id=id)
+            lab_banner.delete()
+            messages.success(request, 'Lab banner deleted successfully!')
+            return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+        
 
