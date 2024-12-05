@@ -1,0 +1,326 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Health2Home Register</title>
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon.png' %}">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <!-- Toastr -->
+    <link rel="stylesheet" href="{% static './vendor/toastr/css/toastr.min.css' %}">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <style>
+        .h-100 {
+            background: url("{% static './images/bg2.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .authincation-content {
+            margin-top: 80px;
+            margin-bottom: 80px;
+        }
+
+        body {
+            color: black;
+        }
+
+        .password-toggle {
+            cursor: pointer;
+        }
+
+        .text-danger {
+            color: #ff4942 !important; /* Ensure red color for danger text */
+        }
+
+        .btn-primary {
+            background-color: #77d5cb;
+            border-color: #77d5cb;
+        }
+
+        .btn-primary:hover {
+            background-color: #64c4b6;
+            border-color: #64c4b6;
+        }
+
+        .hospital-image-container {
+            position: relative;
+            display: inline-block;
+            margin: 30px;
+            width: 150px;
+            height: 150px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Adds shadow to the container */
+            border-radius: 8px;
+        }
+        
+        .hospital-image {
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+            padding: 5px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(126, 126, 126, 0.1);
+        }
+        
+        .remove-btn {
+            position: absolute;
+            background-color: #7a61e2;
+            color: rgb(255, 255, 255);
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            display: none;
+        }
+        
+        #hospital-image-previews {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 25px;
+            position: relative;
+        }
+        
+        #remove-all-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            /* background-color: #bd04f5; Red color for remove button */
+            /* color: white; */
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+            display: none; /* Hide by default */
+        }
+        .remove-all-btn {
+            display: flex; /* Use flexbox to center content */
+            align-items: center; /* Vertically center the icon */
+            justify-content: center; /* Horizontally center the icon */
+            background-color:#656c73; /* Red color for the button */
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px; /* Adjust width as needed */
+            height: 30px; /* Adjust height as needed */
+            text-align: center;
+            font-size: 16px; /* Adjust font size as needed */
+            font-weight: 300; /* Light font weight */
+            cursor: pointer;
+            padding: 0; /* Remove default padding */
+        }
+        
+        .remove-all-btn i {
+            margin: 0; /* Remove margin around the icon if any */
+        }
+            .hospital-logo {
+                width: 150px;
+                height: auto;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+                border-radius: 8px;
+            }
+    </style>
+
+</head>
+
+<body class="h-100">
+    <div class="authincation h-100">
+        <div class="container-fluid h-100">
+            <div class="row justify-content-center h-100 align-items-center">
+                <div class="col-md-6">
+                    <h2 class="text-center mb-4">Health2Home</h2>
+                    <div class="authincation-content">
+                        <div class="row no-gutters">
+                            <div class="col-xl-12">
+                                <div class="auth-form">
+                                    <h4 class="text-center mb-4">Hospital | Register</h4>
+                                    <form id="registerForm" method="post" action="" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="form-row">
+                                            <div class="form-group col-6">
+                                                <label>Hospital Name</label>
+                                                <input type="text" class="form-control" name="hospital_name" placeholder="Input Hospital Name">
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label>User Name</label>
+                                                <input type="text" class="form-control" name="user_name" placeholder="Input Username">
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label>Phone Number</label>
+                                                <input type="text" class="form-control" name="phone_number" placeholder="Input Phone Number">
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label>Email</label>
+                                                <input type="email" class="form-control" name="email" placeholder="Input Email">
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label>Password</label>
+                                                <input type="password" class="form-control" name="password" placeholder="Input Password">
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label>City</label>
+                                                <input type="text" class="form-control" name="city" placeholder="Input City">
+                                            </div>
+                                            
+        
+                                            <div class="form-group col-6">
+                                                <label>Opening Time</label>
+                                                <span class="input-group-append">
+                                                <input type="time" class="form-control" name="open_time"> 
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label>Closing Time</label>
+                                                <span class="input-group-append">
+                                                <input type="time" class="form-control" name="close_time">
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label>Website</label>
+                                                <input type="text" class="form-control" name="website_url" placeholder="Input Website">
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label>Type</label>
+                                                <select id="inputState" class="form-control" name="type">
+                                                    <option selected>Choose...</option>
+                                                    <option value="hospital">Hospital</option>
+                                                    <option value="clinic">Clinic</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label>Status</label>
+                                                <select id="inputState" class="form-control" name="status">
+                                                    <option selected>Choose...</option>
+                                                    <option value="1">Active</option>
+                                                    <option value="0">InActive</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label>Is Recommended</label>
+                                                <select id="inputState" class="form-control" name="isRecommended">
+                                                    <option selected>Choose...</option>
+                                                    <option value="0">No</option>
+                                                    <option value="1">Yes</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-12">
+                                                <label>Address</label>
+                                                <textarea class="form-control" name="address" rows="3" id="comment" placeholder="Input Address"></textarea>
+                                            </div>
+                                            <div class="form-group col-12">
+                                                <label>Description</label>
+                                                <textarea class="form-control" name="description" rows="3" id="comment" placeholder="Input Description"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-4">
+                                            <button type="submit" class="btn btn-primary btn-block">Register</button>
+                                        </div>
+                                    </form>
+                                    <div class="new-account mt-3">
+                                        <p>Already have an account? <a class="text-primary" href="{% url "login" %}">Login Here</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Required vendors -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'vendor/jquery-validation/jquery.validate.min.js' %}"></script>
+    <!-- Toastr -->
+    <script src="{% static './vendor/toastr/js/toastr.min.js' %}"></script>
+
+    <!-- Toastr integration with Django messages -->
+    {% if messages %}
+        <script type="text/javascript">
+            {% for message in messages %}
+                toastr.{{ message.tags }}("{{ message|escapejs }}");
+            {% endfor %}
+        </script>
+    {% endif %}
+
+    <!-- All init script -->
+    <script src="{% static './js/plugins-init/toastr-init.js' %}"></script>
+    <script>
+        // Password toggle functionality
+        document.getElementById('toggle-password').addEventListener('click', function () {
+            const passwordField = document.getElementById('password');
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // jQuery Validation
+        $(document).ready(function () {
+            $('#registerForm').validate({
+                rules: {
+                    hospital_name: {
+                        required: true
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    password: {
+                        required: true,
+                        minlength: 6
+                    }
+                },
+                messages: {
+                    hospital_name: "Please enter your hospital name",
+                    email: "Please enter a valid email",
+                    password: {
+                        required: "Please provide a password",
+                        minlength: "Your password must be at least 6 characters long"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    error.css('color', '#ff4942');
+                    error.insertAfter(element);
+                },
+                highlight: function (element) {
+                    $(element).css('border-color', '#ff4942');
+                },
+                unhighlight: function (element) {
+                    $(element).css('border-color', '#77d5cb');
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const hospitalLogoInput = document.getElementById('hospital-logo-input');
+            const hospitalLogoPreview = document.getElementById('hospital-logo-preview');
+            const defaultLogo = "{% static 'images/default_image.png' %}"; // Default logo path
+        
+            hospitalLogoInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+        
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        hospitalLogoPreview.src = e.target.result; // Set preview image
+                    };
+                    reader.readAsDataURL(file); // Read the file
+                } else {
+                    hospitalLogoPreview.src = defaultLogo; // Reset to default image
+                }
+            });
+        });
+
+    </script>
+</body>
+
+</html>

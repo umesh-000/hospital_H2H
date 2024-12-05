@@ -5,7 +5,9 @@ from django.conf import settings
 
 urlpatterns = [
 
-    path('', include('H2H_admin.urls')),
+    path('', include('accounts.urls')),
+    
+    path('admin/', include('H2H_admin.urls')),
  
     # Hospital Panel
     path('hospital/', include('hospital.urls')),
@@ -18,7 +20,7 @@ urlpatterns = [
     path('lab/', include('lab.urls')),    
 
     # Bed Booking API's
-    path('api/', include('hospital.urls_api')),
+    path('api/', include('H2H_admin.urls_api')),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,109 @@
+{% extends 'admin/master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #000000;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Show Help Desk Query</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Show Help Desk Query</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Show Help Desk Query</h4>
+                        <div>
+                            <a href="{% url 'help_desk_query_list' %}">
+                                <button title="list" type="button" class="btn btn-primary">
+                                    List
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <form action="" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Customer Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" value="{{ query.customer.customer_name }}" placeholder="Customer Name" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" value="{{ query.name }}" placeholder="Name" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Email</label>
+                                    <div class="col-sm-10">
+                                        <input type="email" class="form-control" value="{{ query.email }}" placeholder="Email" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Message</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" rows="5" readonly>{{ query.message }}</textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Created At</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" value="{{ query.created_at|date:'d M Y, H:i' }}" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Updated At</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" value="{{ query.updated_at|date:'d M Y, H:i' }}" readonly>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

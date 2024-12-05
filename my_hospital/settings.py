@@ -1,3 +1,4 @@
+from django.urls import reverse_lazy
 from pathlib import Path
 import datetime
 import os
@@ -25,6 +26,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework',
     'corsheaders',
+    'accounts',
     'H2H_admin',
     'hospital',
     'doctor',
@@ -107,7 +109,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=15),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,  
     'BLACKLIST_AFTER_ROTATION': False,
@@ -119,7 +121,10 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
 }
 
-AUTH_USER_MODEL = 'hospital.Customer'
+
+# AUTH_USER_MODEL = 'hospital.Customer'
+AUTH_USER_MODEL = 'accounts.User'
+LOGIN_URL = reverse_lazy('login')
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'

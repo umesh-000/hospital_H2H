@@ -1,0 +1,321 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>H2H | Lab Register</title>
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon.png' %}">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <!-- Toastr -->
+    <link rel="stylesheet" href="{% static './vendor/toastr/css/toastr.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <style>
+        .h-100 {
+            background: url("{% static './images/bg2.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .authincation-content {
+            margin-top: 80px;
+            margin-bottom: 80px;
+        }
+
+        .password-toggle {
+            cursor: pointer;
+        }
+
+        .text-danger {
+            color: #ff4942 !important; /* Ensure red color for danger text */
+        }
+
+        .btn-primary {
+            background-color: #77d5cb;
+            border-color: #77d5cb;
+        }
+
+        .btn-primary:hover {
+            background-color: #64c4b6;
+            border-color: #64c4b6;
+        }
+
+        .img-thumbnail {
+            width: 100px;
+            height: 100px;
+            padding: 10px;
+            object-fit: fill;
+        }
+    
+        .shadow-box {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 5px;
+            background-color: #fff;
+        }
+    </style>
+
+</head>
+<body class="h-100">
+    <div class="authincation h-100">
+        <div class="container-fluid h-100">
+            <div class="row justify-content-center h-100 align-items-center">
+                <div class="col-md-6">
+                    <h2 class="text-center mb-4">Health2Home</h2>
+                    <div class="authincation-content">
+                        <div class="row no-gutters">
+                            <div class="col-xl-12">
+                                <div class="auth-form">
+                                    <h4 class="text-center mb-4">Lab | Register</h4>
+                                    <form id="registerForm" method="post" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="form-row">
+
+                                            <div class="form-group col-12">
+                                                <label>Lab Image</label>
+                                                <img id="lab_image_preview" class="img-thumbnail mt-2 mb-2 shadow-box" style="display:none;" />
+                                                <input type="file" class="form-control" name="lab_image" accept="image/*" onchange="previewImage(event, 'lab_image_preview')">
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Lab Name</label>
+                                                <input type="text" class="form-control" name="lab_name" placeholder="Enter Lab Name" required>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Username</label>
+                                                <input type="text" class="form-control" name="username" placeholder="Enter username" required>
+                                            </div>
+
+                                            <div class="form-group col-12">
+                                                <label>Address</label>
+                                                <textarea class="form-control" name="address" rows="3" placeholder="Enter Lab Address"></textarea>
+                                            </div>
+        
+        
+                                            <div class="form-group col-6">
+                                                <label>Password</label>
+                                                <input type="password" class="form-control" placeholder="Enter password" id="password" name="password" required>
+                                                <span class="position-absolute password-toggle" style="right: 15px; top: 40px;"><i class="fa fa-eye-slash" id="toggle-password"></i></span>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>City</label>
+                                                <input type="text" class="form-control" name="city" placeholder="Enter City" required>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>State/Province</label>
+                                                <input type="text" class="form-control" name="state_province" placeholder="Enter State/Province" required>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Postal Code</label>
+                                                <input type="text" class="form-control" name="postal_code" placeholder="Enter Postal Code" required>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Contact Number</label>
+                                                <input type="text" class="form-control" name="contact_number" placeholder="Enter Contact Number" required>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Alternate Number</label>
+                                                <input type="text" class="form-control" name="alternate_number" placeholder="Enter Alternate Number">
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Email</label>
+                                                <input type="email" class="form-control" name="email" placeholder="Enter Email" required>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Website</label>
+                                                <input type="url" class="form-control" name="website" placeholder="Enter Website URL">
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Operating Hours</label>
+                                                <input type="text" class="form-control" name="operating_hours" placeholder="Enter Operating Hours">
+                                            </div>
+        
+        
+                                            <div class="form-group col-6">
+                                                <label>Specializations</label>
+                                                <select class="form-control" name="specializations" required>
+                                                    <option selected disabled value="">Select</option>
+                                                    <option value="pediatric_diagnostics">Pediatric Diagnostics</option>
+                                                    <option value="cardiac_diagnostics">Cardiac Diagnostics</option>
+                                                    <option value="general_practice">General Practice</option>
+                                                </select>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Lab Commission</label>
+                                                <input type="text" class="form-control" name="lab_commission" placeholder="Enter Lab Commission">
+                                            </div>
+                                            <div class="form-group col-12">
+                                                <label>Description</label>
+                                                <textarea class="form-control" name="description" rows="3" placeholder="Enter Lab Description"></textarea>
+                                            </div>
+        
+                                            <div class="form-group col-12">
+                                                <label>Insurance Accepted</label>
+                                                <textarea class="form-control" name="insurance_accepted" rows="3" placeholder="Enter Insurance Information"></textarea>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Payment Methods</label>
+                                                <select class="form-control" name="payment_methods" required>
+                                                    <option selected disabled value="">Select</option>
+                                                    <option value="Credit Card">Credit Card</option>
+                                                    <option value="Debit Card">Debit Card</option>
+                                                    <option value="Cash">Cash</option>
+                                                </select>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Emergency Services</label>
+                                                <select class="form-control" name="emergency_services" required>
+                                                    <option selected disabled value="">Select</option>
+                                                    <option value="1">Yes</option>
+                                                    <option value="0">No</option>
+                                                </select>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Home Sample Collection</label>
+                                                <select class="form-control" name="home_sample_collection" required>
+                                                    <option selected disabled value="">Select</option>
+                                                    <option value="1">Yes</option>
+                                                    <option value="0">No</option>
+                                                </select>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Report Delivery Options</label>
+                                                <select class="form-control" name="report_delivery_options" required>
+                                                    <option selected disabled value="">Select</option>
+                                                    <option value="Online">Online</option>
+                                                    <option value="Email">Email</option>
+                                                    <option value="Physical Copy">Physical Copy</option>
+                                                </select>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Promote</label>
+                                                <select class="form-control" name="promote" required>
+                                                    <option selected disabled value="">Select</option>
+                                                    <option value="1">Yes</option>
+                                                    <option value="0">No</option>
+                                                </select>
+                                            </div>
+        
+                                            <div class="form-group col-6">
+                                                <label>Status</label>
+                                                <select class="form-control" name="status" required>
+                                                    <option selected disabled value="">Select</option>
+                                                    <option value="1">Active</option>
+                                                    <option value="0">Inactive</option>
+                                                </select>
+                                            </div>
+                                            
+                                        </div>
+                                        <div class="text-center mt-4">
+                                            <button type="submit" class="btn btn-primary btn-block">Register</button>
+                                        </div>
+                                    </form>
+                                    <div class="new-account mt-3">
+                                        <p>Already have an account? <a class="text-primary" href="{% url "login" %}">Login Here</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Required vendors -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'vendor/jquery-validation/jquery.validate.min.js' %}"></script>
+    <!-- Toastr -->
+    <script src="{% static './vendor/toastr/js/toastr.min.js' %}"></script>
+
+    <!-- Toastr integration with Django messages -->
+    {% if messages %}
+        <script type="text/javascript">
+            {% for message in messages %}
+                toastr.{{ message.tags }}("{{ message|escapejs }}");
+            {% endfor %}
+        </script>
+    {% endif %}
+
+    <!-- All init script -->
+    <script src="{% static './js/plugins-init/toastr-init.js' %}"></script>
+    <script>
+        // Password toggle functionality
+        function previewImage(event, previewId) {
+            var input = event.target;
+            var reader = new FileReader();
+            reader.onload = function() {
+                var preview = document.getElementById(previewId);
+                preview.src = reader.result;
+                preview.style.display = 'block'; 
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    
+        // Password toggle functionality
+        document.getElementById('toggle-password').addEventListener('click', function () {
+                const passwordField = document.getElementById('password');
+                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordField.setAttribute('type', type);
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+
+        // jQuery Validation
+        $(document).ready(function () {
+            $('#registerForm').validate({
+                rules: {
+                    lab_name: {
+                        required: true
+                    },
+                    email: {
+                        required: true,
+                        email: true
+                    },
+                    password: {
+                        required: true,
+                        minlength: 6
+                    }
+                },
+                messages: {
+                    lab_name: "Please enter your lab name",
+                    email: "Please enter a valid email",
+                    password: {
+                        required: "Please provide a password",
+                        minlength: "Your password must be at least 6 characters long"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    error.css('color', '#ff4942');
+                    error.insertAfter(element);
+                },
+                highlight: function (element) {
+                    $(element).css('border-color', '#ff4942');
+                },
+                unhighlight: function (element) {
+                    $(element).css('border-color', '#77d5cb');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

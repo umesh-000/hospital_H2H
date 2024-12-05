@@ -1,0 +1,234 @@
+{% extends 'admin/master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #000000;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .badge-inside {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background-color: #ffaa16;
+        color: rgb(31, 29, 29);
+    }
+
+    .form-control {
+        padding-right: 80px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+
+    .image-preview {
+        width: 150px;
+        height: 150px;
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f9f9f9;
+        margin-top: 10px;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Create Lab Package</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url "admin_dashboard" %}">Admin</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Create Lab Package</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Create Lab Package</h4>
+                        <div>
+                            <a href="{% url 'lab_package_list' %}">
+                                <button title="List" type="button" class="btn btn-primary">
+                                    List
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <form action="{% url 'lab_package_create' %}" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Package Image</label>
+                                    <div class="col-sm-10">
+                                        <div class="image-preview mb-3" id="imagePreview">
+                                            <img src="{% static 'images/default_image.png' %}" alt="Default Image" style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px;">
+                                        </div>
+                                        <input type="file" class="form-control" name="package_img" accept="image/*" id="packageImageInput">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Laboratory</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="lab_id" required>
+                                            <option disabled selected value="">Select Laboratory</option>
+                                            {% for lab in laboratories %}
+                                                <option value="{{ lab.id }}">{{ lab.lab_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Specialization</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="lab_specialization" required>
+                                            <option disabled selected value="">Select Lab Specialization</option>
+                                            <option value="pediatric_diagnostics">Pediatric Diagnostics</option>
+                                            <option value="cardiac_diagnostics">Cardiac Diagnostics</option>
+                                            <option value="general_practice">General Practice</option>
+                                        </select>
+                                    </div>
+                                </div>
+        
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Package Name</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="package_name" placeholder="Enter Package Name" required>
+                                    </div>
+                                </div>
+        
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Lab Service</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="lab_service" required>
+                                            <option disabled selected value="">Select Lab Service</option>
+                                            {% for service in lab_services %}
+                                                <option value="{{ service.id }}">{{ service.service.service_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+        
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Test Preparation</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="test_preparation" rows="3" placeholder="Enter Test Preparation Instructions"></textarea>
+                                    </div>
+                                </div>
+        
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Expected Delivery</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="expected_delivery" placeholder="Enter Expected Delivery">
+                                    </div>
+                                </div>
+        
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Lab Tag</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="lab_tag" required>
+                                            <option disabled selected value="">Select Lab Tag</option>
+                                            {% for tag in lab_tags %}
+                                                <option value="{{ tag.id }}">{{ tag.tag_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+        
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Lab Price</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" class="form-control" name="lab_price" step="0.01" placeholder="Enter Lab Price" required>
+                                    </div>
+                                </div>
+        
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Sale Price</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" class="form-control" name="sale_price" step="0.01" placeholder="Enter Sale Price" required>
+                                    </div>
+                                </div>
+        
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Promote</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="promote">
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                </div>
+        
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Status</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="status" required>
+                                            <option value="1">Active</option>
+                                            <option value="0">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+        
+                                <div class="form-group row">
+                                    <div class="offset-sm-2">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                        <a href="{% url 'lab_package_list' %}" class="btn btn-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById('packageImageInput').addEventListener('change', function (event) {
+        const previewContainer = document.getElementById('imagePreview');
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewContainer.innerHTML = `<img src="${e.target.result}" alt="Image Preview" style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px;">`;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewContainer.innerHTML = `<img src="{% static 'images/default_image.png' %}" alt="Default Image" style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px;">`;
+        }
+    });
+</script>
+{% endblock content %}

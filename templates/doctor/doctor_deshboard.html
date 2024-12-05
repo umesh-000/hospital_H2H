@@ -1,7 +1,112 @@
-{% extends 'doctor/doctor_master.html' %}
+{% extends 'admin/master.html' %}
 {% load static %}
 
+{% block header %}
+    <div class="nav-header">
+        <a href="{% url "doctors_dashboard" %}" class="brand-logo">
+            <img class="logo-abbr" src="{% static './images/logo-color.png' %}" alt="">
+            <span class="brand-title"><b>Health2Home</b></span>
+        </a>
 
+        <div class="nav-control">
+            <div class="hamburger">
+                <span class="line"></span><span class="line"></span><span class="line"></span>
+            </div>
+        </div>
+    </div>
+    <!--**********************************  Nav header end ***********************************-->
+
+    <!--********************************** Header start ***********************************-->
+    <div class="header">
+        <div class="header-content">
+            <nav class="navbar navbar-expand">
+                <div class="collapse navbar-collapse justify-content-between">
+                    <div class="header-left">
+                        <div class="search_bar dropdown">
+                            <span class="search_icon p-3 c-pointer" data-toggle="dropdown">
+                                <i class="mdi mdi-magnify"></i>
+                            </span>
+                            <div class="dropdown-menu p-0 m-0">
+                                <form>
+                                    <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ul class="navbar-nav header-right">
+                        <li class="nav-item dropdown notification_dropdown">
+                            <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                <i class="mdi mdi-bell"></i>
+                                <div class="pulse-css"></div>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <ul class="list-unstyled">
+                                    <li class="media dropdown-item">
+                                        <span class="primary"><i class="ti-heart"></i></span>
+                                        <div class="media-body">
+                                            <a href="#">
+                                                <p><strong>David</strong> purchased Light Dashboard 1.0.</p>
+                                            </a>
+                                        </div>
+                                        <span class="notify-time">3:20 am</span>
+                                    </li>
+                                </ul>
+                                <a class="all-notification" href="#">See all notifications <i
+                                        class="ti-arrow-right"></i></a>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown header-profile">
+                            <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                <i class="mdi mdi-account"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a href="./app-profile.html" class="dropdown-item">
+                                    <i class="icon-user"></i>
+                                    <span class="ml-2">Profile </span>
+                                </a>
+                                <a href="{% url "logout" %}" class="dropdown-item">
+                                    <i class="icon-key"></i>
+                                    <span class="ml-2">Logout </span>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+{% endblock header %}
+    <!--********************************** Header end ti-comment-alt ***********************************-->
+
+{% block sidebar %}
+<!--**********************************  Sidebar start ***********************************-->
+<div class="quixnav">
+    <div class="quixnav-scroll">
+        <ul class="metismenu" id="menu">
+            <li class="nav-label first">Main Menu</li>
+
+            <li><a href="/doctor/" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="nav-text">Dashboard</span></a></li>
+
+            <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-user-md"></i><span class="nav-text"> Doctor Module </span></a>
+                <ul aria-expanded="false">
+                    <li><a href="/doctor/doctors/"><i class="fa fa-stethoscope"></i>Doctors</a></li>
+                    <li><a href="/doctor/doctor_clinics/"><i class="fa fa-hospital-o"></i>Doctor Clinics</a></li>
+                    <li><a href="/doctor/doctor_clinic_categories/"><i class="fa fa-align-justify"></i>Doctor Clinic Category</a></li>
+                    <li><a href="/doctor/doctor_banner/"><i class="fa fa-image"></i>Doctor Banner</a></li>
+                    <li><a href="/doctor/doctor_documents/"><i class="fa fa-bars"></i>Doctors Documents</a></li>
+                    <li><a href="/doctor/symptoms"><i class="fa fa-assistive-listening-systems"></i>Symptoms</a></li>
+                    <li><a href="/doctor/specialists/"><i class="fa fa-certificate"></i>Doctor Specialist &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Categories</a></li>
+                    <li><a href="/doctor/doctor-bookings/"><i class="fa fa-bars"></i>Doctor Clinic Booking</a></li>
+                </ul>
+            </li>
+            <li><a href="#" aria-expanded="false"><i class="fa fa-feed"></i><span class="nav-text">Feedback</span></a></li>
+        </ul>
+    </div>
+</div>
+<!--**********************************  Sidebar end  ***********************************-->
+{% endblock sidebar %}
 
 {% block content %}\
 
@@ -26,72 +131,71 @@
     }
 </style>
 
-        <!--********************************** Content body start  ***********************************-->
-        <div class="content-body">
-            <!-- row -->
-            <div class="container-fluid">
-                <div class="dashboard-header">Dashboard</div>
-                <div class="row">
-                    <div class="col-lg-3 col-sm-6">
-                        <div style="background-color: #0073b7;" class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">Total Orders </div>
-                                    <div class="stat-digit">59</div>
-                                </div>
-                            </div>
+<!--********************************** Content body start  ***********************************-->
+<div class="content-body">
+    <!-- row -->
+    <div class="container-fluid">
+        <div class="dashboard-header">Doctors Dashboard</div>
+        <div class="row">
+            <div class="col-lg-3 col-sm-6">
+                <div style="background-color: #0073b7;" class="card">
+                    <div class="stat-widget-two card-body">
+                        <div class="stat-content">
+                            <div class="stat-text">Total Orders </div>
+                            <div class="stat-digit">59</div>
                         </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <div style="background-color: #ff851b;" class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">Completed Orders</div>
-                                    <div class="stat-digit">2</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <div style="background-color: #001f3f;" class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">Pending orders</div>
-                                    <div class="stat-digit"> 0 </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <div style="background-color: #3d9970;" class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">New Orders</div>
-                                    <div class="stat-digit"> 0 </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- /# card -->
                     </div>
                 </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div style="background-color: #ff851b;" class="card">
+                    <div class="stat-widget-two card-body">
+                        <div class="stat-content">
+                            <div class="stat-text">Completed Orders</div>
+                            <div class="stat-digit">2</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div style="background-color: #001f3f;" class="card">
+                    <div class="stat-widget-two card-body">
+                        <div class="stat-content">
+                            <div class="stat-text">Pending orders</div>
+                            <div class="stat-digit"> 0 </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div style="background-color: #3d9970;" class="card">
+                    <div class="stat-widget-two card-body">
+                        <div class="stat-content">
+                            <div class="stat-text">New Orders</div>
+                            <div class="stat-digit"> 0 </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /# card -->
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
                 <div class="row">
-                    <div class="col-12">
-                        <div class="row">
-                            <div class="col-lg-12 col-sm-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4 class="card-title">Gradient Bar Chart</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <canvas id="barChart_2"></canvas>
-                                    </div>
-                                </div>
+                    <div class="col-lg-12 col-sm-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Gradient Bar Chart</h4>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="barChart_2"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!--********************************** Content body end  ***********************************-->
-
+    </div>
+</div>
+<!--********************************** Content body end  ***********************************-->
 {% endblock content %}
