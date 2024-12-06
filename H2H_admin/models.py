@@ -8,6 +8,12 @@ STATUS_CHOICES = [
     (1, 'Active'),
     (0, 'Inactive'),
 ]
+GENDER_CHOICES = [
+    ('M', 'Male'),
+    ('F', 'Female'),
+    ('O', 'Other'),
+]
+
 
 class AppModule(models.Model):
     id = models.AutoField(primary_key=True)
@@ -466,7 +472,7 @@ class Reminder(models.Model):
     title = models.CharField(max_length=255) 
     description = models.TextField(null=True, blank=True)
     reminder_date = models.DateTimeField()  
-    status = models.IntegerField(choices=STATUS_CHOICES,default=1)
+    status = models.IntegerField(choices=STATUS_CHOICES,default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -524,3 +530,59 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"Feedback by {self.customer} - Rating: {self.rating}"
+
+class CustomerInsurance(models.Model):
+    customer = models.ForeignKey('accounts.Customer', on_delete=models.CASCADE, related_name='insurances')
+    insurance_company_id = models.IntegerField(null=True, blank=True)
+    insurance_company_name = models.CharField(max_length=255, null=True, blank=True)
+    insurance_type = models.CharField(max_length=255)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'customer_insurances'
+
+    def __str__(self):
+        return f"Insurance for {self.customer.customer_name} with {self.insurance_company_name}"
+
+
+class FamilyMember(models.Model):
+    customer = models.ForeignKey('accounts.Customer', on_delete=models.CASCADE, related_name="family_members", null=True, blank=True)
+    first_name = models.CharField(max_length=255, null=True, blank=True)
+    last_name = models.CharField(max_length=255, null=True, blank=True)
+    dob = models.DateField(null=True, blank=True)
+    age = models.IntegerField(null=True, blank=True)
+    relation = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(max_length=255, null=True, blank=True)
+    mobile_no = models.CharField(max_length=15, null=True, blank=True)
+    is_minor = models.BooleanField(default=False)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, null=True, blank=True)
+    blood_group = models.CharField(max_length=20, null=True, blank=True)
+    medical_history = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'family_members'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.relation})"
+
+class Address(models.Model):
+    customer = models.ForeignKey('accounts.Customer',on_delete=models.CASCADE, related_name='addresses')
+    address = models.TextField()
+    landmark = models.CharField(max_length=150)
+    lat = models.CharField(max_length=250)
+    lng = models.CharField(max_length=250)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'addresses'
+
+    def __str__(self):
+        return f"{self.address} ({self.customer.user.email})"

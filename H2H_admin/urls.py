@@ -27,6 +27,11 @@ urlpatterns = [
     path('help_desk_query/<int:id>/show/', customers_views.help_desk_query_show, name='help_desk_query_show'),
     path('help_desk_query/<int:id>/delete/', customers_views.help_desk_query_delete, name='help_desk_query_delete'),
 
+    # User Feedback
+    path('feedbacks/', customers_views.feedbacks, name='feedbacks_list'),
+    path('feedbacks/<int:id>/edit/', customers_views.feedbacks_edit, name='feedbacks_edit'),
+    path('feedbacks/<int:id>/show/', customers_views.feedbacks_show, name='feedbacks_show'),
+    path('feedbacks/<int:id>/delete/', customers_views.feedbacks_delete, name='feedbacks_delete'),
 
     # Blogs
     path('blogs/', views.blogs_list, name='blogs_list'),

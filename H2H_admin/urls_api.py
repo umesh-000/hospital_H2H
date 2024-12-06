@@ -47,4 +47,32 @@ urlpatterns = [
     path('customer/addReminder/', hospital_api_view.addReminder, name='add_reminder_api'),
     
     path('customer/addFeedback/', hospital_api_view.addFeedback, name='addFeedback_api'),
+    path("customer/updateProfile/", hospital_api_view.updateProfile, name="updateProfile_api"),
+    path('customer/mark_As_Done_Reminder/', hospital_api_view.mark_As_Done_Reminder, name='mark_as_done_reminder_api'),
+    path('customer/getTopCities/', hospital_api_view.getTopCities, name='get_top_cities_api'),
+    path('customer/addCustomerInsurance/', hospital_api_view.addCustomerInsurance, name='get_top_cities_api'),
+    path('customer/deleteCustomerInsurance/', hospital_api_view.delete_Customer_Insurance, name='delete_Customer_Insurance_api'),
+    path('customer/getCustomerInsurance/', hospital_api_view.getCustomerInsurance, name='getCustomerInsurance_api'),
+    path('customer/updateReminder/', hospital_api_view.updateReminder, name='updateReminder_api'),
+    path('customer/deleteReminder/', hospital_api_view.deleteReminder, name='deleteReminder_api'),
+
+    # customer family member
+    path('customer/familyMemberAdd/', hospital_api_view.familyMemberAdd, name='familyMemberAdd_api'),
+    path('customer/familyMemberUpdate/', hospital_api_view.familyMemberUpdate, name='familyMemberUpdate_api'),
+    path('customer/familyMemberDelete/', hospital_api_view.familyMemberDelete, name='familyMemberDelete_api'),
+    path('customer/familyMemberLists/', hospital_api_view.familyMemberLists, name='familyMemberLists_api'),
+    path('customer/fetchFamilyMemberDetails/<int:member_id>/', hospital_api_view.fetchFamilyMemberDetails, name='fetchFamilyMemberDetails_api'),
+
+    # Laboratory 
+    path('customer/labLists/', hospital_api_view.labLists, name='labLists_api'),        
+    path('customer/labCategories/', hospital_api_view.labServicesList, name='labCategories_api'),        
+    path('customer/labBookingTimeSlot/', hospital_api_view.labBookingTimeSlot, name='labBookingTimeSlot_api'),        
+    path('customer/labDetails/', hospital_api_view.labDetails, name='labDetails_api'),  
+    path('customer/labPackages/', hospital_api_view.labPackages, name='labPackages_api'),  
+    path('customer/labPackageDetails/', hospital_api_view.labPackageDetails, name='labPackageDetails_api'),    
+    path('customer/addAddress/', hospital_api_view.addAddress, name='addAddress_api'),    
+    path('customer/updateAddress/', hospital_api_view.updateAddress, name='updateAddress_api'),    
+    path('customer/editAddress/', hospital_api_view.editAddress, name='editAddress_api'),    
+    path('customer/listAddresses/', hospital_api_view.listCustomerAddresses, name='listCustomerAddresses_api'),    
+    path('customer/deleteAddresses/', hospital_api_view.deleteAddresses, name='deleteAddresses_api'),    
 ]

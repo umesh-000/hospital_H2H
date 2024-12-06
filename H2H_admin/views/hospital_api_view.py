@@ -4,16 +4,19 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.exceptions import ObjectDoesNotExist
 from H2H_admin import serializers as API_serializers
+from django.shortcuts import get_object_or_404
 from math import radians, cos, sin, asin, sqrt
 from accounts import models as account_models
 from H2H_admin import models as admin_models
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from datetime import datetime, timedelta
-from django.http import JsonResponse
 from django.db.models import Prefetch
+from django.http import JsonResponse
+from django.db.models import Count
 from rest_framework import status
 from django.conf import settings
+from django.db import models
 import logging
 import json
 
@@ -1292,6 +1295,833 @@ def addFeedback(request):
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 '''
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def updateProfile(request):
+    try:
+        user = request.user
+        customer = getattr(user, 'customer_profile', None)
+        if not customer:
+            return Response({"message": "User is not associated with a customer profile.","status": 0,"result": None},status=status.HTTP_400_BAD_REQUEST)
+
+        data = request.data
+
+        serializer = API_serializers.CustomerProfileSerializer( customer, data=data, partial=True, context={"request": request} )
+        if serializer.is_valid():
+            updated_customer = serializer.save()
+            user.updated_at = models.DateTimeField(auto_now=True)
+            user.email = data['email']
+            user.username = data['email']
+            user.save()
+
+            # Prepare response data
+            response_data = {
+                "id": updated_customer.id,
+                "customer_name": updated_customer.customer_name,
+                "phone_number": updated_customer.phone_number,
+                "email": updated_customer.user.email,
+                "profile_picture": updated_customer.profile_picture.url if updated_customer.profile_picture else None,
+                "pre_existing_disease": updated_customer.pre_existing_disease,
+                "blood_group": updated_customer.blood_group,
+                "gender": updated_customer.gender,
+                "wallet": updated_customer.wallet,
+                "overall_ratings": updated_customer.overall_ratings,
+                "no_of_ratings": updated_customer.no_of_ratings,
+                "status": updated_customer.status,
+                "dob": updated_customer.dob,
+                "age": updated_customer.age,
+                "height": updated_customer.height,
+                "weight": updated_customer.weight,
+                "emergency_contact_no": updated_customer.emergency_contact_no,
+                "allergies": updated_customer.allergies,
+                "current_medications": updated_customer.current_medications,
+                "created_at": updated_customer.user.created_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                "updated_at": updated_customer.user.updated_at.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+            }
+
+            return Response( { "message": "Profile updated successfully", "status": 1, "result": response_data }, status=status.HTTP_200_OK )
+        else:
+            return Response( { "message": "Validation error", "status": 0, "result": None, "errors": serializer.errors }, status=status.HTTP_400_BAD_REQUEST )
+
+    except Exception as e:
+        return Response( { "message": f"An error occurred: {str(e)}", "status": 0, "result": None }, status=status.HTTP_500_INTERNAL_SERVER_ERROR )
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def mark_As_Done_Reminder(request):
+    try:
+        reminder_id = request.data.get('reminder_id')
+
+        if not reminder_id:
+            return Response({"message": "Reminder ID is required.","status": 0,"result": None}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Fetch the reminder object
+        reminder = admin_models.Reminder.objects.filter(id=reminder_id).first()
+
+        if not reminder:
+            return Response({
+                "message": "Reminder not found.",
+                "status": 0,
+                "result": None
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Mark the reminder as done by updating its status
+        reminder.status = 1 
+        reminder.save()
+
+        # Serialize the reminder data for the response
+        serializer = API_serializers.markAs_Read_ReminderSerializer(reminder)
+
+        return Response({
+            "message": "Reminder marked as done successfully",
+            "status": 1,
+            "result": serializer.data
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({
+            "message": f"An error occurred: {str(e)}",
+            "status": 0,
+            "result": None
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def getTopCities(request):
+    try:
+        top_cities = account_models.Hospital.objects.values('city').annotate(hospital_count=Count('id')).order_by('-hospital_count')
+        # Format the results to return city and hospital count
+        result = [{'city': city['city'], 'hospital_count': city['hospital_count']} for city in top_cities]
+        return Response({'result': result,'message': 'Success','status': 1}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'message': f"An error occurred: {str(e)}",'status': 0,'result': None}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def addCustomerInsurance(request):
+    customer_id = request.data.get('customer_id')
+    customer = get_object_or_404(account_models.Customer, id=customer_id)
+
+    serializer = API_serializers.CustomerInsuranceSerializer(data=request.data)
+    if serializer.is_valid():
+        insurance = serializer.save(customer=customer)
+
+        response_data = {
+            "message": "Customer insurance added successfully",
+            "status": 1,
+            "result": {
+                "customer_id": customer.id,
+                "insurance_company_id": insurance.insurance_company_id,
+                "insurance_company_name": insurance.insurance_company_name,
+                "insurance_type": insurance.insurance_type,
+                "start_date": insurance.start_date,
+                "end_date": insurance.end_date,
+                "updated_at": insurance.updated_at,
+                "created_at": insurance.created_at,
+                "id": insurance.id
+            }
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+@api_view(['DELETE'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def delete_Customer_Insurance(request):
+    customer_id = request.data.get('customer_id')
+    insurance_id = request.data.get('insurance_id')
+
+    if not customer_id or not insurance_id:
+        return Response({"error": "Both customer_id and insurance_id are required."}, status=status.HTTP_400_BAD_REQUEST)
+    customer = get_object_or_404(account_models.Customer, id=customer_id)
+    try:
+        insurance = admin_models.CustomerInsurance.objects.get(id=insurance_id, customer=customer)
+    except admin_models.CustomerInsurance.DoesNotExist:
+        return Response({"error": "Insurance record not found for the given customer."}, status=status.HTTP_404_NOT_FOUND)
+
+    insurance.delete()
+    return Response({
+        "message": "Customer insurance deleted successfully",
+        "status": 1,
+    }, status=status.HTTP_200_OK)
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def getCustomerInsurance(request):
+    try:
+        user = request.user
+        customer = getattr(user, 'customer_profile', None)
+        customer_id= customer.id
+        
+        # Validate if the user has a customer profile
+        if not customer_id:
+            return Response({
+                "message": "User is not associated with a customer profile.",
+                "status": 0,
+                "result": None
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve customer insurances
+        insurances = admin_models.CustomerInsurance.objects.filter(customer=customer_id).order_by('-created_at')
+
+        # Format the response data
+        insurance_list = [
+            {
+                "id": insurance.id,
+                "customer_id": insurance.customer.id,
+                "insurance_company_id": insurance.insurance_company_id,
+                "insurance_company_name": insurance.insurance_company_name,
+                "insurance_type": insurance.insurance_type,
+                "start_date": insurance.start_date.isoformat(),
+                "end_date": insurance.end_date.isoformat(),
+                "created_at": insurance.created_at.isoformat(),
+                "updated_at": insurance.updated_at.isoformat(),
+            }
+            for insurance in insurances
+        ]
+
+        return Response({
+            "message": "Customer insurance records retrieved successfully",
+            "status": 1,
+            "result": insurance_list
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({
+            "message": f"An error occurred: {str(e)}",
+            "status": 0,
+            "result": None
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def updateReminder(request):
+    try:
+        data = request.data
+        reminder_id = data.get("reminder_id")
+        category_id = data.get("category_id")
+        title = data.get("title")
+        description = data.get("description")
+        reminder_date = data.get("reminder_date")
+        
+        if not reminder_id or not title or not reminder_date:
+            return Response({ "message": "Missing required fields: reminder_id, title, or reminder_date.","status": 0,"result": None}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            reminder = admin_models.Reminder.objects.get(id=reminder_id)
+        except admin_models.Reminder.DoesNotExist:
+            return Response({"message": "Reminder not found.","status": 0,"result": None}, status=status.HTTP_404_NOT_FOUND)
+
+        
+        reminder.category_id = category_id
+        reminder.title = title
+        reminder.description = description
+        reminder.reminder_date = reminder_date
+        reminder.updated_at = datetime.now()
+        reminder.save()
+
+        # Prepare the response data
+        result = {
+            "id": reminder.id,
+            "customer_id": reminder.customer.id,
+            "category_id": reminder.category_id,
+            "title": reminder.title,
+            "description": reminder.description,
+            "reminder_date": reminder.reminder_date,
+            "status": reminder.status,
+            "created_at": reminder.created_at,
+            "updated_at": reminder.updated_at
+        }
+        return Response({ "message": "Reminder updated successfully", "status": 1, "result": result }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({ "message": f"An error occurred: {str(e)}", "status": 0, "result": None }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def deleteReminder(request):
+    try:
+        data = request.data
+        reminder_id = data.get("reminder_id")
+        if not reminder_id:
+            return Response({ "message": "Missing required field: reminder_id.", "status": 0 }, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            reminder = admin_models.Reminder.objects.get(id=reminder_id)
+        except admin_models.Reminder.DoesNotExist:
+            return Response({ "message": "Reminder not found.", "status": 0 }, status=status.HTTP_404_NOT_FOUND)
+        reminder.delete()
+        return Response({
+            "message": "Reminder deleted successfully",
+            "status": 1
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({ "message": f"An error occurred: {str(e)}", "status": 0 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def familyMemberAdd(request):
+    try:
+        customer = request.user.customer_profile 
+        data = request.data
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        mobile_no = data.get('mobile_no')
+        email = data.get('email')
+        relation = data.get('relation')
+        dob = data.get('dob')
+        blood_group = data.get('blood_group')
+        is_minor = bool(data.get('is_minor', 0))  # Convert to boolean
+        gender = data.get('gender')
+        medical_history = data.get('medical_history', '')
+
+        # Validate mandatory fields
+        if not first_name or not mobile_no or not relation:
+            return Response(
+                {"message": "First name, mobile number, and relation are required fields.", "status": 0}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Create FamilyMember instance
+        family_member = admin_models.FamilyMember.objects.create(
+            customer=customer, first_name=first_name, last_name=last_name,
+            mobile_no=mobile_no, email=email, relation=relation,
+            dob=dob, blood_group=blood_group, is_minor=is_minor,
+            gender=gender, medical_history=medical_history,
+        )
+
+        return Response( {"message": "Member added successfully", "status": 1}, status=status.HTTP_201_CREATED )
+    except Exception as e:
+        return Response( {"message": f"An error occurred: {str(e)}", "status": 0}, status=status.HTTP_404_NOT_FOUND )
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def familyMemberUpdate(request):
+    try:
+        data = request.data
+        member_id = data.get('member_id')
+        try:
+            family_member = admin_models.FamilyMember.objects.get(id=member_id)
+        except admin_models.FamilyMember.DoesNotExist:
+            return Response( {"message": "Family member not found with the provided member ID.", "status": 0}, status=status.HTTP_400_BAD_REQUEST )
+
+        # Update the fields with the provided data
+        family_member.first_name = data.get('first_name', family_member.first_name)
+        family_member.last_name = data.get('last_name', family_member.last_name)
+        family_member.mobile_no = data.get('mobile_no', family_member.mobile_no)
+        family_member.email = data.get('email', family_member.email)
+        family_member.relation = data.get('relation', family_member.relation)
+        family_member.dob = data.get('dob', family_member.dob)
+        family_member.blood_group = data.get('blood_group', family_member.blood_group)
+        family_member.is_minor = bool(data.get('is_minor', family_member.is_minor))
+        family_member.gender = data.get('gender', family_member.gender)
+        family_member.medical_history = data.get('medical_history', family_member.medical_history)
+
+        # Save the updated instance
+        family_member.save()
+
+        # Prepare the response data
+        updated_data = {
+            "member_id": family_member.id,
+            "first_name": family_member.first_name,
+            "last_name": family_member.last_name,
+            "mobile_no": family_member.mobile_no,
+            "email": family_member.email,
+            "relation": family_member.relation,
+            "dob": family_member.dob,
+            "blood_group": family_member.blood_group,
+            "is_minor": family_member.is_minor,
+            "gender": family_member.gender,
+            "medical_history": family_member.medical_history,
+        }
+
+        return Response(
+            {"message": "Family member updated successfully", "status": 1, "updated_data": updated_data}, status=status.HTTP_200_OK )
+    except Exception as e:
+        return Response( {"message": f"An error occurred: {str(e)}", "status": 0}, status=status.HTTP_400_BAD_REQUEST )
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def familyMemberDelete(request):
+    try:
+        member_id = request.data.get('member_id')
+        if not member_id:
+            return Response( {"message": "Member ID is required.", "status": 0}, status=status.HTTP_400_BAD_REQUEST )
+        try:
+            family_member = admin_models.FamilyMember.objects.get(id=member_id)
+        except admin_models.FamilyMember.DoesNotExist:
+            return Response( {"message": "Family member not found.", "status": 0}, status=status.HTTP_400_BAD_REQUEST )
+        family_member.delete()
+        return Response( {"message": "Family member deleted successfully.", "status": 1}, status=status.HTTP_200_OK )
+    except Exception as e:
+        return Response( {"message": f"An error occurred: {str(e)}", "status": 0}, status=status.HTTP_400_BAD_REQUEST )
+
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def familyMemberLists(request):
+    try:
+        user = request.user
+        if not hasattr(user, 'customer_profile'):
+            return Response( {"message": "Only customers can view family member lists.", "status": 0}, status=400 )
+        family_members = admin_models.FamilyMember.objects.filter(customer_id=user.customer_profile.id)
+        serialized_data = API_serializers.FamilyMemberSerializer(family_members, many=True).data
+        return Response( {"message": "Family members fetched successfully.", "status": 1, "result": serialized_data}, status=200 )
+    except Exception as e:
+        return Response( {"message": f"An error occurred: {str(e)}", "status": 0}, status=400 )
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def fetchFamilyMemberDetails(request, member_id):
+    try:
+        user = request.user
+        if not hasattr(user, 'customer_profile'):
+            return Response( {"message": "Only customers can fetch family member details.", "status": 0}, status=400 )
+        family_member = admin_models.FamilyMember.objects.filter( customer_id=user.customer_profile.id, id=member_id ).first()
+        if not family_member:
+            return Response( {"message": "Family member not found or does not belong to this user.", "status": 0}, status=404 )
+        serialized_data = API_serializers.FamilyMemberSerializer(family_member).data
+        return Response( {"message": "Family member details fetched successfully.", "status": 1, "result": serialized_data}, status=200 )
+    except Exception as e:
+        return Response( {"message": f"An error occurred: {str(e)}", "status": 0}, status=400 )
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def labLists(request):
+    try:
+        labs = account_models.Laboratory.objects.filter(status=1)
+        serialized_data = API_serializers.LaboratorySerializer(labs, many=True).data
+        return Response(
+            {
+                "result": serialized_data,
+                "count": labs.count(),
+                "message": "Success",
+                "status": 1,
+            },
+            status=200,
+        )
+    except Exception as e:
+        return Response(
+            {
+                "message": f"An error occurred: {str(e)}",
+                "status": 0,
+            },
+            status=400,
+        )
+    
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def labServicesList(request):
+    try:
+        lab_services = admin_models.LabService.objects.filter(status=1).select_related('service', 'laboratory')
+        result = [
+            {
+                "id": lab_service.id,
+                "name": lab_service.service.service_name,
+                "display_name": lab_service.service.service_name,
+            }
+            for lab_service in lab_services
+        ]
+        return Response( { "result": result, "count": len(result), "message": "Success", "status": 1, }, status=200, )
+    except Exception as e:
+        return Response( { "message": f"An error occurred: {str(e)}", "status": 0, }, status=400, )
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  
+@authentication_classes([JWTAuthentication])
+def labBookingTimeSlot(request):
+    start_time = datetime.strptime("00:00", "%H:%M")
+    end_time = datetime.strptime("23:00", "%H:%M")
+    time_slots = []
+
+    while start_time <= end_time:
+        time_slots.append({ "slot_time": start_time.strftime("%H:%M"), })
+        start_time += timedelta(hours=1)
+
+    return JsonResponse({
+        "result": time_slots,
+        "message": "Success",
+        "status": 1
+    })
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def labDetails(request):
+    try:
+        lab_id = request.GET.get('lab_id')
+        if lab_id:
+            lab = account_models.Laboratory.objects.filter(id=lab_id, status=1).first()
+            if not lab:
+                return Response({"message": "Lab not found or inactive.", "status": 0}, status=404)
+            data = API_serializers.LaboratoryDetailsSerializer(lab, context={'request': request}).data
+        else:
+            labs = account_models.Laboratory.objects.filter(status=1)
+            data = API_serializers.LaboratoryDetailsSerializer(labs, many=True, context={'request': request}).data
+
+        return Response({"result": data, "message": "Success", "status": 1}, status=200)
+    except Exception as e:
+        return Response({"message": f"An error occurred: {str(e)}", "status": 0}, status=400)
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def labPackages(request):
+    lab_packages = admin_models.LabPackage.objects.filter(status=1)
+    serializer = API_serializers.LabPackageSerializer( lab_packages, many=True, context={'request': request})
+    response_data = {"result": serializer.data,"count": len(serializer.data),"message": "Success","status": 1}
+    return Response(response_data, status=status.HTTP_200_OK)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def labPackageDetails(request):
+    try:
+        package_id = request.GET.get('package_id')
+        lab_package = admin_models.LabPackage.objects.get(id=package_id)
+        serializer = API_serializers.LabPackageDetailsSerializer(lab_package, context={'request': request})
+        return Response({ "result": serializer.data,"message": "Success", "status": 1}, status=status.HTTP_200_OK)
+    except admin_models.LabPackage.DoesNotExist:
+        return Response({ "result": None, "message": "Lab Package not found", "status": 0}, status=status.HTTP_404_NOT_FOUND)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def addAddress(request):
+    try:
+        data = request.data
+        customer_id = data.get('customer_id')
+        try:
+            customer = account_models.Customer.objects.get(id=customer_id)
+        except account_models.Customer.DoesNotExist:
+            return Response(
+                {"message": "Customer not found with the provided customer ID.", "status": 0}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Extract and validate address details
+        address = data.get('address')
+        landmark = data.get('landmark')
+        lat = data.get('lat')
+        lng = data.get('lng')
+        status_value = data.get('status', 1)  # Default status is 1 (Active)
+
+        if not all([address, landmark, lat, lng]):
+            return Response(
+                {"message": "All fields (address, landmark, lat, lng) are required.", "status": 0}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Create a new address
+        new_address = admin_models.Address.objects.create(customer=customer,address=address,landmark=landmark,lat=lat,lng=lng,status=status_value,created_at=datetime.now(),updated_at=datetime.now())
+        response_data = {
+            "id": new_address.id,"customer_id": customer.id,"address": new_address.address,
+            "landmark": new_address.landmark,"lat": new_address.lat,"lng": new_address.lng,
+            "status": new_address.status,"created_at": new_address.created_at,"updated_at": new_address.updated_at,
+        }
+
+        return Response(
+            {"message": "Address added successfully.", "status": 1, "data": response_data}, 
+            status=status.HTTP_201_CREATED
+        )
+    except Exception as e:
+        return Response(
+            {"message": f"An error occurred: {str(e)}", "status": 0}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def updateAddress(request):
+    try:
+        # Extract data from request
+        data = request.data
+        address_id = data.get('id')
+        customer_id = data.get('customer_id')
+        address = data.get('address')
+        landmark = data.get('landmark')
+        lat = data.get('lat')
+        lng = data.get('lng')
+        if not all([address_id, customer_id, address, landmark, lat, lng]):
+            return Response({"message": "All fields (id, customer_id, address, landmark, lat, lng) are required.", "status": 0},status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = account_models.Customer.objects.get(id=customer_id)
+        except account_models.Customer.DoesNotExist:
+            return Response({"message": "Customer not found with the provided customer ID.", "status": 0},status=status.HTTP_400_BAD_REQUEST)
+        try:
+            address_obj = admin_models.Address.objects.get(id=address_id, customer=customer)
+        except admin_models.Address.DoesNotExist:
+            return Response({"message": "Address not found with the provided ID for this customer.", "status": 0},status=status.HTTP_400_BAD_REQUEST)
+        address_obj.address = address
+        address_obj.landmark = landmark
+        address_obj.lat = lat
+        address_obj.lng = lng
+        address_obj.updated_at = datetime.now()
+        address_obj.save()
+        updated_data = {
+            "id": address_obj.id,
+            "customer_id": customer.id,
+            "address": address_obj.address,
+            "landmark": address_obj.landmark,
+            "lat": address_obj.lat,
+            "lng": address_obj.lng,
+            "updated_at": address_obj.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+        }
+        return Response({"message": "Updated Successfully", "status": 1,"updated_data": updated_data},status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"message": f"An error occurred: {str(e)}", "status": 0},status=status.HTTP_400_BAD_REQUEST)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def editAddress(request):
+    try:
+        data = request.data
+        address_id = data.get('address_id')
+        if not address_id:
+            return Response({"message": "field ID is required.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        try:
+            customer = account_models.Customer.objects.get(user=user)
+        except account_models.Customer.DoesNotExist:
+            return Response({"message": "Customer not found for the logged-in user.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            address_obj = admin_models.Address.objects.get(id=address_id, customer=customer)
+        except admin_models.Address.DoesNotExist:
+            return Response({"message": "Address not found with the provided ID for this customer.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Prepare the response data
+        data = {
+            "id": address_obj.id,
+            "customer_id": customer.id,
+            "address": address_obj.address,
+            "landmark": address_obj.landmark,
+            "lat": address_obj.lat,
+            "lng": address_obj.lng,
+            "status": address_obj.status,
+            "created_at": address_obj.created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+            "updated_at": address_obj.updated_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        }
+
+        return Response(
+            {
+                "result": data,
+                "message": "Success",
+                "status": 1
+            },
+            status=status.HTTP_200_OK
+        )
+
+    except Exception as e:
+        return Response(
+            {"message": f"An error occurred: {str(e)}", "status": 0},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def listCustomerAddresses(request):
+    try:
+        data = request.data
+        customer_id = data.get('customer_id')
+        if not customer_id:
+            return Response({"message": "Customer ID is required.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = account_models.Customer.objects.get(id=customer_id)
+        except account_models.Customer.DoesNotExist:
+            return Response({"message": "Customer not found.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
+        addresses = admin_models.Address.objects.filter(customer=customer)
+        if not addresses:
+            return Response({"message": "No addresses found for the customer.", "status": 0}, status=status.HTTP_404_NOT_FOUND)
+
+        address_data = []
+        for address in addresses:
+            address_data.append({
+                "id": address.id,
+                "address": address.address,
+                "landmark": address.landmark,
+                "lat": address.lat,
+                "lng": address.lng,
+                "status": address.status,
+                "created_at": address.created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                "updated_at": address.updated_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            })
+
+        return Response(
+            {
+                "result": address_data,
+                "message": "Success",
+                "status": 1
+            },
+            status=status.HTTP_200_OK
+        )
+
+    except Exception as e:
+        return Response(
+            {"message": f"An error occurred: {str(e)}", "status": 0},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def deleteAddresses(request):
+    try:
+        data = request.data
+        address_id = data.get('address_id')
+        customer_id = data.get('customer_id')
+        if not address_id or not customer_id:
+            return Response({"message": "Both address_id and customer_id are required.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            customer = account_models.Customer.objects.get(id=customer_id)
+        except account_models.Customer.DoesNotExist:
+            return Response({"message": "Customer not found.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            address_obj = admin_models.Address.objects.get(id=address_id, customer=customer)
+        except admin_models.Address.DoesNotExist:
+            return Response({"message": "Address not found with the provided ID for this customer.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
+        address_obj.delete()
+        return Response( {"message": "Address deleted successfully.", "status": 1},status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"message": f"An error occurred: {str(e)}", "status": 0},status=status.HTTP_400_BAD_REQUEST)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+
 
 # @api_view(['GET'])
 # @permission_classes([IsAuthenticated])  

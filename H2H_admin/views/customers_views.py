@@ -117,3 +117,58 @@ def help_desk_query_delete(request, id):
         except Exception as e:
             return JsonResponse({'success': False, 'message': f"Error: {str(e)}"})
     return JsonResponse({'success': False, 'message': 'Invalid request method. Use POST.'})
+
+@login_required
+def feedbacks(request):
+    feedbacks = adminModel.Feedback.objects.all()
+    return render(request, "admin/customers/feedbacks_list.html", {"feedbacks": feedbacks})
+
+@login_required
+def feedbacks_edit(request,id):
+    feedback = get_object_or_404(adminModel.Feedback, id=id)
+    customers = account_module.Customer.objects.all()
+    labs = account_module.Laboratory.objects.all()
+    doctors = account_module.DoctorDetails.objects.all()
+    hospitals = account_module.Hospital.objects.all()
+    if request.method == 'POST':
+        try:
+            name = request.POST.get('name')
+            email = request.POST.get('email')
+            message = request.POST.get('message')
+
+            feedback.name = name
+            feedback.email = email
+            feedback.message = message
+            feedback.save()
+
+            messages.success(request, 'Feedback updated successfully!')
+            return redirect('help_desk_query_list')
+        except Exception as e:
+            messages.error(request, f"Error updating query: {str(e)}")
+            return redirect('help_desk_query_edit', id=id)
+    context = {
+        'labs': labs,
+        'doctors': doctors,
+        'feedback': feedback,
+        'hospitals': hospitals,
+        'customers': customers,
+        }
+        
+    return render(request, 'admin/customers/feedback_edit.html',context)
+
+@login_required
+def feedbacks_show(request,id):
+    feedback = get_object_or_404(adminModel.Feedback, id=id)
+    return render(request, 'admin/customers/feedbacks_show.html', {'feedback': feedback})
+
+@login_required
+def feedbacks_delete(request,id):
+    if request.method == 'POST':
+        try:
+            query = get_object_or_404(adminModel.Feedback, id=id)
+            query.delete()
+            messages.success(request, 'Feedback deleted successfully!')
+            return JsonResponse({'success': True, 'message': 'Feedback deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f"Error: {str(e)}"})
+    return JsonResponse({'success': False, 'message': 'Invalid request method. Use POST.'})

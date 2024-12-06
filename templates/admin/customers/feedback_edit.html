@@ -1,0 +1,141 @@
+{% extends 'admin/master.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #000000;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Show Feedback</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Show Feedback</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Feedback Details</h4>
+                        <div>
+                            <a href="{% url 'feedbacks_list' %}"> <button title="List" type="button" class="btn btn-primary"> List </button> </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <form action="" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Customer</label>
+                                    <div class="col-sm-10">
+                                        <select name="customer" class="form-control">
+                                            <option value="">Customer</option>
+                                            {% for customer in customers %}
+                                            <option value="{{ customer.id }}" {% if customer.id == feedback.customer_id %}selected{% endif %}>
+                                                {{ customer.customer_name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Doctor</label>
+                                    <div class="col-sm-10">
+                                        <select name="doctor" class="form-control">
+                                            <option value="">Doctor</option>
+                                            {% for doctor in doctors %}
+                                            <option value="{{ doctor.id }}" {% if doctor.id == feedback.doctor_id %}selected{% endif %}>
+                                                {{ doctor }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Hospital</label>
+                                    <div class="col-sm-10">
+                                        <select name="hospital" class="form-control">
+                                            <option value="">Hospital</option>
+                                            {% for hospital in hospitals %}
+                                            <option value="{{ hospital.id }}" {% if hospital.id == feedback.hospital_id %}selected{% endif %}>
+                                                {{ hospital }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Laboratory</label>
+                                    <div class="col-sm-10">
+                                        <select name="lab" class="form-control">
+                                            <option value="">Laboratory</option>
+                                            {% for lab in labs %}
+                                            <option value="{{ lab.id }}" {% if lab.id == feedback.lab_id %}selected{% endif %}>
+                                                {{ lab }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Feedback</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" rows="5">{{ feedback.feedback }}</textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Rating</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" value="{{ feedback.rating }}" placeholder="Rating" >
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Admin Approved</label>
+                                    <div class="col-sm-10">
+                                        <input type="checkbox" class="form-control">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
