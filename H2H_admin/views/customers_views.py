@@ -3,10 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.core.files.storage import default_storage
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.core.files.base import ContentFile
 from accounts import models as account_module
 from H2H_admin import models as adminModel
+from django.http import JsonResponse
 from django.contrib import messages
 from django.db import transaction
 from django.conf import settings
@@ -124,7 +125,7 @@ def feedbacks(request):
     return render(request, "admin/customers/feedbacks_list.html", {"feedbacks": feedbacks})
 
 @login_required
-def feedbacks_edit(request,id):
+def feedbacks_edit(request, id):
     feedback = get_object_or_404(adminModel.Feedback, id=id)
     customers = account_module.Customer.objects.all()
     labs = account_module.Laboratory.objects.all()
@@ -132,29 +133,54 @@ def feedbacks_edit(request,id):
     hospitals = account_module.Hospital.objects.all()
     if request.method == 'POST':
         try:
-            name = request.POST.get('name')
-            email = request.POST.get('email')
-            message = request.POST.get('message')
+            customer_id = request.POST.get('customer_id')
+            doctor_id = request.POST.get('doctor_id')
+            hospital_id = request.POST.get('hospital_id')
+            lab_id = request.POST.get('lab_id')
+            feedback_text = request.POST.get('feedback')
+            rating = request.POST.get('rating')
+            if not customer_id:
+                messages.error(request, "Customer must be selected.")
+                return redirect('feedbacks_edit', id=id)
+            customer = get_object_or_404(account_module.Customer, id=customer_id)
+            entities = [doctor_id, hospital_id, lab_id]
+            selected_entities = [entity for entity in entities if entity]
+            if len(selected_entities) > 1:
+                messages.error(request,"Only one of Doctor, Hospital, or Lab can be selected at a time.")
+                return redirect('feedbacks_edit', id=id)
+            elif len(selected_entities) == 0:
+                messages.error(request,"Please select either a Doctor, Hospital, or Lab.")
+                return redirect('feedbacks_edit', id=id)
+            if not rating:
+                messages.error(request, "Rating is required.")
+                return redirect('feedbacks_edit', id=id)
+            try:
+                rating_value = float(rating)
+                if rating_value < 1 or rating_value > 5:
+                    messages.error(request,"Rating must be a value between 1 and 5.")
+                    return redirect('feedbacks_edit', id=id)
+            except ValueError:
+                messages.error(request, "Rating must be a number.")
+                return redirect('feedbacks_edit', id=id)
 
-            feedback.name = name
-            feedback.email = email
-            feedback.message = message
+            feedback.customer = customer
+            feedback.doctor = account_module.DoctorDetails.objects.filter(id=doctor_id).first() if doctor_id else None
+            feedback.hospital = account_module.Hospital.objects.filter(id=hospital_id).first() if hospital_id else None
+            feedback.lab = account_module.Laboratory.objects.filter(id=lab_id).first() if lab_id else None
+            feedback.feedback = feedback_text
+            feedback.rating = rating_value
             feedback.save()
-
-            messages.success(request, 'Feedback updated successfully!')
-            return redirect('help_desk_query_list')
+            messages.success(request, "Feedback updated successfully!")
+            return redirect('feedbacks_edit', id=id)
         except Exception as e:
-            messages.error(request, f"Error updating query: {str(e)}")
-            return redirect('help_desk_query_edit', id=id)
+            messages.error(request, f"Error updating feedback: {str(e)}")
+            return redirect('feedbacks_edit', id=id)
     context = {
-        'labs': labs,
-        'doctors': doctors,
-        'feedback': feedback,
-        'hospitals': hospitals,
-        'customers': customers,
-        }
-        
-    return render(request, 'admin/customers/feedback_edit.html',context)
+        'labs': labs, 'doctors': doctors, 'feedback': feedback,
+        'hospitals': hospitals, 'customers': customers,
+    }
+    return render(request, 'admin/customers/feedback_edit.html', context)
+
 
 @login_required
 def feedbacks_show(request,id):
@@ -172,3 +198,23 @@ def feedbacks_delete(request,id):
         except Exception as e:
             return JsonResponse({'success': False, 'message': f"Error: {str(e)}"})
     return JsonResponse({'success': False, 'message': 'Invalid request method. Use POST.'})
+
+
+@csrf_exempt
+def update_approval_status(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            feedback_id = data.get('feedbackId')
+            is_approved = data.get('is_approved')
+            if feedback_id is None or is_approved is None:
+                return JsonResponse({'success': False, 'message': 'Invalid data provided.'}, status=400)
+            feedback = adminModel.Feedback.objects.get(id=feedback_id)
+            feedback.admin_approved = is_approved
+            feedback.save()
+            return JsonResponse({'success': True, 'message': 'Status updated successfully.'})
+        except Feedback.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Feedback not found.'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=500)
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=400)

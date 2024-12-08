@@ -25,6 +25,54 @@
         font-size: 10px;
     }
 
+    /* Switch container */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 30px;
+    }
+
+    /* Hide the default checkbox */
+    .switch input {
+        display: none;
+    }
+
+    /* Slider styles */
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 30px;
+    }
+
+    /* Toggle circle */
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 5px;
+        bottom: 5px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+    }
+
+    /* Active state */
+    input:checked + .slider {
+        background-color: #6b51df;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(30px);
+    }
+
    
 </style>
 
@@ -78,7 +126,10 @@
                                         <td>{{ feedback.feedback|truncatechars:50 }}</td>
                                         <td>{{ feedback.rating }}</td>
                                         <td>
-                                            <input class="form-check-input" type="checkbox" id="toggleSwitch">
+                                            <label class="switch">
+                                                <input type="checkbox" class="toggle-switch" data-feedback-id="{{ feedback.id }}" {% if feedback.admin_approved %}checked{% endif %}>
+                                                <span class="slider"></span>
+                                            </label>
                                         </td>
                                         <td>{{ feedback.created_at|date:"Y-m-d H:i" }}</td>
                                         <td>
@@ -110,6 +161,53 @@
 </div>
 
 <script>
+   
+    document.querySelectorAll('.toggle-switch').forEach((toggle) => {
+        toggle.addEventListener('change', function () {
+            const feedbackId = this.dataset.feedbackId; 
+            const isApproved = this.checked;
+            fetch("{% url 'update_approval_status' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    feedbackId: feedbackId,
+                    is_approved: isApproved
+                })
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        toastr.success(data.message, "Success");
+                    } else {
+                        toastr.error(data.message, "Error");
+                        this.checked = !isApproved; 
+                    }
+                })
+                .catch((error) => {
+                    toastr.error("An error occurred while updating status.", "Error");
+                    this.checked = !isApproved; 
+                });
+        });
+    });
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
     function confirmFeedbackDelete(feedbackId) {
         Swal.fire({
             title: 'Are you sure?',

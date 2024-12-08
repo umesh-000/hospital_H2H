@@ -12,8 +12,16 @@ import json
 @login_required
 def admin_dashboard(request):
     doctors_count = accountModels.DoctorDetails.objects.count()
+    customers_count = accountModels.Customer.objects.count()
+    labs_count = accountModels.Laboratory.objects.count()
+    hospitals_count = accountModels.Hospital.objects.count()
+    total_users = accountModels.User.objects.exclude(user_type='admin').count()
     context = {
         "doctors_count":doctors_count,
+        "customers_count":customers_count,
+        "hospitals_count":hospitals_count,
+        "labs_count":labs_count,
+        "total_users":total_users,
     }
     return render(request, "admin/deshboard.html",context)
 

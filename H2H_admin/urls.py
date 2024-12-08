@@ -32,6 +32,7 @@ urlpatterns = [
     path('feedbacks/<int:id>/edit/', customers_views.feedbacks_edit, name='feedbacks_edit'),
     path('feedbacks/<int:id>/show/', customers_views.feedbacks_show, name='feedbacks_show'),
     path('feedbacks/<int:id>/delete/', customers_views.feedbacks_delete, name='feedbacks_delete'),
+     path('feedbacks/approve-status/', customers_views.update_approval_status, name='update_approval_status'),
 
     # Blogs
     path('blogs/', views.blogs_list, name='blogs_list'),

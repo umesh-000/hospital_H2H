@@ -28,13 +28,13 @@
             <div class="col-sm-6 p-md-0">
                 <div class="welcome-text">
                     <h4>Hi, welcome back!</h4>
-                    <span class="ml-1">Show Feedback</span>
+                    <span class="ml-1">Edit Feedback</span>
                 </div>
             </div>
             <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
-                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Show Feedback</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Edit Feedback</a></li>
                 </ol>
             </div>
         </div>
@@ -43,21 +43,21 @@
             <div class="col-xl-12 col-xxl-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title">Feedback Details</h4>
+                        <h4 class="card-title">Edit Feedback Details</h4>
                         <div>
                             <a href="{% url 'feedbacks_list' %}"> <button title="List" type="button" class="btn btn-primary"> List </button> </a>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="basic-form">
-                            <form action="" method="POST" enctype="multipart/form-data">
+                            <form action="{% url "feedbacks_edit" feedback.id  %}" method="POST" enctype="multipart/form-data">
                                 {% csrf_token %}
 
                                 <div class="form-group row">
                                     <label class="col-sm-2 col-form-label">Customer</label>
                                     <div class="col-sm-10">
-                                        <select name="customer" class="form-control">
-                                            <option value="">Customer</option>
+                                        <select name="customer_id" class="form-control">
+                                            <option value="">Select Customer</option>
                                             {% for customer in customers %}
                                             <option value="{{ customer.id }}" {% if customer.id == feedback.customer_id %}selected{% endif %}>
                                                 {{ customer.customer_name }}
@@ -70,8 +70,8 @@
                                 <div class="form-group row">
                                     <label class="col-sm-2 col-form-label">Doctor</label>
                                     <div class="col-sm-10">
-                                        <select name="doctor" class="form-control">
-                                            <option value="">Doctor</option>
+                                        <select name="doctor_id" class="form-control">
+                                            <option value="">Select Doctor</option>
                                             {% for doctor in doctors %}
                                             <option value="{{ doctor.id }}" {% if doctor.id == feedback.doctor_id %}selected{% endif %}>
                                                 {{ doctor }}
@@ -84,8 +84,8 @@
                                 <div class="form-group row">
                                     <label class="col-sm-2 col-form-label">Hospital</label>
                                     <div class="col-sm-10">
-                                        <select name="hospital" class="form-control">
-                                            <option value="">Hospital</option>
+                                        <select name="hospital_id" class="form-control">
+                                            <option value="">Select Hospital</option>
                                             {% for hospital in hospitals %}
                                             <option value="{{ hospital.id }}" {% if hospital.id == feedback.hospital_id %}selected{% endif %}>
                                                 {{ hospital }}
@@ -98,8 +98,8 @@
                                 <div class="form-group row">
                                     <label class="col-sm-2 col-form-label">Laboratory</label>
                                     <div class="col-sm-10">
-                                        <select name="lab" class="form-control">
-                                            <option value="">Laboratory</option>
+                                        <select name="lab_id" class="form-control">
+                                            <option value="">Select Laboratory</option>
                                             {% for lab in labs %}
                                             <option value="{{ lab.id }}" {% if lab.id == feedback.lab_id %}selected{% endif %}>
                                                 {{ lab }}
@@ -113,21 +113,21 @@
                                 <div class="form-group row">
                                     <label class="col-sm-2 col-form-label">Feedback</label>
                                     <div class="col-sm-10">
-                                        <textarea class="form-control" rows="5">{{ feedback.feedback }}</textarea>
+                                        <textarea class="form-control" name="feedback" rows="5">{{ feedback.feedback }}</textarea>
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
                                     <label class="col-sm-2 col-form-label">Rating</label>
                                     <div class="col-sm-10">
-                                        <input type="text" class="form-control" value="{{ feedback.rating }}" placeholder="Rating" >
+                                        <input type="text" class="form-control" name="rating" value="{{ feedback.rating }}" placeholder="Rating" >
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
-                                    <label class="col-sm-2 col-form-label">Admin Approved</label>
-                                    <div class="col-sm-10">
-                                        <input type="checkbox" class="form-control">
+                                    <div class="offset-sm-2">
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                        <a href="{% url 'feedbacks_list' %}" class="btn btn-secondary">Cancel</a>
                                     </div>
                                 </div>
                             </form>
