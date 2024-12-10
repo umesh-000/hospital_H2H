@@ -30,13 +30,13 @@ def admin_login(request):
                 return redirect('admin_dashboard')
             elif user.user_type == 'hospital':
                 messages.success(request, "Login Successful!")
-                return redirect('hospital_dashboard')
+                return redirect('admin_dashboard')
             elif user.user_type == 'lab':
                 messages.success(request, "Login Successful!")
-                return redirect('lab_dashboard')
+                return redirect('admin_dashboard')
             elif user.user_type == 'doctor':
                 messages.success(request, "Login Successful!")
-                return redirect('doctors_dashboard')
+                return redirect('admin_dashboard')
             else:
                 messages.error(request, "Unknown user type.")
                 return redirect('login')

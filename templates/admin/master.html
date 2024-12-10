@@ -67,137 +67,12 @@
 
         <!--********************************** Nav header start ***********************************-->
         {% block header %}
-        <div class="nav-header">
-            <a href="{% url "admin_dashboard" %}" class="brand-logo">
-                <img class="logo-abbr" src="{% static './images/logo-color.png' %}" alt="">
-                <span class="brand-title"><b>Health2Home</b></span>
-            </a>
-
-            <div class="nav-control">
-                <div class="hamburger">
-                    <span class="line"></span><span class="line"></span><span class="line"></span>
-                </div>
-            </div>
-        </div>
-        <!--**********************************  Nav header end ***********************************-->
-
-        <!--********************************** Header start ***********************************-->
-        <div class="header">
-            <div class="header-content">
-                <nav class="navbar navbar-expand">
-                    <div class="collapse navbar-collapse justify-content-between">
-                        <div class="header-left">
-                            <div class="search_bar dropdown">
-                                <span class="search_icon p-3 c-pointer" data-toggle="dropdown">
-                                    <i class="mdi mdi-magnify"></i>
-                                </span>
-                                <div class="dropdown-menu p-0 m-0">
-                                    <form>
-                                        <input class="form-control" type="search" placeholder="Search"
-                                            aria-label="Search">
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <ul class="navbar-nav header-right">
-                            <li class="nav-item dropdown header-profile">
-                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-account"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a href="#" class="dropdown-item">
-                                        <i class="icon-user"></i>
-                                        <span class="ml-2">Profile </span>
-                                    </a>
-                                    <a href="{% url "logout" %}" class="dropdown-item">
-                                        <i class="icon-key"></i>
-                                        <span class="ml-2">Logout </span>
-                                    </a>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-            </div>
-        </div>
-
+       
         {% endblock header %}
         <!--********************************** Header end ti-comment-alt ***********************************-->
 
         {% block sidebar %}
-        <!--**********************************  Sidebar start ***********************************-->
-        <div class="quixnav">
-            <div class="quixnav-scroll">
-                <ul class="metismenu" id="menu">
-                    <li class="nav-label first">Main Menu</li>
-                    <li><a href="/admin/" aria-expanded="false"><i class="fa fa-bar-chart"></i><span class="nav-text">Dashboard</span></a></li>
-
-                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-users"></i><span class="nav-text">Customers</span></a>
-                        <ul aria-expanded="false">
-                            <li><a href="{% url "hospital_list" %}"><i class="fa fa-google-wallet"></i>Customer Wallet History</a></li>
-                            <li><a href="{% url "ward_list" %}"><i class="fa fa-money"></i>Customer Rewards</a></li>
-                            <li><a href="{% url "help_desk_query_list" %}"><i class="fa fa-volume-control-phone"></i>Help Desk Query</a></li>
-                            <li><a href="{% url "customers_list" %}"><i class="fa fa-female"></i>Customers</a></li>
-                        </ul>
-                    </li>
-                    
-                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-stethoscope"></i><span class="nav-text">Hospitals</span></a>
-                        <ul aria-expanded="false">
-                            <li><a href="{% url "hospital_list" %}"><i class="fa fa-align-right"></i>Hospitals</a></li>
-                            <li><a href="{% url "ward_list" %}"><i class="fa fa-hotel"></i>Hospital Wards</a></li>
-                            <li><a href="{% url "bed_list" %}"><i class="fa fa-bed"></i>Hospital Bed</a></li>
-                            <li><a href="{% url "bed_status_list" %}"><i class="fa fa-hospital-o"></i>Hospital Bed Status</a></li>
-                            <li><a href="{% url "hospital_service_list" %}"><i class="fa fa-cogs"></i> Hospital Services</a></li>
-                            <li><a href="{% url "hospital_department_list" %}"><i class="fa fa-building"></i> Hospital Department</a></li>
-                            <li><a href="{% url "hospital_facilities_list" %}"><i class="fa fa-building"></i> Hospital Facilities</a></li>
-                            <li><a href="{% url "hospital_doctors_list" %}"><i class="fa fa-user-md"></i> Hospital Doctors</a></li>
-                            <li><a href="{% url "bed_requests" %}"><i class="fa fa-bed"></i> Bed Requests</a></li>
-                        </ul>
-                    </li>
-
-                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-user-md"></i><span class="nav-text"> Doctor Module </span></a>
-                        <ul aria-expanded="false">
-                            <li><a href="{% url "doctors_list" %}"><i class="fa fa-stethoscope"></i>Doctors</a></li>
-                            <li><a href="{% url "doctor_clinic_categories" %}"><i class="fa fa-align-justify"></i>Doctor Clinic Category</a></li>
-                            <li><a href="{% url "doctor_clinic_list" %}"><i class="fa fa-hospital-o"></i>Doctor Clinics</a></li>
-                            <li><a href="{% url "dr_banner_list" %}"><i class="fa fa-image"></i>Doctor Banner</a></li>
-                            <li><a href="{% url "doctor_documents_list" %}"><i class="fa fa-file"></i>Doctors Documents</a></li>
-                            <li><a href="/doctor/doctor-bookings/"><i class="fa fa-calendar"></i>Doctor Clinic Booking</a></li>
-                        </ul>
-                    </li>
-                
-                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-flask"></i><span class="nav-text"> Laboratories </span></a>
-                        <ul aria-expanded="false">
-                            <li><a href="{% url "laboratories_list" %}"><i class="fa fa-flask"></i>Laboratories</a></li>
-                            <li><a href="{% url "lab_services_list" %}"><i class="fa fa-cogs"></i>Lab Services</a></li>
-                            <li><a href="{% url 'lab_package_list' %}"><i class="fa fa-flask"></i> Lab Package</a></li>
-                            <li><a href="{% url "lab_staff_list" %}"><i class="fa fa-users"></i> Lab Staff</a></li> 
-                            <li><a href="{% url "services_list" %}"><i class="fa fa-cogs"></i>Services</a></li>
-                            <li><a href="{% url "lab_tags_list" %}"><i class="fa fa-tags"></i> Lab Tags</a></li>
-                            <li><a href="{% url "lab_banners_list" %}"><i class="fa fa-file-photo-o"></i>Lab Banners</a></li>
-                        </ul>
-                    </li> 
-                    
-                    <li><a href="{% url "specialist_list" %}" aria-expanded="false"><i class="fa fa-certificate"></i><span class="nav-text">Specialist Categories</span></a></li>
-                    <li><a href="{% url "symptoms_list" %}" aria-expanded="false"><i class="fa fa-assistive-listening-systems"></i><span class="nav-text">Symptoms</span></a></li>
-                    <li><a href="{% url 'banners_list' %}" aria-expanded="false"><i class="fa fa-image"></i><span class="nav-text">Banners</span></a></li>
-                    <li><a href="{% url "module_offer_banners_list" %}" aria-expanded="false"><i class="fa fa-gift"></i><span class="nav-text">Module Offer Banner</span></a></li>
-                    <li><a href="{% url 'expert_talks_list' %}" aria-expanded="false"><i class="fa fa-comments"></i><span class="nav-text">Expert Talk</span></a></li>
-                    <li> <a href="{% url 'blogs_list' %}" aria-expanded="false"> <i class="fa fa-newspaper-o"></i> <span class="nav-text">Blogs</span> </a>
-                    <li> <a href="{% url 'feedbacks_list' %}" aria-expanded="false"> <i class="fa fa-comments-o"></i> <span class="nav-text">Feedback</span> </a>
-                    </li>
-                    </li>
-
-                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-tasks"></i><span class="nav-text">Admin</span></a>
-                        <ul aria-expanded="false">
-                            <li><a href="{% url "all_users" %}"><i class="fa fa-users"></i>All Users</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <!--**********************************  Sidebar end  ***********************************-->
+        
         {% endblock sidebar %}
 
         
@@ -250,8 +125,8 @@
     <script src="{% static './vendor/global/global.min.js' %}"></script>
     <script src="{% static './js/quixnav-init.js' %}"></script>
     <script src="{% static './js/custom.min.js' %}"></script>
-    <script src="{% static './js/plugins-init/chartjs-init.js' %}"></script>
     <script src="{% static './vendor/chart.js/Chart.bundle.min.js' %}"></script>
+    <script src="{% static './js/plugins-init/chartjs-init.js' %}"></script>
     
     <!-- Vectormap -->
     <script src="{% static './vendor/raphael/raphael.min.js' %}"></script>
