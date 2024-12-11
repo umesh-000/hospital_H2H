@@ -586,3 +586,22 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.address} ({self.customer.user.email})"
+
+
+# Choices for transaction type and type
+TRANSACTION_TYPE_CHOICES = [('customer added amount', 'Customer added amount'),('refund amount', 'Refund amount'),('deducted amount', 'Deducted amount')]
+TYPE_CHOICES = [('credit', 'Credit'),('debit', 'Debit'),]
+class CustomerWalletHistory(models.Model):
+    customer = models.ForeignKey('accounts.Customer', on_delete=models.CASCADE, related_name='wallet_histories')
+    transaction_type = models.CharField(max_length=20,choices=TYPE_CHOICES)
+    message = models.TextField()
+    transaction_type = models.CharField(max_length=30,choices=TRANSACTION_TYPE_CHOICES)
+    amount = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'customer_wallet_histories'
+
+    def __str__(self):
+        return f'{self.customer.user.email} - {self.get_transaction_type_display()} - {self.amount}'
