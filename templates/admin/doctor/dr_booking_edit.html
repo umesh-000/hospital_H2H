@@ -1,0 +1,144 @@
+{% extends 'admin/deshboard.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #000000;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .badge-inside {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background-color: #ffaa16;
+        color: rgb(31, 29, 29);
+    }
+
+    .form-control {
+        padding-right: 80px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+
+    .image-preview {
+        width: 150px;
+        height: 150px;
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f9f9f9;
+        margin-top: 10px;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Doctor Booking Details</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Doctor Booking</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Doctor Booking Details</h4>
+                        <div>
+                            <a href="{% url 'doctor_booking_requests' %}">
+                                <button title="Back to List" type="button" class="btn btn-primary">List</button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <form method="POST" action="{% url 'doctor_booking_edit' booking.id %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="booking_number">Booking Number</label>
+                                    <input type="text" class="form-control" id="booking_number" name="booking_number" value="{{ booking.booking_number }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="booking_for">Booking For</label>
+                                    <input type="text" class="form-control" id="booking_for" name="booking_for" value="{{ booking.booking_for }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="patient_name">Patient Name</label>
+                                    <input type="text" class="form-control" id="patient_name" name="patient_name" value="{{ booking.patient_name }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="contact_number">Contact Number</label>
+                                    <input type="text" class="form-control" id="contact_number" name="contact_number" value="{{ booking.contact_number }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="age">Age</label>
+                                    <input type="number" class="form-control" id="age" name="age" value="{{ booking.age }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="blood_group">Blood Group</label>
+                                    <input type="text" class="form-control" id="blood_group" name="blood_group" value="{{ booking.blood_group }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="medical_history">Medical History</label>
+                                    <textarea class="form-control" id="medical_history" name="medical_history">{{ booking.medical_history }}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="booking_date">Booking Date</label>
+                                    <input type="date" class="form-control" id="booking_date" name="booking_date" value="{{ booking.booking_date|date:'Y-m-d' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="time_slot">Time Slot</label>
+                                    <input type="time" class="form-control" id="time_slot" name="time_slot" value="{{ booking.time_slot|date:'H:i'|default:'' }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="status">Status</label>
+                                    <select class="form-control" id="status" name="status">
+                                        {% for key, value in status_choices %}
+                                            <option value="{{ key }}" {% if booking.status == key %}selected{% endif %}>{{ value }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                <a href="{% url 'doctor_booking_requests' %}" class="btn btn-secondary">Cancel</a>
+                            </form>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.files.storage import FileSystemStorage
 from django.core.files.storage import default_storage
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse,JsonResponse
 from django.core.files.base import ContentFile
 from accounts import models as account_module
@@ -512,3 +513,53 @@ def lab_package_delete(request, id):
             return JsonResponse({'success': True, 'message': 'Deleted successfully!'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
+
+@login_required
+def lab_orders_list(request):
+    lab_orders = adminModel.LabOrders.objects.select_related('customer', 'lab').prefetch_related('lab_order_items').all()
+    return render(request, 'admin/lab/lab_orders_list.html', {'lab_orders': lab_orders})
+
+@login_required
+def lab_orders_show(request, id):
+    lab_order = get_object_or_404(adminModel.LabOrders, id=id)
+    lab_order_items = lab_order.lab_order_items.all()
+    context = {
+        'lab_order': lab_order,
+        'lab_order_items': lab_order_items,
+    }
+    return render(request, "admin/lab/lab_orders_show.html", context)
+
+@login_required
+def lab_orders_edit(request, id):
+    lab_order = get_object_or_404(adminModel.LabOrders, id=id)
+    lab_staffs = adminModel.LabStaff.objects.all()
+    if request.method == 'POST':
+        lab_staff_id = request.POST.get('lab_staff_id')
+        status = request.POST.get('status')
+        report = request.FILES.get('report')
+        print(lab_staff_id)
+        lab_staff = get_object_or_404(adminModel.LabStaff, id=lab_staff_id)
+        lab_order.lab_staff = lab_staff
+        lab_order.status = status
+        if report:
+            lab_order.report = report
+        lab_order.save()
+        messages.success(request, 'Lab Order updated successfully!')
+        return redirect('lab_orders_list')
+    context = {
+        'lab_staffs':lab_staffs,
+        'lab_order': lab_order,
+    }
+    return render(request, 'admin/lab/lab_order_edit.html', context)
+
+@login_required
+def lab_orders_delete(request, id):
+    if request.method == 'POST':
+        try:
+            lab_order = get_object_or_404(adminModel.LabOrders, id=id)
+            lab_order.delete()
+            messages.success(request, 'Lab Order deleted successfully!')
+            return JsonResponse({'success': True, 'message': 'Lab order deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})

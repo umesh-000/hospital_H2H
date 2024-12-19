@@ -120,6 +120,8 @@ class BedStatus(models.Model):
 
     def __str__(self):
         return f'{self.bed.bed_type} - {self.get_status_display()}'
+
+
  
 class HospitalService(models.Model):
     hospital = models.ForeignKey('accounts.Hospital', on_delete=models.SET_NULL, related_name='services', null=True, blank=True)
@@ -422,6 +424,73 @@ class LabPackage(models.Model):
     def __str__(self):
         return f"{self.package_name} - {self.lab.lab_name}"
 
+class LabOrders(models.Model):
+    STATUS_CHOICES = [
+        (1, 'Order Placed'),
+        (2, 'Confirmed'),
+        (3, 'Collective Person Assigned'),
+        (4, 'On Progress'),
+        (5, 'Report Ready To Dispatch'),
+        (6, 'Completed'),
+    ]
+
+    # Choices for booking type
+    BOOKING_TYPE_CHOICES = [
+        (1, 'Collect From Home'),
+        (2, 'Lab Visit'),
+    ]
+    customer = models.ForeignKey('accounts.Customer', on_delete=models.CASCADE, related_name='lab_orders')
+    lab = models.ForeignKey('accounts.Laboratory', on_delete=models.CASCADE, related_name='lab_orders')
+    lab_staff = models.ForeignKey(LabStaff, on_delete=models.CASCADE, null=True, blank=True, related_name='lab_orders', verbose_name="Collective Person")
+    patient_name = models.CharField(max_length=150)
+    patient_dob = models.DateField()
+    patient_gender = models.CharField(max_length=10)
+    address_id = models.IntegerField() 
+    promo_id = models.IntegerField()
+    discount = models.FloatField()
+    tax = models.FloatField()
+    sub_total = models.FloatField()
+    total = models.FloatField()
+    special_instruction = models.CharField(max_length=250, null=True, blank=True)
+    payment_mode = models.IntegerField()
+    booking_type = models.IntegerField(choices=BOOKING_TYPE_CHOICES, default=1)
+    items = models.TextField()
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
+    created_by = models.IntegerField(null=True, blank=True)
+    updated_by = models.IntegerField(null=True, blank=True)
+    appointment_time = models.TimeField(null=True, blank=True)
+    report = models.FileField(upload_to='lab/reports/', null=True, blank=True)
+    appointment_date = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'lab_orders'
+        verbose_name = 'Lab Order'
+        verbose_name_plural = 'Lab Orders'
+
+    def __str__(self):
+        return f"Order {self.id} for Patient {self.patient_name}"
+    
+class LabOrderItems(models.Model):
+    order = models.ForeignKey(LabOrders, on_delete=models.CASCADE, related_name='lab_order_items')
+    item_id = models.IntegerField()
+    item_name = models.CharField(max_length=150)
+    price = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'lab_order_items'
+        verbose_name = 'Lab Order Item'
+        verbose_name_plural = 'Lab Order Items'
+
+    def __str__(self):
+        return f"Item {self.item_name} for Order {self.order.id}"
+
+
+
+
 class Blog(models.Model):
     title = models.CharField(max_length=250)
     description = models.TextField()
@@ -495,7 +564,6 @@ class Allergy(models.Model):
 
     def __str__(self):
         return self.name
-
 
 
 class Medication(models.Model):
@@ -593,9 +661,9 @@ TRANSACTION_TYPE_CHOICES = [('customer added amount', 'Customer added amount'),(
 TYPE_CHOICES = [('credit', 'Credit'),('debit', 'Debit'),]
 class CustomerWalletHistory(models.Model):
     customer = models.ForeignKey('accounts.Customer', on_delete=models.CASCADE, related_name='wallet_histories')
-    transaction_type = models.CharField(max_length=20,choices=TYPE_CHOICES)
     message = models.TextField()
-    transaction_type = models.CharField(max_length=30,choices=TRANSACTION_TYPE_CHOICES)
+    transaction_type = models.CharField(max_length=20,choices=TYPE_CHOICES)
+    transaction_type_choices = models.CharField(max_length=30,choices=TRANSACTION_TYPE_CHOICES)
     amount = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -605,3 +673,83 @@ class CustomerWalletHistory(models.Model):
 
     def __str__(self):
         return f'{self.customer.user.email} - {self.get_transaction_type_display()} - {self.amount}'
+
+class DoctorBooking(models.Model):
+    STATUS_CHOICES = [
+        ('confirm', 'Confirm'),
+        ('complete', 'Complete'),
+        ('cancelled', 'Cancelled'),
+        ('pending', 'Pending'),
+    ]
+    booking_number = models.CharField(max_length=50, null=True, blank=True)
+    doctor = models.ForeignKey('accounts.DoctorDetails', on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings')
+    clinic = models.ForeignKey(DoctorClinics, on_delete=models.SET_NULL, null=True, blank=True, related_name='clinic_bookings')
+    customer = models.ForeignKey('accounts.Customer', on_delete=models.CASCADE, related_name='doctor_bookings')
+    booking_for = models.CharField(max_length=10, null=True, blank=True)
+    patient_name = models.CharField(max_length=255)
+    email = models.EmailField()
+    age = models.IntegerField(null=True, blank=True)
+    contact_number = models.CharField(max_length=255, null=True, blank=True)
+    emergency_contact = models.CharField(max_length=255, null=True, blank=True)
+    blood_group = models.CharField(max_length=255)
+    medical_history = models.TextField(null=True, blank=True)
+    current_symptoms = models.CharField(max_length=255, null=True, blank=True)
+    booking_date = models.DateField(null=True, blank=True)
+    time_slot = models.TimeField(null=True, blank=True)
+    consultation_charge = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    base_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    tax = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    additional_charges = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    final_total = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    payment_mode = models.CharField(max_length=50, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=255,choices=STATUS_CHOICES,default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'doctor_bookings'
+        verbose_name = "Doctor Booking"
+        verbose_name_plural = "Doctor Bookings"
+
+    def __str__(self):
+        return f"Booking {self.booking_number} - {self.patient_name}"
+
+class FcmNotification(models.Model):
+    slug = models.CharField(max_length=50, unique=True)
+    customer_title = models.CharField(max_length=100)
+    customer_description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'fcm_notifications'
+        verbose_name = 'FCM Notification'
+        verbose_name_plural = 'FCM Notifications'
+
+    def __str__(self):
+        return f"Notification: {self.slug} (Customer: {self.customer_title})"
+    
+
+class Notification(models.Model):
+    STATUS_CHOICES = [(0, 'Active'),(1, 'Inactive'),]
+    customer = models.ForeignKey('accounts.Customer', on_delete=models.SET_NULL, null=True, blank=True, related_name='notifications')
+    app_module = models.ForeignKey('AppModule',on_delete=models.CASCADE,related_name='notifications', null=True, blank=True)
+    title = models.CharField(max_length=250)
+    description = models.TextField()
+    image = models.ImageField(upload_to='notifications_images/', blank=True, null=True)
+    type = models.CharField(max_length=50, null=True, blank=True)
+    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=0)
+    meta = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'notifications'
+        verbose_name = 'Notification'
+        verbose_name_plural = 'Notifications'
+
+    def __str__(self):
+        return f"Notification: {self.title} (Status: {'Active' if self.status else 'Inactive'})"

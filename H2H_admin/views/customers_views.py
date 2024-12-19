@@ -72,6 +72,37 @@ def customers_delete(request, id):
             return JsonResponse({'success': False, 'message': f"Error: {str(e)}"})
     return JsonResponse({'success': False, 'message': 'Invalid request method. Use POST.'})
 
+
+
+@login_required
+def customer_wallet_histories_list(request):
+    customer_wallet_histories = adminModel.CustomerWalletHistory.objects.all()
+    return render(request, "admin/customers/customer_wallet_histories.html", {"customer_wallet_histories": customer_wallet_histories})
+
+
+@login_required
+def customer_wallet_histories_create(request):
+    if request.method == 'POST':
+        customer_id = request.POST.get('customer')
+        message = request.POST.get('message')
+        transaction_type = request.POST.get('transaction_type')
+        transaction_type_choices = request.POST.get('transaction_type_choices')
+        amount = request.POST.get('amount')
+
+        customer = get_object_or_404(account_module.Customer, id=customer_id)
+        adminModel.CustomerWalletHistory.objects.create(customer=customer,message=message,transaction_type=transaction_type,transaction_type_choices=transaction_type_choices,amount=amount,)
+        messages.success(request, 'Wallet History created successfully!')
+        return redirect('customer_wallet_histories_list')
+
+    # On GET request, render the form
+    customers = account_module.Customer.objects.all()
+    context = {
+        'customers': customers,
+        'type_choices': adminModel.CustomerWalletHistory._meta.get_field('transaction_type').choices,
+        'transaction_type_choices': adminModel.CustomerWalletHistory._meta.get_field('transaction_type_choices').choices,
+    }
+    return render(request, 'admin/customers/customer_wallet_histories_create.html', context)
+
 @login_required
 def help_desk_query(request):
     queries = adminModel.HelpDeskQuery.objects.all()
@@ -213,7 +244,7 @@ def update_approval_status(request):
             feedback.admin_approved = is_approved
             feedback.save()
             return JsonResponse({'success': True, 'message': 'Status updated successfully.'})
-        except Feedback.DoesNotExist:
+        except adminModel.Feedback.DoesNotExist:
             return JsonResponse({'success': False, 'message': 'Feedback not found.'}, status=404)
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)}, status=500)

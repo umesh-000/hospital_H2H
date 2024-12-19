@@ -21,6 +21,10 @@ urlpatterns = [
     path('customers/<int:id>/show/', customers_views.customers_show, name='customers_show'),
     path('customers/<int:id>/delete/', customers_views.customers_delete, name='customers_delete'),
 
+    # Customer Wallet Histories
+    path('customer-wallet-histories/', customers_views.customer_wallet_histories_list, name='customer_wallet_histories_list'),
+    path('customer-wallet-histories/create/', customers_views.customer_wallet_histories_create, name='customer_wallet_histories_create'),
+
     # Help Desk Query
     path('help_desk_query/', customers_views.help_desk_query, name='help_desk_query_list'),
     path('help_desk_query/<int:id>/edit/', customers_views.help_desk_query_edit, name='help_desk_query_edit'),
@@ -32,7 +36,7 @@ urlpatterns = [
     path('feedbacks/<int:id>/edit/', customers_views.feedbacks_edit, name='feedbacks_edit'),
     path('feedbacks/<int:id>/show/', customers_views.feedbacks_show, name='feedbacks_show'),
     path('feedbacks/<int:id>/delete/', customers_views.feedbacks_delete, name='feedbacks_delete'),
-     path('feedbacks/approve-status/', customers_views.update_approval_status, name='update_approval_status'),
+    path('feedbacks/approve-status/', customers_views.update_approval_status, name='update_approval_status'),
 
     # Blogs
     path('blogs/', views.blogs_list, name='blogs_list'),
@@ -139,11 +143,11 @@ urlpatterns = [
     path('change_doc_status/', dr_views.change_doc_status, name='change_doc_status'),
     
 
-    
-
 #     # Doctor Booking 
-#     path('doctor-bookings/', views.doctor_booking_requests, name='doctor_booking_requests'),
-#     path('update_doctor_booking_status/', views.update_doctor_booking_status, name='update_doctor_booking_status'),
+    path('doctor-bookings/', dr_views.dr_booking_list, name='doctor_booking_requests'),
+    path('doctor-bookings/<int:id>/show/', dr_views.doctor_booking_show, name='doctor_booking_show'),
+    path('doctor-bookings/<int:id>/edit/', dr_views.doctor_booking_edit, name='doctor_booking_edit'),
+    path('update_doctor_booking_status/', dr_views.update_doctor_booking_status, name='update_doctor_booking_status'),
 
     # LAB 
     path('laboratories/', lab_views.laboratories, name='laboratories_list'),
@@ -188,6 +192,13 @@ urlpatterns = [
     path('lab_package/<int:id>/edit/', lab_views.lab_package_edit, name='lab_package_edit'),
     path('lab_package/<int:id>/delete/', lab_views.lab_package_delete, name='lab_package_delete'),
 
+    #Lab Order
+    path('lab_orders/', lab_views.lab_orders_list, name='lab_orders_list'),
+    path('lab_orders/<int:id>/show/', lab_views.lab_orders_show, name='lab_orders_show'),
+    path('lab_orders/<int:id>/edit/', lab_views.lab_orders_edit, name='lab_order_edit'),
+    path('lab_orders/<int:id>/delete/', lab_views.lab_orders_delete, name='lab_order_delete'),
+
+
     path('banners/', views.banners_list, name='banners_list'),
     path('banner_create/', views.banner_create, name='banner_create'),
     path('banner/<int:id>/edit/', views.banner_edit, name='banner_edit'),
@@ -197,6 +208,10 @@ urlpatterns = [
     path('module_offer_banner_create/', views.module_offer_banners_create, name='module_offer_banners_create'),
     path('module_offer_banner/<int:id>/edit/', views.module_offer_banners_edit, name='module_offer_banners_edit'),
     path('module_offer_banner/<int:id>/delete/', views.module_offer_banners_delete, name='module_offer_banners_delete'),
+
+    path('fcm_notifications/', views.fcm_notifications, name='fcm_notifications_list'),
+    path('fcm_notifications/create/', views.fcm_notifications_create, name='fcm_notifications_create'),
+    path('fcm_notifications/<int:id>/edit/', views.fcm_notifications_edit, name='fcm_notifications_edit'),
 
     path('expert_talks/', views.expert_talks_list, name='expert_talks_list'),
     path('expert_talks/create/', views.expert_talks_create, name='expert_talks_create'),

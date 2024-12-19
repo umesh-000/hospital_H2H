@@ -251,6 +251,55 @@ def module_offer_banners_delete(request, id):
             return JsonResponse({'success': False, 'message': str(e)})
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
+@login_required
+def fcm_notifications(request):
+    if request.method == "GET":
+        fcm_notifications = admin_models.FcmNotification.objects.all()
+        context = {"fcm_notifications": fcm_notifications}
+        return render(request, "admin/fcm_notifications_list.html", context)
+    
+@login_required
+def fcm_notifications_create(request):
+    if request.method == "POST":
+        slug = request.POST.get('slug')
+        customer_title = request.POST.get('customer_title')
+        customer_description = request.POST.get('customer_description')
+        try:
+            if admin_models.FcmNotification.objects.filter(slug=slug).exists():
+                messages.error(request, 'A notification with this slug already exists.')
+                return redirect('fcm_notifications_create')
+            notification = admin_models.FcmNotification(slug=slug,customer_title=customer_title,customer_description=customer_description)
+            notification.save()
+            messages.success(request, 'FCM created successfully!')
+            return redirect('fcm_notifications_list')
+        except Exception as e:
+            messages.error(request, f'Error occurred: {str(e)}')
+            return redirect('fcm_notifications_create')
+    return render(request, "admin/fcm_notification_create.html")
+
+@login_required
+def fcm_notifications_edit(request, id):
+    fcm_notification = get_object_or_404(admin_models.FcmNotification, id=id)
+    if request.method == "POST":
+        slug = request.POST.get('slug')
+        customer_title = request.POST.get('customer_title')
+        customer_description = request.POST.get('customer_description')
+        if admin_models.FcmNotification.objects.filter(slug=slug).exclude(id=id).exists():
+            messages.error(request, 'A notification with this slug already exists.')
+            return redirect('fcm_notifications_edit', id=id)
+        try:
+            fcm_notification.slug = slug
+            fcm_notification.customer_title = customer_title
+            fcm_notification.customer_description = customer_description
+            fcm_notification.save()
+            messages.success(request, 'FCM Notification updated successfully!')
+            return redirect('fcm_notifications_list')
+        except Exception as e:
+            messages.error(request, f'Error occurred: {str(e)}')
+            return redirect('fcm_notifications_edit', id=id)
+    context = {'fcm_notification': fcm_notification,}
+    return render(request, "admin/fcm_notification_edit.html", context)
+
 
 # List all expert talks
 @login_required

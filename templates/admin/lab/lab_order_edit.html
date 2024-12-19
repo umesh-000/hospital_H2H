@@ -1,0 +1,167 @@
+{% extends 'admin/deshboard.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #000000;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .badge-inside {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background-color: #ffaa16;
+        color: rgb(31, 29, 29);
+    }
+
+    .form-control {
+        padding-right: 80px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+
+    .image-preview {
+        width: 150px;
+        height: 150px;
+        border: 1px solid #cccccc;
+        border-radius: 4px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f9f9f9;
+        margin-top: 10px;
+    }
+
+    .image-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Edit Lab Order</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Edit Lab Order</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Edit Lab Order</h4>
+                        <div>
+                            <a href="{% url 'lab_orders_list' %}">
+                                <button title="List" type="button" class="btn btn-primary">
+                                    List
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Lab Staff</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="lab_staff_id" required>
+                                            <option disabled selected value="">Select Lab Staff</option>
+                                            {% for staff in lab_staffs %}
+                                                <option value="{{ staff.id }}" {% if lab_order.lab_staff.id == staff.id %}selected{% endif %}>
+                                                    {{ staff.name }} - {{ staff.get_staff_type_display }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Status</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="status" required>
+                                            <option disabled selected value="">Select Status</option>
+                                            {% for value, label in lab_order.STATUS_CHOICES %}
+                                                <option value="{{ value }}" {% if lab_order.status == value %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-2 col-form-label">Report</label>
+                                    <div class="col-10">
+                                        <input type="file" class="custom-file-input" id="report" name="report" accept="application/pdf" onchange="previewFile()">
+                                        <label class="custom-file-label" for="report">Choose file</label>
+                                        <div id="file-preview" style="margin-top: 10px;"></div>
+                                        <div id="existing-file-preview" style="margin-top: 10px;"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group row">
+                                    <div class="col-sm-10 offset-sm-2">
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                        <a href="{% url 'lab_orders_list' %}" class="btn btn-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to preview the chosen PDF file
+    function previewFile() {
+        const fileInput = document.getElementById('report');
+        const file = fileInput.files[0];
+        const filePreviewDiv = document.getElementById('file-preview');
+        if (file && file.type === 'application/pdf') {
+            const fileName = file.name;
+            filePreviewDiv.innerHTML = `<strong>Selected file: </strong>${fileName}`;
+            const fileURL = URL.createObjectURL(file);
+            filePreviewDiv.innerHTML += `<br><a class="btn btn-info text-white" href="${fileURL}" target="_blank">View PDF</a>`;
+        } else {
+            filePreviewDiv.innerHTML = "<span style='color: red;'>Please choose a valid PDF file.</span>";
+        }
+    }
+
+    function displayExistingFile(existingFileURL) {
+        const existingFilePreviewDiv = document.getElementById('existing-file-preview');
+        
+        if (existingFileURL) {
+            existingFilePreviewDiv.innerHTML = `<strong>Existing file: <br></strong><a href="${existingFileURL}" target="_blank" class="btn btn-info text-white">View Existing PDF</a>`;
+        }
+    }
+    const existingFileURL = '{{ lab_order.report.url }}';
+    displayExistingFile(existingFileURL);
+</script>
+{% endblock %}

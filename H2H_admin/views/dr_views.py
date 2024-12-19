@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
 from django.contrib.auth.hashers import make_password
+from django.views.decorators.http import require_POST
 from accounts import models as account_module
 from H2H_admin import models as adminModel
 from django.http import JsonResponse
@@ -9,8 +10,10 @@ from django.contrib import messages
 from django.db import transaction
 from django.conf import settings
 from H2H_admin import utils
+from datetime import time
 import traceback
 import logging
+import json
 import os
 
 logger = logging.getLogger(__name__)
@@ -492,3 +495,71 @@ def doctor_banner_delete(request, id):
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+# Doctor Booking
+@login_required
+def dr_booking_list(request):
+    dr_booking_list = adminModel.DoctorBooking.objects.all()
+    context = {
+        'dr_booking_list': dr_booking_list,
+        'status_choices': adminModel.DoctorBooking.STATUS_CHOICES,
+    }
+    return render(request, "admin/doctor/dr_booking_list.html", context)
+
+
+@login_required
+def doctor_booking_show(request,id):
+    dr_booking = get_object_or_404(adminModel.DoctorBooking, id=id)
+    context = {'booking': dr_booking}
+    return render(request, "admin/doctor/dr_booking_show.html", context)
+
+
+@login_required
+def doctor_booking_edit(request, id):
+    dr_booking = get_object_or_404(adminModel.DoctorBooking, id=id)
+    if request.method == 'POST':
+        dr_booking.booking_number = request.POST.get('booking_number')
+        dr_booking.booking_for = request.POST.get('booking_for')
+        dr_booking.patient_name = request.POST.get('patient_name')
+        dr_booking.contact_number = request.POST.get('contact_number')
+        dr_booking.age = request.POST.get('age')
+        dr_booking.blood_group = request.POST.get('blood_group')
+        dr_booking.medical_history = request.POST.get('medical_history')
+        dr_booking.booking_date = request.POST.get('booking_date')
+        time_slot = request.POST.get('time_slot')
+
+        dr_booking.status = request.POST.get('status')
+        if time_slot:
+            try:
+                hours, minutes = map(int, time_slot.split(':'))
+                dr_booking.time_slot = time(hour=hours, minute=minutes)
+            except ValueError:
+                messages.error(request, 'Invalid time format. Please enter a valid time in HH:MM format.')
+                return redirect('doctor_booking_edit', id=id)
+        else:
+            dr_booking.time_slot = None
+        dr_booking.save()
+        messages.success(request, 'Booking updated successfully!')
+        return redirect('doctor_booking_requests')
+    context = {
+            'booking': dr_booking,
+            'status_choices': adminModel.DoctorBooking.STATUS_CHOICES,
+        }
+    return render(request, "admin/doctor/dr_booking_edit.html", context)
+
+
+@require_POST
+def update_doctor_booking_status(request):
+    data = json.loads(request.body)
+    booking_id = data.get('booking_id')
+    new_status = data.get('status')
+    print(booking_id)
+    try:
+        booking = adminModel.DoctorBooking.objects.get(id=booking_id)  
+        booking.status = new_status
+        booking.save()
+        return JsonResponse({'success': True, 'message': 'Status updated successfully.'})
+    except adminModel.DoctorBooking.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Booking not found.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})

@@ -1,0 +1,86 @@
+{% extends 'admin/deshboard.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Customer Wallet Histories</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Wallet Histories</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header dark-font">
+                        <h4 class="card-title">Customer Wallet Histories</h4>
+                        <a href="{% url "customer_wallet_histories_create" %}">
+                            <button type="button" class="btn btn-rounded btn-primary ml-auto">
+                                <span class="btn-icon-left text-primary"><i class="fa fa-plus"></i></span>New
+                            </button>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr class="dark-font">
+                                        <th>ID</th>
+                                        <th>Customer</th>
+                                        <th>Type</th>
+                                        <th>Message</th>
+                                        <th>Amount</th>
+                                        <th>Transaction Description</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for history in customer_wallet_histories %}
+                                    <tr class="dark-font">
+                                        <td>{{ history.id }}</td>
+                                        <td>{{ history.customer.customer_name }}</td>
+                                        <td>
+                                            {% if history.transaction_type == 'credit' %}
+                                                <span class="badge badge-success text-white">{{ history.get_transaction_type_display }}</span>
+                                            {% elif history.transaction_type == 'debit' %}
+                                                <span class="badge badge-danger text-white">{{ history.get_transaction_type_display }}</span>
+                                            {% else %}
+                                                <span class="badge badge-secondary text-white">{{ history.get_transaction_type_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ history.message }}</td>
+                                        <td>{{ history.amount }}</td>
+                                        <td>{{ history.get_transaction_type_choices_display }}</td>
+                                        <td></td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="8" class="text-center">No wallet history records found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

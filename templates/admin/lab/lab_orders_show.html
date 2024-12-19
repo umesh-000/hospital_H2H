@@ -1,0 +1,109 @@
+{% extends 'admin/deshboard.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545;
+    }
+</style>
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Lab Order Invoice</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Lab Order Invoice</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header dark-font">
+                        <h4 class="card-title">Lab Order Invoice</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <div class="container">
+                                <!-- Invoice Title -->
+                                <div class="text-center invoice-section">
+                                  <h2>Invoice</h2>
+                                  <p><strong>Lab Order ID:</strong> {{ lab_order.id }}</p>
+                                  <p><strong>Created At:</strong> {{ lab_order.created_at }}</p>
+                                </div>
+                              
+                                <!-- Patient Information Section -->
+                                <div class="row invoice-section">
+                                  <div class="col-md-6">
+                                    <h4>Patient Information</h4>
+                                    <p><strong>Name:</strong> {{ lab_order.patient_name }}</p>
+                                    <p><strong>DOB:</strong> {{ lab_order.patient_dob }}</p>
+                                    <p><strong>Gender:</strong> {{ lab_order.patient_gender }}</p>
+                                  </div>
+                              
+                                  <div class="col-md-6">
+                                    <h4>Order Details</h4>
+                                    <p><strong>Status:</strong> {{ lab_order.get_status_display }}</p>
+                                    <p><strong>Booking Type:</strong> {{ lab_order.get_booking_type_display }}</p>
+                                    <p><strong>Appointment Date:</strong> {{ lab_order.appointment_date }}</p>
+                                  </div>
+                                </div>
+                              
+                                <!-- Special Instructions Section -->
+                                <div class="mt-4 invoice-section">
+                                  <h4>Special Instructions</h4>
+                                  <p>{{ lab_order.special_instruction }}</p>
+                                </div>
+                              
+                                <!-- Items Table -->
+                                <div class="mt-4 invoice-section">
+                                  <h4>Items</h4>
+                                  <table class="table table-bordered">
+                                    <thead>
+                                      <tr>
+                                        <th>Item Name</th>
+                                        <th>Price</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {% for item in lab_order_items %}
+                                        <tr>
+                                          <td>{{ item.item_name }}</td>
+                                          <td> ₹{{ item.price|floatformat:2 }}</td>
+                                        </tr>
+                                      {% endfor %}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              
+                                <!-- Total Section -->
+                                <div class="mt-4 invoice-section">
+                                  <h4>Total: ₹{{ lab_order.total|floatformat:2 }}</h4>
+                                </div>
+                              
+                                <!-- Report Link Section -->
+                                {% if lab_order.report %}
+                                  <div class="mt-4 invoice-section">
+                                    <h4>Report:</h4>
+                                    <a href="{{ lab_order.report.url }}" target="_blank" class="btn btn-primary">Download Report</a>
+                                  </div>
+                                {% endif %}
+                              </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
+

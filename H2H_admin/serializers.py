@@ -4,7 +4,7 @@ from H2H_admin import models as admin_models
 from django.contrib.auth import authenticate
 from rest_framework import serializers
 from accounts.models import User
-
+import datetime
 
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
@@ -165,26 +165,118 @@ class WardSerializer(serializers.ModelSerializer):
 '''
 
 
-# Bed Booking 
 class BedBookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = admin_models.BedBooking
-        fields = [ 'customer', 'hospital', 'ward_type', 'bed_type', 'booking_type', 'patient_name', 'email', 'age', 'contact_number', 'emergency_contact', 'blood_group', 
-                'medical_history', 'booking_reason', 'insurance_info', 'admission_date', 'discharge_date', 'doctor_assigned', 'booking_date', 'time_slot', 'notes', 'status' ]
+        fields = [
+            'id','customer', 'hospital', 'ward_type', 'bed_type', 'booking_type','patient_name', 'email', 'age', 'contact_number', 'emergency_contact', 'blood_group',
+            'medical_history', 'booking_reason', 'insurance_info', 'admission_date', 'discharge_date', 'doctor_assigned', 'booking_date', 'time_slot', 'notes', 
+            'status']
+
+    def validate_age(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Age must be a positive number.")
+        return value
+
+    def validate_blood_group(self, value):
+        valid_blood_groups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+        if value not in valid_blood_groups:
+            raise serializers.ValidationError("Invalid blood group provided.")
+        return value
+
+    def validate_admission_date(self, value):
+        if value < datetime.date.today():
+            raise serializers.ValidationError("Admission date cannot be in the past.")
+        return value
+
+    def validate_time_slot(self, value):
+        if not isinstance(value, datetime.time):
+            raise serializers.ValidationError("Time slot must be a valid time object (HH:MM).")
+        return value
+
+    def validate(self, data):
+        admission_date = data.get('admission_date')
+        print(admission_date)
+        discharge_date = data.get('discharge_date')
+        ambulance_required = data.get('ambulance_required')
+        ambulance_type = data.get('ambulance_type')
+
+        # Check if admission date is in the past
+        if admission_date and admission_date < datetime.date.today():
+            raise serializers.ValidationError({"admission_date": "Admission date cannot be in the past."})
+
+        # Check if discharge date is after admission date
+        if discharge_date and discharge_date <= admission_date:
+            raise serializers.ValidationError({"discharge_date": "Discharge date must be after admission date."})
+
+        # Check ambulance details
+        if ambulance_required and not ambulance_type:
+            raise serializers.ValidationError({"ambulance_type": "Ambulance type must be specified if ambulance is required."})
+
+        return data
+
+'''
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+'''
+class DoctorBookingSerializer(serializers.ModelSerializer):
+    customer = serializers.SerializerMethodField()
+    doctor = serializers.SerializerMethodField()
+    clinic = serializers.SerializerMethodField()
+
+    class Meta:
+        model = admin_models.DoctorBooking
+        fields = ['id', 'booking_number', 'doctor_id', 'clinic_id', 'customer_id', 'booking_for','patient_name', 'email', 'age', 'contact_number', 'emergency_contact',
+            'blood_group', 'medical_history', 'current_symptoms', 'booking_date', 'time_slot','consultation_charge', 'base_rate', 'tax', 'additional_charges', 'discount', 'total',
+            'final_total', 'payment_mode', 'notes', 'status', 'created_at', 'updated_at','customer', 'doctor', 'clinic']
+
+    def get_customer(self, obj):
+        customer = obj.customer
+        return {"id": customer.id,"customer_name": customer.customer_name,  "profile_picture_url": customer.profile_picture.url}
+
+    def get_doctor(self, obj):
+        doctor = obj.doctor
+        return {"id": doctor.id,"doctor_name": doctor.dr_name,"profile_image_url": doctor.profile_img.url}
+
+    def get_clinic(self, obj):
+        clinic = obj.clinic
+        return {"id": clinic.id,"clinic_name": clinic.clinic_name}
 
 '''
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------
 '''
 
-# class HospitalBedStatusSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         pass
+class HospitalBedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = account_models.Hospital
+        fields = '__all__'
+
+class BedStatusSerializer(serializers.ModelSerializer):
+    hospital = HospitalSerializer()
+
+    class Meta:
+        model = admin_models.BedStatus
+        fields = '__all__'
+
+
 
 '''
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------
 '''
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = admin_models.Notification
+        fields = ['id', 'title', 'description', 'image', 'type', 'status', 'meta', 'created_at']
+
+
+'''
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+'''
+
 # class FeedbackCustomerSerializer(serializers.ModelSerializer):
 #     profile_picture_url = serializers.SerializerMethodField()
 
@@ -566,11 +658,53 @@ class AddressSerializer(serializers.ModelSerializer):
 ---------------------------------------------------------------------------------------------
 '''
 
+class LabOrderItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = admin_models.LabOrderItems
+        fields = ['item_id', 'item_name', 'price']
+
+class LabOrdersSerializer(serializers.ModelSerializer):
+    items = LabOrderItemsSerializer(many=True)
+    class Meta:
+        model = admin_models.LabOrders
+        fields = [
+            'lab', 'customer', 'patient_name', 'patient_dob', 'patient_gender', 'address_id', 'promo_id', 'discount', 'tax', 'sub_total', 'total', 
+            'special_instruction', 'lab_staff', 'payment_mode', 'booking_type', 'items', 'status', 'created_by', 'updated_by', 
+            'appointment_time', 'report', 'appointment_date'
+        ]
+
+    def create(self, validated_data):
+        items_data = validated_data.pop('items')
+        lab_order = admin_models.LabOrders.objects.create(**validated_data)
+        for item_data in items_data:
+            admin_models.LabOrderItems.objects.create(order=lab_order, **item_data)
+        return lab_order
+'''
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+'''
+
 
 '''
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------
 '''
+
+
+
+
+
+'''
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+'''
+
+
+'''
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+'''
+
 
 
 '''

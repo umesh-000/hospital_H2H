@@ -17,8 +17,8 @@ urlpatterns = [
     path('customer/getHospitalBeds/', hospital_api_view.get_hospital_beds_api, name='get_hospital_beds_api'),
     path('customer/getBloodGroup/', hospital_api_view.get_blood_group_api, name='get_blood_group_api'),
     
-    path('store_bed_booking/', hospital_api_view.store_bed_booking, name='store_bed_booking'),
-    # path('hospital_allbed_status/', hospital_api_view.hospital_all_bed_status, name='hospital_all_bed_status'),
+    path('customer/store_bed_booking/', hospital_api_view.store_bed_booking, name='store_bed_booking'),
+    path('customer/allBedStatus/', hospital_api_view.allBedStatus, name='allBedStatus_api'),
 
 
     path('customer/getDoctors/', hospital_api_view.get_doctors_api, name='get_doctors_list'),
@@ -69,10 +69,26 @@ urlpatterns = [
     path('customer/labBookingTimeSlot/', hospital_api_view.labBookingTimeSlot, name='labBookingTimeSlot_api'),        
     path('customer/labDetails/', hospital_api_view.labDetails, name='labDetails_api'),  
     path('customer/labPackages/', hospital_api_view.labPackages, name='labPackages_api'),  
-    path('customer/labPackageDetails/', hospital_api_view.labPackageDetails, name='labPackageDetails_api'),    
+    path('customer/labPackageDetails/', hospital_api_view.labPackageDetails, name='labPackageDetails_api'),  
+
+
     path('customer/addAddress/', hospital_api_view.addAddress, name='addAddress_api'),    
     path('customer/updateAddress/', hospital_api_view.updateAddress, name='updateAddress_api'),    
     path('customer/editAddress/', hospital_api_view.editAddress, name='editAddress_api'),    
     path('customer/listAddresses/', hospital_api_view.listCustomerAddresses, name='listCustomerAddresses_api'),    
-    path('customer/deleteAddresses/', hospital_api_view.deleteAddresses, name='deleteAddresses_api'),    
+    path('customer/deleteAddresses/', hospital_api_view.deleteAddresses, name='deleteAddresses_api'),
+    path('customer/addWalletAmount/', hospital_api_view.addWalletAmount, name='addWalletAmount_api'),    
+    path('customer/getWalletTransactions/', hospital_api_view.getAllTransactionHistory, name='getWalletTransactions_api'),    
+    path('customer/getProfileDetails/', hospital_api_view.getProfileDetails, name='getProfileDetails_api'),    
+    path('customer/getBedBookings/', hospital_api_view.getBedBookings, name='getBedBookings_api'),  
+
+    path('customer/getBedBookings/<int:booking_id>/', hospital_api_view.getBookingDetails, name='getBookingDetails_api'),  
+    path('customer/updateBedBookings/<int:booking_id>/', hospital_api_view.updateBedBookings, name='updateBedBookings_api'),
+    path('customer/addDoctorBookings/', hospital_api_view.addDoctorBooking, name='addDoctorBooking_api'),
+    path('customer/getDoctorBookings/', hospital_api_view.getDoctorBooking, name='getDoctorBooking_api'),
+    path('customer/getDoctorBookings/<int:booking_id>/', hospital_api_view.getDoctorBookingsDetails, name='getDoctorBookingsDetails_api'),  
+    path('customer/cancelDoctorBooking/', hospital_api_view.cancelDoctorBooking, name='cancelDoctorBooking_api'),  
+    path('customer/getNotifications/', hospital_api_view.getNotifications, name='getNotifications_api'),  
+    path('customer/placeLabOrders/', hospital_api_view.PlaceLabOrder.as_view(), name='placeLabOrders_api'),  
+    
 ]

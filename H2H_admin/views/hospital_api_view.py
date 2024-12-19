@@ -1,16 +1,19 @@
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.exceptions import ObjectDoesNotExist
 from H2H_admin import serializers as API_serializers
+from django.core.exceptions import ValidationError
+from datetime import datetime, timedelta ,timezone
+from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
 from math import radians, cos, sin, asin, sqrt
 from accounts import models as account_models
 from H2H_admin import models as admin_models
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from datetime import datetime, timedelta
 from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.db.models import Count
@@ -18,6 +21,7 @@ from rest_framework import status
 from django.conf import settings
 from django.db import models
 import logging
+import random
 import json
 
 
@@ -277,17 +281,88 @@ def get_blood_group_api(request):
 ---------------------------------------------------------------------------------------------------- 
 ----------------------------------------------------------------------------------------------------
 '''
+# Helper function for validating booking data
+def validate_booking_data(customer_id, hospital_id, **kwargs):
+    customer = account_models.Customer.objects.filter(pk=customer_id, status=1).first()
+    if not customer:
+        raise ValidationError(f"Customer with ID {customer_id} does not exist or is inactive.")
+    hospital = account_models.Hospital.objects.filter(pk=hospital_id, status=1).first()
+    if not hospital:
+        raise ValidationError(f"Hospital with ID {hospital_id} does not exist or is inactive.")
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])  
+@permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
 def store_bed_booking(request):
-    serializer = API_serializers.BedBookingSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response({"message": "success","status":status.HTTP_201_CREATED}, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        data = request.data
+        serializer = API_serializers.BedBookingSerializer(data=data)
+        if not serializer.is_valid():
+            return Response({"message": "Validation failed.", "errors": serializer.errors},status=status.HTTP_400_BAD_REQUEST,)
+        validate_booking_data(customer_id=data.get('customer_id'),hospital_id=data.get('hospital'),admission_date=data.get('admission_date'))
 
+        booking = admin_models.BedBooking.objects.create(
+            customer_id=data.get('customer_id'),
+            hospital_id=data.get('hospital'),
+            ward_type=data.get('ward_type'),
+            bed_type=data.get('bed_type'),
+            booking_type=data.get('booking_type'),
+            booking_date=data.get('booking_date'),
+            admission_date=data.get('admission_date'),
+            time_slot=data.get('time_slot'),
+            patient_name=data.get('patient_name'),
+            age=data.get('age'),
+            blood_group=data.get('blood_group'),
+            email=data.get('email'),
+            contact_number=data.get('contact_number'),
+            emergency_contact=data.get('emergency_contact'),
+            medical_history=data.get('medical_history'),
+            booking_reason=data.get('booking_reason'),
+            insurance_info=data.get('insurance_info'),
+            notes=data.get('notes'),
+            status=data.get('status'),
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+        )
+
+        # Prepare the response payload
+        result = {
+            "id": booking.id,
+            "customer_id": booking.customer.id,
+            "hospital_id": booking.hospital.id,
+            "ward_type": booking.ward_type,
+            "bed_type": booking.bed_type,
+            "booking_type": booking.booking_type,
+            "booking_date": booking.booking_date,
+            "admission_date": booking.admission_date,
+            "time_slot": booking.time_slot,
+            "patient_name": booking.patient_name,
+            "age": booking.age,
+            "blood_group": booking.blood_group,
+            "email": booking.email,
+            "contact_number": booking.contact_number,
+            "emergency_contact": booking.emergency_contact,
+            "medical_history": booking.medical_history,
+            "booking_reason": booking.booking_reason,
+            "insurance_info": booking.insurance_info,
+            "status": booking.status,
+            "notes": booking.notes,
+            "bed_price": 800,  # Replace with the actual value or calculation logic
+            "base_rate": 800,  # Replace with the actual value or calculation logic
+            "tax": 0,  # Replace with the actual value or calculation logic
+            "additional_charges": 0,  # Replace with the actual value or calculation logic
+            "discount": 0,  # Replace with the actual value or calculation logic
+            "total": 800,  # Replace with the actual value or calculation logic
+            "final_total": 800,  # Replace with the actual value or calculation logic
+            "booking_number": "H2H241200",  # Replace with the actual booking number logic
+            "created_at": booking.created_at.isoformat(),
+            "updated_at": booking.updated_at.isoformat(),
+        }
+        return Response({"success": True, "message": "Booking created successfully", "result": result},status=status.HTTP_201_CREATED,)
+    except ValidationError as ve:
+        return Response({"message": "Validation error.", "errors": str(ve)},status=status.HTTP_400_BAD_REQUEST,)
+    except Exception as e:
+        return Response({"message": f"An error occurred: {str(e)}"},status=status.HTTP_400_BAD_REQUEST,)
 
 '''
 ----------------------------------------------------------------------------------------------------
@@ -2121,7 +2196,566 @@ def deleteAddresses(request):
 ----------------------------------------------------------------------------------------------------
 '''
 
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def addWalletAmount(request):
+    try:
+        data = request.data
+        customer_id = data.get('customer_id')
+        transaction_type = data.get('transaction_type')
+        transaction_type_chioce = data.get('transaction_type_chioce')
+        message = data.get('message')
+        amount = data.get('amount')
+        try:
+            customer = account_models.Customer.objects.get(id=customer_id)
+        except account_models.Customer.DoesNotExist:
+            return Response({"message": "Customer not found with the provided customer ID.", "status": 0},status=status.HTTP_400_BAD_REQUEST)
+        
+        if not all([transaction_type, message, amount,transaction_type_chioce,]):
+            return Response({"message": "All fields (transaction_type, transaction_type_chioce , message, amount) are required.", "status": 0},status=status.HTTP_400_BAD_REQUEST)
+        
+        if transaction_type == 'credit':
+            customer.wallet += float(amount)
+        elif transaction_type == 'debit':
+            if customer.wallet < float(amount):
+                return Response({"message": "Insufficient wallet balance.", "status": 0},status=status.HTTP_400_BAD_REQUEST)
+            customer.wallet -= float(amount)
+        else:
+            return Response({"message": "Invalid transaction type provided.", "status": 0},status=status.HTTP_400_BAD_REQUEST)
+        customer.save()
 
+        wallet_history = admin_models.CustomerWalletHistory.objects.create(customer=customer,transaction_type=transaction_type,transaction_type_choices=transaction_type_chioce,message=message,amount=amount,created_at=datetime.now(),updated_at=datetime.now())
+        response_data = {
+            "id": wallet_history.id,
+            "customer_id": customer.id,
+            "transaction_type": wallet_history.transaction_type,
+            "transaction_type_chioce": wallet_history.transaction_type_choices,
+            "message": wallet_history.message,
+            "amount": wallet_history.amount,
+            "created_at": wallet_history.created_at,
+            "updated_at": wallet_history.updated_at,
+        }
+
+        return Response({"message": "Wallet updated successfully.", "status": 1, "data": response_data},status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({"message": f"An error occurred: {str(e)}", "status": 0},status=status.HTTP_400_BAD_REQUEST)
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def getAllTransactionHistory(request):
+    try:
+        user = request.user
+        customer = getattr(user, 'customer_profile', None)
+        if not customer:
+            return Response({"message": "Customer profile is required for the logged-in user.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
+        
+        customer_id = customer.id
+        transactions = admin_models.CustomerWalletHistory.objects.filter(customer=customer).order_by('-created_at')
+        
+        # If no transactions found
+        if not transactions:
+            return Response({"message": "No transaction history found for the customer.", "status": 0}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+        transaction_data = [
+            {
+                "id": transaction.id,
+                "customer_id": transaction.customer.id,
+                "transaction_type": transaction.transaction_type,  
+                "message": transaction.message,
+                "transaction_type_choices": transaction.transaction_type_choices,  
+                "amount": transaction.amount,
+                "created_at": transaction.created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+                "updated_at": transaction.updated_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
+            }
+            for transaction in transactions
+        ]
+        
+        # Return the response with transaction data
+        return Response(
+            {
+                "message": "Wallet transaction history retrieved successfully",
+                "status": 1,
+                "result": transaction_data
+            },
+            status=status.HTTP_200_OK
+        )
+    
+    except Exception as e:
+        return Response({"message": f"An error occurred: {str(e)}", "status": 0},status=status.HTTP_400_BAD_REQUEST)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def getProfileDetails(request):
+    try:
+        user = request.user
+        customer = getattr(user, 'customer_profile', None)
+        if not customer:
+            return Response({"message": "Customer profile not found for the logged-in user.", "status": 0}, status=status.HTTP_404_NOT_FOUND)
+
+        # Customer Data
+        customer_data = {
+            "customer_id": customer.id,
+            "customer_name": customer.customer_name,
+            "phone_number": customer.phone_number,
+            "profile_picture": customer.profile_picture.url if customer.profile_picture else None,
+            "pre_existing_disease": customer.pre_existing_disease,
+            "blood_group": customer.blood_group,
+            "gender": customer.gender,
+            "dob": customer.dob,
+            "age": customer.age,
+            "height": customer.height,
+            "weight": customer.weight,
+            "emergency_contact_no": customer.emergency_contact_no,
+            "allergies": customer.allergies,
+            "current_medications": customer.current_medications,
+            "status": customer.status,
+            "wallet": customer.wallet,
+            "overall_ratings": customer.overall_ratings,
+            "no_of_ratings": customer.no_of_ratings
+        }
+
+        bed_bookings = admin_models.BedBooking.objects.filter(customer=customer).values('id', 'hospital', 'ward_type', 'bed_type', 'status', 'admission_date', 'discharge_date')
+        bed_booking_data = list(bed_bookings)
+        help_desk_queries = admin_models.HelpDeskQuery.objects.filter(customer=customer).values('id', 'name', 'email', 'message', 'created_at')
+        help_desk_data = list(help_desk_queries)
+        reminders = admin_models.Reminder.objects.filter(customer=customer).values('id', 'category', 'title', 'description', 'reminder_date', 'status')
+        reminder_data = list(reminders)
+        feedback = admin_models.Feedback.objects.filter(customer=customer).values('id', 'doctor', 'hospital', 'lab', 'rating', 'feedback', 'created_at')
+        feedback_data = list(feedback)
+
+        response_data = {
+            "customer_profile": customer_data,"bed_bookings": bed_booking_data,"help_desk_queries": help_desk_data,
+            "reminders": reminder_data,"feedback": feedback_data
+        }
+
+        return Response({"message": "Customer profile retrieved successfully.", "status": 1, "result": response_data}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"message": f"An error occurred: {str(e)}", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def getBedBookings(request):
+    try:
+        bed_bookings = admin_models.BedBooking.objects.all()
+        result = []
+        for booking in bed_bookings:
+            result.append({
+                "id": booking.id,
+                "booking_number": f"H2H{booking.id:06d}",
+                "customer_id": booking.customer.id if booking.customer else None,
+                "hospital_id": booking.hospital.id if booking.hospital else None,
+                "ward_type": booking.ward_type,
+                "bed_type": booking.bed_type,
+                "booking_type": booking.booking_type,
+                "booking_for": "self",
+                "patient_name": booking.patient_name,
+                "email": booking.email,
+                "age": booking.age,
+                "contact_number": booking.contact_number,
+                "emergency_contact": booking.emergency_contact,
+                "blood_group": booking.blood_group,
+                "medical_history": booking.medical_history,
+                "booking_reason": booking.booking_reason,
+                "insurance_info": booking.insurance_info,
+                "admission_date": str(booking.admission_date),
+                "discharge_date": str(booking.discharge_date) if booking.discharge_date else None,
+                "doctor_id": booking.doctor_assigned.id if booking.doctor_assigned else None,
+                "booking_date": str(booking.booking_date.date()),
+                "time_slot": str(booking.time_slot) if booking.time_slot else None,
+                "bed_number": 10,  # Replace with actual bed details if available
+                "bed_price": "800.00",  # Replace with dynamic pricing if available
+                "base_rate": "800.00",  # Replace with dynamic pricing if available
+                "tax": "0.00",  # Replace with dynamic tax if applicable
+                "additional_charges": "0.00",
+                "discount": "0.00",
+                "total": "800.00",  # Replace with calculated total
+                "final_total": "800.00",  # Replace with final calculated total
+                "payment_mode": "online",  # Assuming payment mode is fixed
+                "ambulance_required": 1,  # Replace with dynamic value if applicable
+                "ambulance_type": "with_oxygen",  # Replace with dynamic type if applicable
+                "notes": booking.notes,
+                "status": booking.status,
+                "created_at": booking.created_at.isoformat(),
+                "updated_at": booking.updated_at.isoformat(),
+                "customer": {
+                    "id": booking.customer.id if booking.customer else None,
+                    "customer_name": booking.customer.customer_name if booking.customer else None,
+                    "profile_picture_url": booking.customer.profile_picture.url if booking.customer else None
+                },
+                "hospital": {
+                    "id": booking.hospital.id if booking.hospital else None,
+                    "hospital_name": booking.hospital.hospital_name if booking.hospital else None,
+                    "hospital_logo_url": booking.hospital.hospital_logo.url if booking.hospital else None,
+                    "images_url": []
+                },
+                "doctor": {
+                    "id": booking.doctor_assigned.id if booking.doctor_assigned else None,
+                    "name": booking.doctor_assigned.dr_name if booking.doctor_assigned else None
+                } if booking.doctor_assigned else None,
+                "ward": {
+                    "id": 1,  # Replace with actual ward ID if applicable
+                    "name": "General Ward"  # Replace with actual ward name if applicable
+                },
+                "bed": {
+                    "id": 7,  # Replace with actual bed ID if applicable
+                    "bed_type": "General Ward Beds"  # Replace with actual bed type if applicable
+                }
+            })
+
+        return Response({
+            "success": True,
+            "message": "Bookings retrieved successfully",
+            "result": result
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({
+            "success": False,
+            "message": f"An error occurred: {str(e)}"
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def getBookingDetails(request, booking_id):
+    try:
+        # Retrieve the booking by ID
+        booking = admin_models.BedBooking.objects.filter(id=booking_id).first()
+        if not booking:
+            raise NotFound(f"No booking found with ID {booking_id}")
+
+        # Prepare the response data
+        result = {
+            "id": booking.id,
+            "customer_id": booking.customer_id,
+            "hospital_id": booking.hospital_id,
+            "ward_type": booking.ward_type,
+            "bed_type": booking.bed_type,
+            "booking_type": booking.booking_type,
+            "patient_name": booking.patient_name,
+            "email": booking.email,
+            "age": booking.age,
+            "contact_number": booking.contact_number,
+            "emergency_contact": booking.emergency_contact,
+            "blood_group": booking.blood_group,
+            "medical_history": booking.medical_history,
+            "booking_reason": booking.booking_reason,
+            "insurance_info": booking.insurance_info,
+            "admission_date": booking.admission_date,
+            "discharge_date": booking.discharge_date,
+            "doctor_id": booking.doctor_assigned,
+            "booking_date": booking.booking_date,
+            "time_slot": booking.time_slot,
+            # "bed_price": booking.bed_price,  # Replace with actual logic or field
+            # "base_rate": booking.base_rate,  # Replace with actual logic or field
+            # "tax": booking.tax,  # Replace with actual logic or field
+            # "additional_charges": booking.additional_charges,  # Replace with actual logic or field
+            # "discount": booking.discount,  # Replace with actual logic or field
+            # "total": booking.total,  # Replace with actual logic or field
+            # "final_total": booking.final_total,  # Replace with actual logic or field
+            # "payment_mode": booking.payment_mode,
+            # "ambulance_required": booking.ambulance_required,
+            # "ambulance_type": booking.ambulance_type,
+            "notes": booking.notes,
+            "status": booking.status,
+            "created_at": booking.created_at.isoformat(),
+            "updated_at": booking.updated_at.isoformat(),
+        }
+
+        # Return the response
+        return Response({"success": True, "message": "Booking retrieved successfully", "result": result},status=status.HTTP_200_OK,)
+
+    except NotFound as e:
+        return Response({"success": False, "message": str(e)},status=status.HTTP_404_NOT_FOUND,)
+    except Exception as e:
+        return Response({"success": False, "message": f"An error occurred: {str(e)}"},status=status.HTTP_400_BAD_REQUEST,)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def updateBedBookings(request, booking_id):
+    try:
+        booking = admin_models.BedBooking.objects.filter(id=booking_id).first()
+        if not booking:
+            raise NotFound(f"No booking found with ID {booking_id}")
+        patient_name = request.data.get('patient_name')
+        email = request.data.get('email')
+        time_slot = request.data.get('time_slot')
+        if patient_name:
+            booking.patient_name = patient_name
+        if email:
+            booking.email = email
+        if time_slot:
+            booking.time_slot = time_slot
+        booking.save()
+        result = API_serializers.BedBookingSerializer(booking).data
+        # result = {
+        #     'booking_id': booking.id,
+        #     'patient_name': booking.patient_name,
+        #     'email': booking.email,
+        #     'time_slot': booking.time_slot,
+        # }
+        return Response({"success": True, "message": "Booking updated successfully", "result": result},status=status.HTTP_200_OK,)
+    except NotFound as e:
+        return Response({"success": False, "message": str(e)},status=status.HTTP_404_NOT_FOUND,)
+    except Exception as e:
+        return Response({"success": False, "message": f"An error occurred: {str(e)}"},status=status.HTTP_400_BAD_REQUEST,)
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def addDoctorBooking(request):
+    data = request.data
+    user = request.user
+    customer = getattr(user, 'customer_profile', None)
+    if not customer:
+        return Response({"message": "Customer profile is required for the logged-in user.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
+    customer_id = customer.id
+    try:
+        doctor = account_models.DoctorDetails.objects.get(id=data.get('doctor_id'))
+    except ObjectDoesNotExist:
+        return JsonResponse({"success": False,"message": "Doctor not found","doctor_id": data.get('doctor_id')}, status=404)
+
+    try:
+        clinic = admin_models.DoctorClinics.objects.get(id=data.get('clinic_id'))
+    except admin_models.DoctorClinics.DoesNotExist:
+        return JsonResponse({"success": False, "message": "Clinic not found", "clinic_id": data.get('clinic_id')}, status=404)
+
+    try:
+        customer = account_models.Customer.objects.get(id=customer_id)
+    except ObjectDoesNotExist:
+        return JsonResponse({"success": False,"message": "Customer not found","customer_id": customer_id}, status=404)
+    
+    booking_number = f"DOC-{random.randint(100000, 999999)}"
+    base_rate = float('400.00')
+    tax = float('0.00')
+    additional_charges = float('0.00')
+    discount = float('0.00')
+    total = base_rate + tax + additional_charges - discount
+
+    # Create booking
+    booking = admin_models.DoctorBooking.objects.create(
+        booking_number=booking_number,doctor=doctor,
+        clinic=clinic,customer=customer,
+        booking_for=data.get('booking_for'),
+        patient_name=data.get('patient_name'),
+        email=data.get('email'),age=data.get('age'),
+        contact_number=data.get('contact_number'),
+        emergency_contact=data.get('emergency_contact'),
+        blood_group=data.get('blood_group'),
+        medical_history=data.get('medical_history'),
+        current_symptoms=data.get('current_symptoms'),
+        booking_date=data.get('booking_date'),
+        time_slot=data.get('time_slot'),
+        consultation_charge=base_rate,
+        base_rate=base_rate,tax=tax,
+        additional_charges=additional_charges,
+        discount=discount,total=total,
+        final_total=total,
+        payment_mode=data.get('payment_mode'),
+        notes=data.get('notes'),
+        status="pending"
+    )
+
+    # Format the response
+    result = {
+        "id": booking.id,
+        "doctor_id": booking.doctor.id,
+        "clinic_id": booking.clinic.id,
+        "customer_id": booking.customer.id,
+        "booking_for": booking.booking_for,
+        "booking_date": booking.booking_date,
+        "time_slot": booking.time_slot,
+        "patient_name": booking.patient_name,
+        "email": booking.email,
+        "age": booking.age,
+        "contact_number": booking.contact_number,
+        "emergency_contact": booking.emergency_contact,
+        "blood_group": booking.blood_group,
+        "medical_history": booking.medical_history,
+        "current_symptoms": booking.current_symptoms,
+        "payment_mode": booking.payment_mode,
+        "notes": booking.notes,
+        "consultation_charge": booking.consultation_charge,
+        "base_rate": booking.base_rate,
+        "tax": booking.tax,
+        "additional_charges": booking.additional_charges,
+        "discount": booking.discount,
+        "total": booking.total,
+        "final_total": booking.final_total,
+        "status": booking.status,
+        "booking_number": booking.booking_number,
+        "created_at": booking.created_at,
+        "updated_at": booking.updated_at
+    }
+
+    return Response({"success": True,"message": "Booking created successfully","result": result}, status=status.HTTP_201_CREATED)
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def getDoctorBooking(request):
+    try:
+        bookings = admin_models.DoctorBooking.objects.all()
+        serializer = API_serializers.DoctorBookingSerializer(bookings, many=True)
+
+        response = {
+            "success": True,
+            "message": "Bookings retrieved successfully",
+            "result": serializer.data,
+            "total": bookings.count()
+        }
+        return Response(response, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"success": False, "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def getDoctorBookingsDetails(request,booking_id):
+    try:
+        booking = admin_models.DoctorBooking.objects.get(id=booking_id)
+        serializer = API_serializers.DoctorBookingSerializer(booking)
+        response = {
+            "success": True,
+            "message": "Booking retrieved successfully",
+            "result": serializer.data,
+        }
+        return Response(response, status=status.HTTP_200_OK)
+    except admin_models.DoctorBooking.DoesNotExist:
+            return Response({"success": False,"message": "Booking not found"}, status=status.HTTP_404_NOT_FOUND)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def cancelDoctorBooking(request):
+    booking_id = request.data.get("booking_id")
+    if not booking_id:
+        return Response({"success": False,"message": "Booking ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        booking = admin_models.DoctorBooking.objects.get(id=booking_id)
+        if booking.status == "cancelled":
+            return Response({"success": False,"message": "Booking is already cancelled"}, status=status.HTTP_400_BAD_REQUEST)
+        booking.status = "cancelled"
+        booking.save()
+        return Response({"success": True,"message": "Booking cancelled successfully"}, status=status.HTTP_200_OK)
+    except admin_models.DoctorBooking.DoesNotExist:
+        return Response({"success": False,"message": "Booking not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def allBedStatus(request):
+    bed_statuses = admin_models.BedStatus.objects.all()
+    serializer = API_serializers.BedStatusSerializer(bed_statuses, many=True)
+    return Response({"result": serializer.data, "message": "Success", "status": 1})
+
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def getNotifications(request):
+    try:
+        app_module = request.data.get('app_module')
+        page = request.data.get('page', 1)
+        per_page = request.data.get('per_page', 10)
+        if not app_module:
+            return Response({"success": False, "message": "app_module is required"}, status=400)
+        notifications = admin_models.Notification.objects.filter(app_module_id=app_module).order_by('-created_at')
+        paginator = PageNumberPagination()
+        paginator.page_size = per_page
+        paginated_notifications = paginator.paginate_queryset(notifications, request)
+
+        serialized_notifications = API_serializers.NotificationSerializer(paginated_notifications, many=True)
+        return paginator.get_paginated_response({
+            "success": True,
+            "message": "Notifications retrieved successfully",
+            "result": serialized_notifications.data,
+        })
+
+    except Exception as e:
+        return Response({"success": False, "message": str(e)}, status=500)
+
+'''
+----------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------
+'''
+
+class PlaceLabOrder(APIView):
+    permission_classes = [IsAuthenticated] 
+    authentication_classes = [JWTAuthentication]
+    def post(self, request):
+        serializer = API_serializers.LabOrdersSerializer(data=request.data)
+        if serializer.is_valid():
+            lab_order = serializer.save()
+            return Response({
+                'message': 'Lab order placed successfully!',
+                'lab_order_id': lab_order.id
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 '''
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
@@ -2133,60 +2767,7 @@ def deleteAddresses(request):
 ----------------------------------------------------------------------------------------------------
 '''
 
-
 '''
 ----------------------------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------
 '''
-
-
-'''
-----------------------------------------------------------------------------------------------------
-----------------------------------------------------------------------------------------------------
-'''
-
-
-
-'''
-----------------------------------------------------------------------------------------------------
-----------------------------------------------------------------------------------------------------
-'''
-
-
-
-'''
-----------------------------------------------------------------------------------------------------
-----------------------------------------------------------------------------------------------------
-'''
-
-
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])  
-# @authentication_classes([JWTAuthentication])
-# def hospital_all_facilities(request):
-#     hospital_id = request.GET.get('hospital_id')
-
-#     if not hospital_id:
-#         return Response({"error": "hospital_id query parameter is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-#     try:
-#         hospital = models.Hospital.objects.get(id=hospital_id)
-#         hospital_facilities = models.HospitalFacility.objects.filter(hospital=hospital)
-#         serializer = serializers.HospitalFacilitySerializer(hospital_facilities, many=True)
-#         return Response({"result": serializer.data}, status=status.HTTP_200_OK)
-#     except models.Hospital.DoesNotExist:
-#         return Response({"error": "Hospital not found."}, status=status.HTTP_404_NOT_FOUND)
-
-
-'''
-----------------------------------------------------------------------------------------------------
-----------------------------------------------------------------------------------------------------
-'''
-
-# @api_view(['GET'])
-# @permission_classes([IsAuthenticated])  
-# @authentication_classes([JWTAuthentication])
-# def hospital_all_bed_status(request):
-#     beds = models.Bed.objects.all()
-#     serializer = serializers.HospitalBedStatusSerializer(beds, many=True)
-#     return Response({"result": serializer.data})

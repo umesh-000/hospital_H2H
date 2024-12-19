@@ -1,0 +1,146 @@
+{% extends 'admin/deshboard.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .badge-inside {
+        position: absolute;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        background-color: #ffaa16;
+        color: rgb(31, 29, 29);
+    }
+
+    .form-control {
+        padding-right: 80px;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-header .btn {
+        margin-left: 10px;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>Hi, welcome back!</h4>
+                    <span class="ml-1">Create Wallet History</span>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url "admin_dashboard" %}">Admin</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">Create Wallet History</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-12 col-xxl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Create Wallet History</h4>
+                        <div>
+                            <a href="{% url "customer_wallet_histories_list" %}">
+                                <button type="button" class="btn btn-rounded btn-primary ml-auto">
+                                    <span class="btn-icon-left text-primary"><i class="fa fa-list"></i></span>List
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <!-- Wallet History Form -->
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Customer</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="customer" required>
+                                            <option value="" disabled selected>Choose a customer</option>
+                                            {% for customer in customers %}
+                                            <option value="{{ customer.id }}">{{ customer.customer_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Message</label>
+                                    <div class="col-sm-10">
+                                        <textarea class="form-control" name="message" placeholder="Enter message" required></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Transaction Type</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="transaction_type" required>
+                                            <option value="" disabled selected>Choose transaction type</option>
+                                            {% for value, label in type_choices %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Transaction Type Details</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" name="transaction_type_choices" required>
+                                            <option value="" disabled selected>Choose transaction type details</option>
+                                            {% for value, label in transaction_type_choices %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-sm-2 col-form-label">Amount</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="amount" placeholder="Enter amount" required onkeypress="return onlyNumbers(event)" inputmode="decimal">
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="offset-sm-2">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                        <a href="{% url 'customer_wallet_histories_list' %}" class="btn btn-secondary">Cancel</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function onlyNumbers(event) {
+        const charCode = event.which ? event.which : event.keyCode;
+        if ((charCode >= 48 && charCode <= 57) || charCode === 46 || charCode === 8) {
+            return true;
+        }
+        return false;
+    }
+</script>
+{% endblock content %}

@@ -1,0 +1,99 @@
+{% extends 'admin/deshboard.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dark-font {
+        color: #454545;
+    }
+    .small-swal-popup {
+        width: 300px;
+        padding: 15px;
+    }
+    .small-swal-title {
+        font-size: 16px;
+    }
+    .small-swal-text {
+        font-size: 13px;
+    }
+    .small-swal-button {
+        font-size: 12px;
+        padding: 5px 10px;
+    }
+    .small-swal-icon {
+        font-size: 10px;
+    }
+</style>
+
+<div class="content-body">
+    <div class="container-fluid">
+        <div class="row page-titles mx-0">
+            <div class="col-sm-6 p-md-0">
+                <div class="welcome-text">
+                    <h4>FCM Notifications</h4>
+                </div>
+            </div>
+            <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+                    <li class="breadcrumb-item active"><a href="javascript:void(0)">FCM Notifications</a></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header dark-font">
+                        <h4 class="card-title">FCM Notifications</h4>
+                        <a href="{% url "fcm_notifications_create" %}">
+                            <button type="button" class="btn btn-rounded btn-primary ml-auto">
+                                <span class="btn-icon-left text-primary"><i class="fa fa-plus"></i></span>New
+                            </button>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr class="dark-font">
+                                        <th>ID</th>
+                                        <th>Slug</th>
+                                        <th>Customer Title</th>
+                                        <th>Customer Description</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for notification in fcm_notifications %}
+                                    <tr class="dark-font">
+                                        <td>{{ notification.id }}</td>
+                                        <td>{{ notification.slug }}</td>
+                                        <td>{{ notification.customer_title }}</td>
+                                        <td>{{ notification.customer_description|truncatechars:50 }}</td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-primary" type="button" id="actionDropdown{{ notification.id }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="actionDropdown{{ notification.id }}">
+                                                    <a class="dropdown-item" href="{% url "fcm_notifications_edit" notification.id %}">Edit</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center">No notifications found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
