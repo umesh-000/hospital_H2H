@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse,JsonResponse
 from django.core.files.base import ContentFile
 from accounts import models as account_module
+from django.core.paginator import Paginator
 from H2H_admin import models as adminModel
 import doctor.models as doctor_module
 from django.contrib import messages
@@ -29,8 +30,11 @@ logger = logging.getLogger(__name__)
 @login_required
 def laboratories(request):
     laboratories = account_module.Laboratory.objects.all()
+    paginator = Paginator(laboratories, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        "laboratories": laboratories,
+        "laboratories": page_obj,
     }
     return render(request, "admin/lab/laboratories_list.html", context)
 
@@ -139,8 +143,11 @@ def laboratories_delete(request, id):
 @login_required
 def lab_tags(request):
     lab_tags = adminModel.LabTag.objects.all()
+    paginator = Paginator(lab_tags, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        "lab_tags": lab_tags,
+        "lab_tags": page_obj,
     }
     return render(request, "admin/lab/lab_tags_list.html", context)
 
@@ -183,8 +190,11 @@ def lab_tags_delete(request, id):
 @login_required
 def services_list(request):
     services = adminModel.Service.objects.all()
+    paginator = Paginator(services, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'services':services,
+        'services':page_obj,
     }
     return render(request, "admin/lab/services_list.html", context)
 
@@ -228,8 +238,11 @@ def services_delete(request, id):
 @login_required
 def lab_services_list(request):
     lab_services = adminModel.LabService.objects.all()
+    paginator = Paginator(lab_services, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'lab_services': lab_services,
+        'lab_services': page_obj,
     }
     return render(request, "admin/lab/lab_services_list.html", context)
 
@@ -293,7 +306,10 @@ def lab_services_delete(request, id):
 @login_required
 def lab_banners_list(request):
     lab_banners = adminModel.LabBanner.objects.all()
-    context = { 'lab_banners': lab_banners, }
+    paginator = Paginator(lab_banners, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = { 'lab_banners': page_obj, }
     return render(request, 'admin/lab/lab_banners_list.html', context)
 
 @login_required
@@ -345,8 +361,11 @@ def lab_banners_delete(request, id):
 @login_required
 def lab_staff_list(request):
     lab_staff = adminModel.LabStaff.objects.all()
+    paginator = Paginator(lab_staff, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'lab_staff': lab_staff,
+        'lab_staff': page_obj,
     }
     return render(request, 'admin/lab/lab_staff_list.html', context)
 
@@ -409,8 +428,11 @@ def lab_staff_delete(request, id):
 @login_required
 def lab_package_list(request):
     lab_packages = adminModel.LabPackage.objects.all()
+    paginator = Paginator(lab_packages, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'lab_packages': lab_packages,
+        'lab_packages': page_obj,
     }
     return render(request, 'admin/lab/lab_package_list.html', context)
 
@@ -517,7 +539,10 @@ def lab_package_delete(request, id):
 @login_required
 def lab_orders_list(request):
     lab_orders = adminModel.LabOrders.objects.select_related('customer', 'lab').prefetch_related('lab_order_items').all()
-    return render(request, 'admin/lab/lab_orders_list.html', {'lab_orders': lab_orders})
+    paginator = Paginator(lab_orders, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'admin/lab/lab_orders_list.html', {'lab_orders': page_obj})
 
 @login_required
 def lab_orders_show(request, id):

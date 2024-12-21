@@ -92,6 +92,72 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                            <div class="card-body">
+                                <nav>
+                                    <ul class="pagination pagination-gutter">
+                                        {% if expert_talks.has_previous %}
+                                        <!-- First Page -->
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1" aria-label="First">
+                                                <i class="icon-arrow-left"></i> First
+                                            </a>
+                                        </li>
+                                        <!-- Previous Page -->
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ expert_talks.previous_page_number }}" aria-label="Previous">
+                                                <i class="icon-arrow-left"></i>
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <!-- Disabled First Page -->
+                                        <li class="page-item disabled">
+                                            <span class="page-link"><i class="icon-arrow-left"></i> First</span>
+                                        </li>
+                                        <!-- Disabled Previous Page -->
+                                        <li class="page-item disabled">
+                                            <span class="page-link"><i class="icon-arrow-left"></i></span>
+                                        </li>
+                                        {% endif %}
+                            
+                                        <!-- Page Range -->
+                                        {% for num in expert_talks.paginator.page_range %}
+                                            {% if num == expert_talks.number %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                            {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                            </li>
+                                            {% endif %}
+                                        {% endfor %}
+                            
+                                        {% if expert_talks.has_next %}
+                                        <!-- Next Page -->
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ expert_talks.next_page_number }}" aria-label="Next">
+                                                <i class="icon-arrow-right"></i>
+                                            </a>
+                                        </li>
+                                        <!-- Last Page -->
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ expert_talks.paginator.num_pages }}" aria-label="Last">
+                                                Last <i class="icon-arrow-right"></i>
+                                            </a>
+                                        </li>
+                                        {% else %}
+                                        <!-- Disabled Next Page -->
+                                        <li class="page-item disabled">
+                                            <span class="page-link"><i class="icon-arrow-right"></i></span>
+                                        </li>
+                                        <!-- Disabled Last Page -->
+                                        <li class="page-item disabled">
+                                            <span class="page-link">Last <i class="icon-arrow-right"></i></span>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </nav>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -43,7 +43,7 @@
             <nav class="navbar navbar-expand">
                 <div class="collapse navbar-collapse justify-content-between">
                     <div class="header-left">
-                        <div class="search_bar dropdown">
+                        {% comment %} <div class="search_bar dropdown">
                             <span class="search_icon p-3 c-pointer" data-toggle="dropdown">
                                 <i class="mdi mdi-magnify"></i>
                             </span>
@@ -53,7 +53,7 @@
                                         aria-label="Search">
                                 </form>
                             </div>
-                        </div>
+                        </div> {% endcomment %}
                     </div>
 
                     <ul class="navbar-nav header-right">
@@ -93,7 +93,7 @@
                 <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa fa-users"></i><span class="nav-text">Customers</span></a>
                     <ul aria-expanded="false">
                         <li><a href="{% url "customer_wallet_histories_list" %}"><i class="fa fa-google-wallet"></i>Customer Wallet History</a></li>
-                        <li><a href="{% url "ward_list" %}"><i class="fa fa-money"></i>Customer Rewards</a></li>
+                        <li><a href="#"><i class="fa fa-money"></i>Customer Rewards</a></li>
                         <li><a href="{% url "help_desk_query_list" %}"><i class="fa fa-volume-control-phone"></i>Help Desk Query</a></li>
                         <li><a href="{% url "customers_list" %}"><i class="fa fa-female"></i>Customers</a></li>
                     </ul>
@@ -316,8 +316,8 @@
                         <div style="background-color: #ff851b;" class="card">
                             <div class="stat-widget-two card-body">
                                 <div class="stat-content">
-                                    <div class="stat-text">Pending Pharmacy Orders</div>
-                                    <div class="stat-digit">0</div>
+                                    <div class="stat-text">Laboratories Orders</div>
+                                    <div class="stat-digit">{{ lab_orders_count }}</div>
                                 </div>
                             </div>
                         </div>

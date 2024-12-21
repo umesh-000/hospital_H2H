@@ -4,6 +4,7 @@ from django.core.files.storage import default_storage
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.http import require_POST
 from accounts import models as account_module
+from django.core.paginator import Paginator
 from H2H_admin import models as adminModel
 from django.http import JsonResponse
 from django.contrib import messages
@@ -22,7 +23,10 @@ logger = logging.getLogger(__name__)
 @login_required
 def doctors_list(request):
     doctors = account_module.DoctorDetails.objects.all()
-    return render(request, "admin/doctor/doctors_list.html", {'doctors': doctors})
+    paginator = Paginator(doctors, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, "admin/doctor/doctors_list.html", {'doctors': page_obj})
 
 @login_required
 def doctor_create(request):
@@ -230,8 +234,11 @@ def doctor_delete(request, id):
 @login_required
 def doctor_clinic_categories(request):
     categories = adminModel.ClinicCategory.objects.all()
+    paginator = Paginator(categories, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'categories':categories,
+        'categories':page_obj,
     }
     return render(request, 'admin/doctor/clinic_category_list.html', context)
 
@@ -285,8 +292,11 @@ def clinic_category_delete(request, id):
 @login_required
 def doctor_clinics(request):
     clinics = adminModel.DoctorClinics.objects.all()
+    paginator = Paginator(clinics, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'clinic_list': clinics
+        'clinic_list': page_obj
     }
     return render(request, 'admin/doctor/doctor_clinics_list.html', context)
 
@@ -386,8 +396,11 @@ def doctor_clinics_delete(request, id):
 @login_required
 def doctor_documents(request):
     doctor_doc_list = account_module.DoctorDetails.objects.all()
+    paginator = Paginator(doctor_doc_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'doctor_doc_list': doctor_doc_list,
+        'doctor_doc_list': page_obj,
     }
     return render(request, "admin/doctor/doctor_doc_list.html", context)
 
@@ -412,8 +425,11 @@ def change_doc_status(request):
 @login_required
 def dr_banner_list(request):
     dr_banner_list = adminModel.DoctorBanner.objects.all()
+    paginator = Paginator(dr_banner_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'dr_banner_list': dr_banner_list,
+        'dr_banner_list': page_obj,
     }
     return render(request, "admin/doctor/dr_banner_list.html", context)
 
@@ -500,8 +516,11 @@ def doctor_banner_delete(request, id):
 @login_required
 def dr_booking_list(request):
     dr_booking_list = adminModel.DoctorBooking.objects.all()
+    paginator = Paginator(dr_booking_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'dr_booking_list': dr_booking_list,
+        'dr_booking_list': page_obj,
         'status_choices': adminModel.DoctorBooking.STATUS_CHOICES,
     }
     return render(request, "admin/doctor/dr_booking_list.html", context)

@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.base import ContentFile
 from accounts import models as account_module
+from django.core.paginator import Paginator
 from H2H_admin import models as adminModel
 from django.http import JsonResponse
 from django.contrib import messages
@@ -24,7 +25,10 @@ logger = logging.getLogger(__name__)
 @login_required
 def customers_list(request):
     customers = account_module.Customer.objects.select_related('user').all()
-    return render(request,"admin/customers/customers_list.html",{"customers_list":customers})
+    paginator = Paginator(customers, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request,"admin/customers/customers_list.html",{"customers_list":page_obj})
 
 @login_required
 def customers_edit(request, id):
@@ -73,12 +77,13 @@ def customers_delete(request, id):
     return JsonResponse({'success': False, 'message': 'Invalid request method. Use POST.'})
 
 
-
 @login_required
 def customer_wallet_histories_list(request):
-    customer_wallet_histories = adminModel.CustomerWalletHistory.objects.all()
-    return render(request, "admin/customers/customer_wallet_histories.html", {"customer_wallet_histories": customer_wallet_histories})
-
+    customer_wallet_histories = adminModel.CustomerWalletHistory.objects.all().order_by('-id')
+    paginator = Paginator(customer_wallet_histories, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, "admin/customers/customer_wallet_histories.html", {"customer_wallet_histories": page_obj})
 
 @login_required
 def customer_wallet_histories_create(request):
@@ -106,7 +111,10 @@ def customer_wallet_histories_create(request):
 @login_required
 def help_desk_query(request):
     queries = adminModel.HelpDeskQuery.objects.all()
-    return render(request, "admin/customers/help_desk_query_list.html", {"queries": queries})
+    paginator = Paginator(queries, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, "admin/customers/help_desk_query_list.html", {"queries": page_obj})
 
 
 @login_required
@@ -153,7 +161,10 @@ def help_desk_query_delete(request, id):
 @login_required
 def feedbacks(request):
     feedbacks = adminModel.Feedback.objects.all()
-    return render(request, "admin/customers/feedbacks_list.html", {"feedbacks": feedbacks})
+    paginator = Paginator(feedbacks, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, "admin/customers/feedbacks_list.html", {"feedbacks": page_obj})
 
 @login_required
 def feedbacks_edit(request, id):

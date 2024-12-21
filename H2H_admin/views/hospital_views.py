@@ -3,10 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.core.files.storage import default_storage
 from django.views.decorators.http import require_POST
-from django.http import JsonResponse
 from django.core.files.base import ContentFile
 from accounts import models as account_module
+from django.core.paginator import Paginator
 from H2H_admin import models as adminModel
+from django.http import JsonResponse
 from django.contrib import messages
 from django.db import transaction
 from django.conf import settings
@@ -23,7 +24,10 @@ logger = logging.getLogger(__name__)
 @login_required
 def hospital_list(request):
     hospitals = account_module.Hospital.objects.select_related('user').all()
-    return render(request,"admin/hospital/hospital_list.html",{"hospital_list":hospitals})
+    paginator = Paginator(hospitals, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request,"admin/hospital/hospital_list.html",{"hospital_list":page_obj})
 
 @login_required
 def hospital_create(request):
@@ -169,8 +173,11 @@ def hospital_delete(request, id):
 def ward_list(request):
     if request.method == "GET":
         ward_list = adminModel.Ward.objects.all()
+        paginator = Paginator(ward_list, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
         context ={
-            "ward_list":ward_list,
+            "ward_list":page_obj,
         }
         return render(request,"admin/hospital//ward_list.html",context)
 
@@ -232,8 +239,11 @@ def ward_delete(request, id):
 def bed_list(request):
     if request.method == "GET":
         bed_list = adminModel.Bed.objects.all()
+        paginator = Paginator(bed_list, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
         context ={
-            "bed_list":bed_list,
+            "bed_list":page_obj,
         }
         return render(request,"admin/hospital/list_bed.html",context)
     
@@ -322,8 +332,11 @@ def bed_delete(request, id):
 @login_required
 def bed_status_list(request):
     bed_statuses = adminModel.BedStatus.objects.select_related('hospital', 'bed').all()
+    paginator = Paginator(bed_statuses, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        "bed_statuses": bed_statuses,
+        "bed_statuses": page_obj,
     }
     return render(request, 'admin/hospital/bed_status_list.html', context)
 
@@ -390,8 +403,11 @@ def bed_status_delete(request, id):
 @login_required
 def hospital_service_list(request):
     hospital_service = adminModel.HospitalService.objects.all()
+    paginator = Paginator(hospital_service, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'hospital_service': hospital_service,
+        'hospital_service': page_obj,
     }
     return render(request, 'admin/hospital/hospital_services_list.html', context)
 
@@ -476,8 +492,11 @@ def hospital_service_delete(request, id):
 @login_required
 def hospital_department_list(request):
     hospital_department = adminModel.HospitalDepartment.objects.all()
+    paginator = Paginator(hospital_department, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'hospital_departments': hospital_department,
+        'hospital_departments': page_obj,
     }
     return render(request, 'admin/hospital/hospital_departments_list.html',context)
 
@@ -555,8 +574,11 @@ def hospital_department_delete(request, id):
 @login_required
 def hospital_facilities_list(request):
     hospital_facilities = adminModel.HospitalFacility.objects.all()
+    paginator = Paginator(hospital_facilities, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        'hospital_facilities': hospital_facilities,
+        'hospital_facilities': page_obj,
     }
     return render(request, 'admin/hospital/hospital_facilities_list.html', context)
 
@@ -628,8 +650,11 @@ def hospital_facility_delete(request, id):
 @login_required
 def hospital_doctors_list(request):
     hospital_doctors = adminModel.HospitalDoctors.objects.all()
+    paginator = Paginator(hospital_doctors, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        "hospital_doctors":hospital_doctors,
+        "hospital_doctors":page_obj,
     }
     return render(request,"admin/hospital/hospital_doctors_list.html",context)
 
@@ -705,7 +730,10 @@ def hospital_doctor_delete(request, id):
 @login_required
 def symptoms_list(request):
     symptoms = adminModel.Symptom.objects.all()
-    return render(request, "admin/symptom_list.html", {'symptoms': symptoms})
+    paginator = Paginator(symptoms, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, "admin/symptom_list.html", {'symptoms': page_obj})
 
 @login_required
 def symptom_create(request):
@@ -784,7 +812,10 @@ def symptom_delete(request, id):
 @login_required
 def specialist_list(request):
     specialist_categories = adminModel.SpecialistCategory.objects.all()
-    return render(request, "admin/specialist_list.html", {'specialist_categories': specialist_categories})
+    paginator = Paginator(specialist_categories, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, "admin/specialist_list.html", {'specialist_categories': page_obj})
 
 @login_required
 def specialist_create(request):
@@ -856,8 +887,11 @@ def specialist_delete(request, id):
 # bed booking 
 def bed_requests(request):
     bed_list = adminModel.BedBooking.objects.all()
+    paginator = Paginator(bed_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        "bed_list": bed_list,
+        "bed_list": page_obj,
     }
     return render(request, 'admin/hospital/bed_booking_requests_list.html', context)
 

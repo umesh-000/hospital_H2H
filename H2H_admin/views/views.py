@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.core.paginator import Paginator
 import accounts.models as accountModels
 import H2H_admin.models as admin_models
 from django.contrib import messages
@@ -16,11 +17,14 @@ def admin_dashboard(request):
     labs_count = accountModels.Laboratory.objects.count()
     hospitals_count = accountModels.Hospital.objects.count()
     total_users = accountModels.User.objects.exclude(user_type='admin').count()
+    lab_orders = admin_models.LabOrders.objects.select_related('customer', 'lab').prefetch_related('lab_order_items').all()
+    lab_orders_count = lab_orders.count()
     context = {
         "doctors_count":doctors_count,
         "customers_count":customers_count,
         "hospitals_count":hospitals_count,
         "labs_count":labs_count,
+        'lab_orders_count':lab_orders_count,
         "total_users":total_users,
     }
     return render(request, "admin/deshboard.html",context)
@@ -30,7 +34,10 @@ def admin_dashboard(request):
 def banners_list(request):
     if request.method == "GET":
         banners = admin_models.Banner.objects.all()
-        context = {"banners": banners,}
+        paginator = Paginator(banners, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context = {"banners": page_obj,}
         return render(request, "admin/banners/banners_list.html", context)
 
 @login_required
@@ -113,7 +120,10 @@ def banner_delete(request, id):
 def blogs_list(request):
     if request.method == "GET":
         blogs_list = admin_models.Blog.objects.all()
-        context = {"blogs": blogs_list,}
+        paginator = Paginator(blogs_list, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context = {"blogs": page_obj,}
         return render(request, "admin/blogs_list.html", context)
 
 @login_required
@@ -179,7 +189,10 @@ def blogs_delete(request, id):
 def module_offer_banners(request):
     if request.method == "GET":
         banners = admin_models.ModuleOfferBanner.objects.all()
-        context = {"banners": banners}
+        paginator = Paginator(banners, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context = {"banners": page_obj}
         return render(request, "admin/banners/module_offer_banners_list.html", context)
 
 @login_required
@@ -255,7 +268,10 @@ def module_offer_banners_delete(request, id):
 def fcm_notifications(request):
     if request.method == "GET":
         fcm_notifications = admin_models.FcmNotification.objects.all()
-        context = {"fcm_notifications": fcm_notifications}
+        paginator = Paginator(fcm_notifications, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context = {"fcm_notifications": page_obj}
         return render(request, "admin/fcm_notifications_list.html", context)
     
 @login_required
@@ -306,7 +322,10 @@ def fcm_notifications_edit(request, id):
 def expert_talks_list(request):
     if request.method == "GET":
         expert_talks = admin_models.ExpertTalk.objects.select_related('doctor').all()
-        context = {"expert_talks": expert_talks}
+        paginator = Paginator(expert_talks, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context = {"expert_talks": page_obj}
         return render(request, "admin/expert_talks_list.html", context)
 
 # Create a new expert talk
@@ -434,8 +453,11 @@ def users(request):
         })
     # print(json.dumps(list(all_users), indent=4))
     all_users = sorted(all_users, key=lambda x: x['user_id'])
+    paginator = Paginator(all_users, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     context = {
-        "all_users": all_users,
+        "all_users": page_obj,
     }
     return render(request, "admin/users.html", context)
 
