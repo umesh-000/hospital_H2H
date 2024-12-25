@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect, render
 from django.core.paginator import Paginator
 import accounts.models as accountModels
@@ -490,3 +492,193 @@ def delete_user(request, id):
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+@login_required
+def admin_profile(request, id):
+    admin_instance = get_object_or_404(accountModels.Admin, user_id=id)
+
+    if request.method=="POST":
+        pass
+
+
+    context = {
+        "profile" : admin_instance
+    }
+    return render(request, "admin/admin_profile.html", context)
+
+@login_required
+def admin_profile(request, id):
+    admin_instance = get_object_or_404(accountModels.Admin, user_id=id)
+    if request.method == "POST":
+        profile_image = request.FILES.get('profile_image')
+        if profile_image:
+            admin_instance.profile_image = profile_image
+            admin_instance.save()
+            messages.success(request, "Profile image updated successfully!")
+        else:
+            messages.error(request, "Please select a valid image.")
+
+    context = {
+        "profile": admin_instance,
+    }
+    return render(request, "admin/admin_profile.html", context)
+
+@login_required
+def admin_change_password(request, id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    admin_profile = get_object_or_404(accountModels.Admin, id=id)
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        user = admin_profile.user
+        if not check_password(current_password, user.password):
+            messages.error(request, 'Current password is incorrect.')
+            return redirect('admin_profile', id=id)
+        if new_password != confirm_password:
+            messages.error(request, 'New password and confirmation do not match.')
+            return redirect('admin_profile', id=id)
+        user.set_password(new_password)
+        user.save()
+        update_session_auth_hash(request, user)
+        messages.success(request, 'Password updated successfully.')
+        return redirect('admin_profile', id=id)
+    context = {
+        "profile": admin_profile,
+    }
+    return render(request, 'admin/admin_profile.html', context)
+
+@login_required
+def hospital_profile(request, id):
+    admin_instance = get_object_or_404(accountModels.Hospital, user_id=id)
+    if request.method == "POST":
+        profile_image = request.FILES.get('profile_image')
+        if profile_image:
+            admin_instance.hospital_logo = profile_image
+            admin_instance.save()
+            messages.success(request, "Profile image updated successfully!")
+        else:
+            messages.error(request, "Please select a valid image.")
+
+    context = {
+        "profile": admin_instance,
+    }
+    return render(request, 'hospital/hospital_profile.html', context)
+
+
+@login_required
+def hospital_change_password(request, id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    admin_profile = get_object_or_404(accountModels.Hospital, user_id=id)
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        user = admin_profile.user
+        if not check_password(current_password, user.password):
+            messages.error(request, 'Current password is incorrect.')
+            return redirect('hospital_profile', id=id)
+        if new_password != confirm_password:
+            messages.error(request, 'New password and confirmation do not match.')
+            return redirect('hospital_profile', id=id)
+        user.set_password(new_password)
+        user.save()
+        update_session_auth_hash(request, user)
+        messages.success(request, 'Password updated successfully.')
+        return redirect('hospital_profile', id=id)
+    context = {
+        "profile": admin_profile,
+    }
+    return render(request, 'hospital/hospital_profile.html', context)
+
+@login_required
+def doctor_profile(request, id):
+    admin_instance = get_object_or_404(accountModels.DoctorDetails, user_id=id)
+    if request.method == "POST":
+        profile_image = request.FILES.get('profile_image')
+        if profile_image:
+            admin_instance.profile_img = profile_image
+            admin_instance.save()
+            messages.success(request, "Profile image updated successfully!")
+        else:
+            messages.error(request, "Please select a valid image.")
+
+    context = {
+        "profile": admin_instance,
+    }
+    return render(request, 'doctor/doctor_profile.html', context)
+
+
+@login_required
+def doctor_change_password(request, id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    admin_profile = get_object_or_404(accountModels.DoctorDetails, user_id=id)
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        user = admin_profile.user
+        if not check_password(current_password, user.password):
+            messages.error(request, 'Current password is incorrect.')
+            return redirect('doctor_profile', id=id)
+        if new_password != confirm_password:
+            messages.error(request, 'New password and confirmation do not match.')
+            return redirect('doctor_profile', id=id)
+        user.set_password(new_password)
+        user.save()
+        update_session_auth_hash(request, user)
+        messages.success(request, 'Password updated successfully.')
+        return redirect('doctor_profile', id=id)
+    context = {
+        "profile": admin_profile,
+    }
+    return render(request, 'doctor/doctor_profile.html', context)
+
+
+@login_required
+def lab_profile(request, id):
+    admin_instance = get_object_or_404(accountModels.Laboratory, user_id=id)
+    if request.method == "POST":
+        profile_image = request.FILES.get('profile_image')
+        if profile_image:
+            admin_instance.lab_image = profile_image
+            admin_instance.save()
+            messages.success(request, "Profile image updated successfully!")
+        else:
+            messages.error(request, "Please select a valid image.")
+
+    context = {
+        "profile": admin_instance,
+    }
+    return render(request, 'lab/lab_profile.html',context)
+
+
+@login_required
+def lab_change_password(request, id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    admin_profile = get_object_or_404(accountModels.Laboratory, user_id=id)
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        user = admin_profile.user
+        if not check_password(current_password, user.password):
+            messages.error(request, 'Current password is incorrect.')
+            return redirect('lab_profile', id=id)
+        if new_password != confirm_password:
+            messages.error(request, 'New password and confirmation do not match.')
+            return redirect('lab_profile', id=id)
+        user.set_password(new_password)
+        user.save()
+        update_session_auth_hash(request, user)
+        messages.success(request, 'Password updated successfully.')
+        return redirect('lab_profile', id=id)
+    context = {
+        "profile": admin_profile,
+    }
+    return render(request, 'lab/lab_profile.html', context)

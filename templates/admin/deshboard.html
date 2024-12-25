@@ -58,19 +58,63 @@
 
                     <ul class="navbar-nav header-right">
                         <li class="nav-item dropdown header-profile">
-                            <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                <i class="mdi mdi-account"></i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <a href="#" class="dropdown-item">
-                                    <i class="icon-user"></i>
-                                    <span class="ml-2 ">{{ user.username|capfirst }} - {{ user.user_type|capfirst }} </span>
-                                </a>
-                                <a href="{% url "logout" %}" class="dropdown-item">
-                                    <i class="icon-key"></i>
-                                    <span class="ml-2">Logout </span>
-                                </a>
-                            </div>
+                            {% if user.user_type == 'admin' %}
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown"> <i class="mdi mdi-account"></i>  {{ user.username|capfirst }} </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="{% url 'admin_profile' user.id %}" class="dropdown-item">
+                                        <i class="icon-user"></i>
+                                        <span class="ml-2">{{ user.username|capfirst }} - Admin</span>
+                                    </a>
+                                    <a href="{% url "logout" %}" class="dropdown-item">
+                                        <i class="icon-key"></i>
+                                        <span class="ml-2">Logout </span>
+                                    </a>
+                                </div>
+                            {% elif user.user_type == 'hospital' %}
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown"> <i class="mdi mdi-account"></i>  {{ user.username|capfirst }} </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="{% url 'hospital_profile' user.id %}" class="dropdown-item">
+                                        <i class="icon-user"></i>
+                                        <span class="ml-2">{{ user.username|capfirst }} - Hospital</span>
+                                    </a>
+                                    <a href="{% url "logout" %}" class="dropdown-item">
+                                        <i class="icon-key"></i>
+                                        <span class="ml-2">Logout </span>
+                                    </a>
+                                </div>    
+                            {% elif user.user_type == 'lab' %}
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown"> <i class="mdi mdi-account"></i>  {{ user.username|capfirst }} </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="{% url 'lab_profile' user.id %}" class="dropdown-item">
+                                        <i class="icon-user"></i>
+                                        <span class="ml-2">{{ user.username|capfirst }} - Lab</span>
+                                    </a>
+                                    <a href="{% url "logout" %}" class="dropdown-item">
+                                        <i class="icon-key"></i>
+                                        <span class="ml-2">Logout </span>
+                                    </a>
+                                </div>
+                            {% elif user.user_type == 'doctor' %}
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown"> <i class="mdi mdi-account"></i>  {{ user.username|capfirst }} </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="{% url 'doctor_profile' user.id %}" class="dropdown-item">
+                                        <i class="icon-user"></i>
+                                        <span class="ml-2">{{ user.username|capfirst }} - Doctor</span>
+                                    </a>
+                                    <a href="{% url "logout" %}" class="dropdown-item">
+                                        <i class="icon-key"></i>
+                                        <span class="ml-2">Logout </span>
+                                    </a>
+                                </div>
+                            {% else %}
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown"> <i class="mdi mdi-account"></i>  Unknown </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="{% url "logout" %}" class="dropdown-item">
+                                        <i class="icon-key"></i>
+                                        <span class="ml-2">Logout </span>
+                                    </a>
+                                </div>
+                            {% endif %}
                         </li>
                     </ul>
                 </div>

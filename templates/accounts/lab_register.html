@@ -15,10 +15,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <style>
-        .h-100 {
+        {% comment %} .h-100 {
             background: url("{% static './images/bg2.jpg' %}") no-repeat center center fixed;
             background-size: cover;
-        }
+        } {% endcomment %}
 
         .authincation-content {
             margin-top: 80px;
@@ -31,11 +31,6 @@
 
         .text-danger {
             color: #ff4942 !important; /* Ensure red color for danger text */
-        }
-
-        .btn-primary {
-            background-color: #77d5cb;
-            border-color: #77d5cb;
         }
 
         .btn-primary:hover {
@@ -64,11 +59,11 @@
         <div class="container-fluid h-100">
             <div class="row justify-content-center h-100 align-items-center">
                 <div class="col-md-6">
-                    <h2 class="text-center mb-4">Health2Home</h2>
                     <div class="authincation-content">
                         <div class="row no-gutters">
                             <div class="col-xl-12">
                                 <div class="auth-form">
+                                    <h2 class="text-center text-secondary mb-4">Health2Home</h2>
                                     <h4 class="text-center mb-4">Lab | Register</h4>
                                     <form id="registerForm" method="post" enctype="multipart/form-data">
                                         {% csrf_token %}
@@ -225,11 +220,11 @@
                                             
                                         </div>
                                         <div class="text-center mt-4">
-                                            <button type="submit" class="btn btn-primary btn-block">Register</button>
+                                            <button type="submit" class="btn btn-secondary btn-block">Register</button>
                                         </div>
                                     </form>
                                     <div class="new-account mt-3">
-                                        <p>Already have an account? <a class="text-primary" href="{% url "login" %}">Login Here</a></p>
+                                        <p>Already have an account? <a class="text-secondary" href="{% url "login" %}">Login Here</a></p>
                                     </div>
                                 </div>
                             </div>

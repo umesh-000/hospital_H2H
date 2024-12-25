@@ -18,10 +18,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <style>
-        .h-100 {
+        {% comment %} .h-100 {
             background: url("{% static './images/bg2.jpg' %}") no-repeat center center fixed;
             background-size: cover;
-        }
+        } {% endcomment %}
 
         .authincation-content {
             margin-top: 80px;
@@ -83,7 +83,7 @@
                         <div class="row no-gutters">
                             <div class="col-xl-12">
                                 <div class="auth-form">
-                                    <h2 class="text-center mb-4">Health2Home</h2>
+                                    <h2 class="text-center text-secondary mb-4">Health2Home</h2>
                                     <h4 class="text-center mb-4">Doctor Register</h4>
                                     <div class="card-body">
                                         <div class="form-validation">
@@ -355,7 +355,7 @@
 
                                                 <div class="form-group row mt-5">
                                                   <div class="col-md-12 text-center">
-                                                      <button style="background-color: #77d5cb; border-color: #77d5cb;" type="submit" class="btn btn-primary btn-block">Register</button>
+                                                      <button style="border-color: #77d5cb;" type="submit" class="btn btn-secondary btn-block">Register</button>
                                                   </div>
                                                 </div>
                                             </form>

@@ -221,4 +221,18 @@ urlpatterns = [
     path('bed-requests/', hospital_views.bed_requests, name='bed_requests'),
     path('update_booking_status/', hospital_views.update_booking_status, name='update_booking_status'),
 
+    path('<int:id>/admin-profile/', views.admin_profile, name='admin_profile'),
+    path('<int:id>/change_password/', views.admin_change_password, name='admin_change_password'),
+
+
+    path('<int:id>/hospital-profile/', views.hospital_profile, name='hospital_profile'),
+    path('<int:id>/hospital_change_password/', views.hospital_change_password, name='hospital_change_password'),
+
+    path('<int:id>/doctor-profile/', views.doctor_profile, name='doctor_profile'),
+    path('<int:id>/doctor_change_password/', views.doctor_change_password, name='doctor_change_password'),
+
+
+    path('<int:id>/lab-profile/', views.lab_profile, name='lab_profile'),
+    path('<int:id>/lab_change_password/', views.lab_change_password, name='lab_change_password'),
+
 ]
