@@ -13,7 +13,9 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-4#pqfeua2ryn6f73ii6
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 DEBUG = True
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = ["hospital.ionenergyinfra.com","www.hospital.ionenergyinfra.com"]
+
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -68,12 +70,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'my_hospital',
-        'USER': 'root',
-        'PASSWORD': '12345',
+        'USER': 'my_hospital',
+        'PASSWORD': 'my_hospital@123',
         'HOST': 'localhost',
-        # 'USER': 'admin',
-        # 'PASSWORD': 'Admin199377',
-        # 'HOST': 'h2hhospital.c3imaguk6ro4.ap-south-1.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
@@ -124,7 +123,7 @@ SIMPLE_JWT = {
 
 # AUTH_USER_MODEL = 'hospital.Customer'
 AUTH_USER_MODEL = 'accounts.User'
-LOGIN_URL = reverse_lazy('login')
+LOGIN_URL = reverse_lazy('admin_login')
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
