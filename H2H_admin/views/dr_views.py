@@ -3,7 +3,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.http import require_POST
-from accounts import models as account_module
 from django.core.paginator import Paginator
 from H2H_admin import models as adminModel
 from django.http import JsonResponse
@@ -22,7 +21,7 @@ logger = logging.getLogger(__name__)
 # Doctors
 @login_required
 def doctors_list(request):
-    doctors = account_module.DoctorDetails.objects.all()
+    doctors = adminModel.DoctorDetails.objects.all()
     paginator = Paginator(doctors, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -79,7 +78,7 @@ def doctor_create(request):
             specialist = get_object_or_404(adminModel.SpecialistCategory, id=specialist_id)
 
             # Create the User object
-            user = account_module.User.objects.create(
+            user = adminModel.User.objects.create(
                 username=dr_username,
                 password=hashed_password,
                 email=email,
@@ -88,7 +87,7 @@ def doctor_create(request):
             )
 
             # Create DoctorDetails instance
-            doctor = account_module.DoctorDetails(
+            doctor = adminModel.DoctorDetails(
                 user=user,
                 dr_name=dr_name,
                 dr_unique_code=utils.generate_unique_code(),
@@ -129,7 +128,7 @@ def doctor_create(request):
 
 @login_required
 def doctor_edit(request, id):
-    doctor = get_object_or_404(account_module.DoctorDetails, id=id)
+    doctor = get_object_or_404(adminModel.DoctorDetails, id=id)
     specialist_categories = adminModel.SpecialistCategory.objects.all()
     if request.method == 'GET':
         context = {
@@ -218,7 +217,7 @@ def doctor_edit(request, id):
 def doctor_delete(request, id):
     if request.method == 'POST':
         try:
-            doctor = get_object_or_404(account_module.DoctorDetails, id=id)
+            doctor = get_object_or_404(adminModel.DoctorDetails, id=id)
             if doctor.user.user_type != 'doctor':
                 return JsonResponse({'success': False, 'message': 'Invalid user type for deletion.'})
             doctor.delete()
@@ -316,7 +315,7 @@ def doctor_clinics_create(request):
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
 
-        doctor = account_module.DoctorDetails.objects.get(id=doctor_id)
+        doctor = adminModel.DoctorDetails.objects.get(id=doctor_id)
         clinic_category = adminModel.ClinicCategory.objects.get(id=clinic_category_id) if clinic_category_id else None
 
         adminModel.DoctorClinics.objects.create( doctor=doctor, clinic_category=clinic_category, clinic_name=clinic_name, phone=phone,
@@ -328,7 +327,7 @@ def doctor_clinics_create(request):
         return redirect('doctor_clinic_list')
 
     # On GET request, render the form
-    doctors = account_module.DoctorDetails.objects.all()
+    doctors = adminModel.DoctorDetails.objects.all()
     clinic_categories = adminModel.ClinicCategory.objects.all()
     context={
         'doctors': doctors,
@@ -354,7 +353,7 @@ def doctor_clinics_edit(request, id):
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
 
-        doctor = account_module.DoctorDetails.objects.get(id=doctor_id)
+        doctor = adminModel.DoctorDetails.objects.get(id=doctor_id)
         clinic_category = adminModel.ClinicCategory.objects.get(id=clinic_category_id) if clinic_category_id else None
 
         clinic.doctor = doctor; clinic.clinic_category = clinic_category; clinic.clinic_name = clinic_name
@@ -369,7 +368,7 @@ def doctor_clinics_edit(request, id):
         return redirect('doctor_clinic_list')
 
     # On GET request, render the form with existing clinic data
-    doctors = account_module.DoctorDetails.objects.all()
+    doctors = adminModel.DoctorDetails.objects.all()
     clinic_categories = adminModel.ClinicCategory.objects.all()
     context = {
         'clinic': clinic,
@@ -395,7 +394,7 @@ def doctor_clinics_delete(request, id):
 # Doctor Documents :
 @login_required
 def doctor_documents(request):
-    doctor_doc_list = account_module.DoctorDetails.objects.all()
+    doctor_doc_list = adminModel.DoctorDetails.objects.all()
     paginator = Paginator(doctor_doc_list, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -411,11 +410,11 @@ def change_doc_status(request):
         status = request.POST.get('status')
 
         try:
-            doctor = account_module.DoctorDetails.objects.get(id=doctor_id)
+            doctor = adminModel.DoctorDetails.objects.get(id=doctor_id)
             doctor.document_approve_status = status
             doctor.save()
             return JsonResponse({'success': True})
-        except account_module.DoctorDetails.DoesNotExist:
+        except adminModel.DoctorDetails.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Doctor not found'})
     
     return JsonResponse({'success': False, 'error': 'Invalid request'})
@@ -436,7 +435,7 @@ def dr_banner_list(request):
 @login_required
 def doctor_banner_create(request):
     if request.method == "GET":
-        doctors_list = account_module.DoctorDetails.objects.all()
+        doctors_list = adminModel.DoctorDetails.objects.all()
         return render(request, "admin/doctor/dr_banner_create.html", {'doctors_list': doctors_list})
 
     if request.method == "POST":
@@ -452,8 +451,8 @@ def doctor_banner_create(request):
                 banner_image = default_storage.save('doctors/banners/default_image.png', f)
 
         try:
-            doctor = account_module.DoctorDetails.objects.get(id=doctor_id)
-        except account_module.DoctorDetails.DoesNotExist:
+            doctor = adminModel.DoctorDetails.objects.get(id=doctor_id)
+        except adminModel.DoctorDetails.DoesNotExist:
             messages.error(request, "Selected doctor does not exist.")
             return redirect('doctor_banner_create')
 
@@ -467,7 +466,7 @@ def doctor_banner_edit(request, id):
     banner = get_object_or_404(adminModel.DoctorBanner, id=id)
 
     if request.method == 'GET':
-        doctors_list = account_module.DoctorDetails.objects.all()
+        doctors_list = adminModel.DoctorDetails.objects.all()
         context = {
             'banner': banner,
             'doctors_list': doctors_list,
@@ -483,8 +482,8 @@ def doctor_banner_edit(request, id):
 
         # Find the selected doctor
         try:
-            doctor = account_module.DoctorDetails.objects.get(id=doctor_id)
-        except account_module.DoctorDetails.DoesNotExist:
+            doctor = adminModel.DoctorDetails.objects.get(id=doctor_id)
+        except adminModel.DoctorDetails.DoesNotExist:
             messages.error(request, "Selected doctor does not exist.")
             return redirect('doctor_banner_edit', id=id)
 

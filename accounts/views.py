@@ -7,9 +7,7 @@ from H2H_admin import models as admin_models
 from django.contrib import messages
 from django.db import transaction
 from django.conf import settings
-from accounts import models
 from H2H_admin import utils
-import datetime
 import os
 
 # Create your views here.
@@ -51,14 +49,14 @@ def admin_register(request):
         username = request.POST.get('username')
         email = request.POST.get('email')
         password = request.POST.get('password')
-        if models.User.objects.filter(username=username).exists():
+        if admin_models.User.objects.filter(username=username).exists():
             messages.error(request, "Username already exists!")
             return redirect('admin_register')
-        if models.User.objects.filter(email=email).exists():
+        if admin_models.User.objects.filter(email=email).exists():
             messages.error(request, "Email already exists!")
             return redirect('admin_register')
-        user = models.User.objects.create( username=username, email=email, password=make_password(password),user_type="admin")
-        models.Admin.objects.create(user=user)
+        user = admin_models.User.objects.create( username=username, email=email, password=make_password(password),user_type="admin")
+        admin_models.Admin.objects.create(user=user)
         messages.success(request, "Admin registration successful!")
         return redirect('login')
     return render(request, 'accounts/admin_register.html')
@@ -74,15 +72,15 @@ def hospital_register(request):
         password = request.POST.get('password')
 
         # Check if username or email already exists
-        if models.User.objects.filter(username=user_name).exists():
+        if admin_models.User.objects.filter(username=user_name).exists():
             messages.error(request, "Username already exists!")
             return redirect('hospital_create')
-        if models.User.objects.filter(email=email).exists():
+        if admin_models.User.objects.filter(email=email).exists():
             messages.error(request, "Email already exists!")
             return redirect('hospital_create')
 
         # Create User
-        user = models.User.objects.create(
+        user = admin_models.User.objects.create(
             username=user_name,
             email=email,
             password=make_password(password),
@@ -104,7 +102,7 @@ def hospital_register(request):
         address = request.POST.get('address')
         description = request.POST.get('description')
         # Create Hospital instance
-        hospital = models.Hospital.objects.create(
+        hospital = admin_models.Hospital.objects.create(
             user=user,
             hospital_name=hospital_name,
             phone_number=phone_number,
@@ -180,19 +178,13 @@ def doctor_register(request):
                     with open(default_image_path, 'rb') as f:
                         profile_picture = default_storage.save('doctors/default_image.png', f)
 
-                print(profile_picture)
-                print(resume)
-                print(medical_license_document)
-                print(certification_documents)
-                print(other_relevant_documents)
-                # Fetch Specialist Category instance
                 specialist_instance = get_object_or_404(admin_models.SpecialistCategory, id=specialist_id)
 
                 # Create User instance for Doctor
-                user = models.User.objects.create(username=dr_username,password=hashed_password,email=email,user_type='doctor')
+                user = admin_models.User.objects.create(username=dr_username,password=hashed_password,email=email,user_type='doctor')
 
                 # Create DoctorDetails instance
-                doctor = models.DoctorDetails.objects.create(
+                doctor = admin_models.DoctorDetails.objects.create(
                     # Basic Information
                     user=user,
                     dr_name=dr_name,phone=phone,gender=gender,
@@ -231,14 +223,14 @@ def lab_register(request):
         try:
             print("POST")
             with transaction.atomic():
-                user = models.User.objects.create( username=request.POST.get('username'), email=request.POST.get('email'), user_type='lab', password=make_password(request.POST.get('password')))
+                user = admin_models.User.objects.create( username=request.POST.get('username'), email=request.POST.get('email'), user_type='lab', password=make_password(request.POST.get('password')))
                 lab_image = request.FILES.get('lab_image')
                 lab_image_url = None
                 if lab_image:
                     fs = FileSystemStorage()
                     lab_image_url = fs.save(lab_image.name, lab_image)
 
-                models.Laboratory.objects.create(user=user,
+                admin_models.Laboratory.objects.create(user=user,
                     lab_name=request.POST.get('lab_name'), address=request.POST.get('address'), city=request.POST.get('city'),
                     state_province=request.POST.get('state_province'), postal_code=request.POST.get('postal_code'),
                     contact_number=request.POST.get('contact_number'), alternate_number=request.POST.get('alternate_number'),

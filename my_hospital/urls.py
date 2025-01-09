@@ -6,19 +6,13 @@ from django.conf import settings
 urlpatterns = [
 
     path('', include('accounts.urls')),
+
+     path('dj/', admin.site.urls),
     
     path('admin/', include('H2H_admin.urls')),
- 
-    # Hospital Panel
-    path('hospital/', include('hospital.urls')),
 
-    # Doctor
-    # path('admin/', include('doctor.urls')),    
-    path('doctor/', include('doctor.urls')),  
-
-    # LAB Panel  
-    path('lab/', include('lab.urls')),    
-
+    path('auth/', include('rest_framework_social_oauth2.urls')),
+    
     # Bed Booking API's
     path('api/', include('H2H_admin.urls_api')),
 ]

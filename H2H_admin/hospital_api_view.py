@@ -7,36 +7,97 @@ from django.core.exceptions import ObjectDoesNotExist
 from H2H_admin import serializers as API_serializers
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta ,timezone
+from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
 from math import radians, cos, sin, asin, sqrt
-from accounts import models as account_models
+from django.contrib.auth import get_user_model
 from H2H_admin import models as admin_models
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from H2H_admin import otp_service as OTP
+from rest_framework import serializers
 from django.db.models import Prefetch
 from django.http import JsonResponse
+from social_django.utils import psa
 from django.db.models import Count
 from rest_framework import status
 from django.conf import settings
 from django.db import models
+from random import randint
 import logging
 import random
 import json
 
-
 logger = logging.getLogger(__name__)
+User = get_user_model()
 
-class RegisterView(APIView):
+# Service OTP
+otp_storage = {}
+class GenerateOTPView(APIView):
     permission_classes = [AllowAny]
-
     def post(self, request):
-        print("Received form-data:", request.data)
+        phone_number = request.data.get('phone_number')
+        if not phone_number:
+            return Response({"status": 0, "message": "Phone number is required."}, status=status.HTTP_400_BAD_REQUEST)
+        # otp_service = OTP.SendOtp(settings.MSG91_AUTH_KEY, settings.MSG91_TEMPLATE_ID)
+        # otp = otp_service.generateOtp()
+        # otp = str(randint(1000, 9999))
+        otp = "1234"
+        expiration_time = datetime.now() + timedelta(minutes=5)
+        otp_storage[phone_number] = {'otp': otp, 'expires_at': expiration_time}
+        # Send OTP using MSG91
+        # response = otp_service.send_otp_via_msg91(phone_number=phone_number, otp=otp)
+        # if "error" in response:
+        #     return Response({"status": 0, "detail": "Failed to send OTP. " + response["error"]}, status=500)
+        expires_in_minutes = int((expiration_time - datetime.now()).total_seconds() / 60)
+        return Response({
+            "status": 1,
+            "message": "OTP generated successfully!",
+            "otp": otp,  # You can remove this in production to avoid revealing OTP in response
+            "expires_in_minutes": expires_in_minutes,
+            "expiration_time": expiration_time.strftime('%Y-%m-%d %H:%M:%S')
+        }, status=status.HTTP_200_OK)
+
+# Verify OTP
+class VerifyOTPView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        phone_number = request.data.get('phone_number')
+        otp = request.data.get('otp')
+        if not phone_number or not otp:
+            return Response({"status": 0, "message": "Phone number and OTP are required."}, status=status.HTTP_400_BAD_REQUEST)
+        stored_otp_data = otp_storage.get(phone_number)
+        if not stored_otp_data:
+            return Response({"status": 0, "message": "OTP not generated for this phone number."}, status=status.HTTP_400_BAD_REQUEST)
+        if datetime.now() > stored_otp_data['expires_at']:
+            otp_storage.pop(phone_number, None)
+            return Response({"status": 0, "message": "OTP has expired."}, status=status.HTTP_400_BAD_REQUEST)
+        if stored_otp_data['otp'] != otp:
+            return Response({"status": 0, "message": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+        stored_otp_data['verified'] = True
+        return Response({"status": 1, "message": "OTP verified successfully!"}, status=status.HTTP_200_OK)    
+
+
+class RegisterView_OTP(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        phone_number = request.data.get('phone_number')
+        otp = request.data.get('otp')
+        if not phone_number or not otp:
+            return Response({"status": 0, "message": "Phone number and OTP are required."}, status=status.HTTP_400_BAD_REQUEST)
+        stored_otp_data = otp_storage.get(phone_number)
+        if not stored_otp_data:
+            return Response({"status": 0, "message": "OTP not generated for this phone number."}, status=status.HTTP_400_BAD_REQUEST)
+        if not stored_otp_data.get('verified'):
+            return Response({"status": 0, "message": "OTP not verified. Please verify the OTP first."}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = API_serializers.RegisterSerializer(data=request.data)
         if serializer.is_valid():
             customer = serializer.save()
             return Response(
                 {
+                    'status': 1,
                     'message': 'Registration successful',
                     'email': customer.user.email,
                     'customer_name': customer.customer_name,
@@ -44,8 +105,218 @@ class RegisterView(APIView):
                 },
                 status=status.HTTP_201_CREATED,
             )
-        logger.error("Validation errors: %s", serializer.errors)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"status": 0, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# login with OTP Serializer 
+class LoginSerializer_OTP(serializers.Serializer):
+    phone_number = serializers.CharField()
+    otp = serializers.CharField(write_only=True)
+    def validate(self, data):
+        phone_number = data.get('phone_number')
+        otp = data.get('otp')
+        if not phone_number or not otp:
+            raise serializers.ValidationError("Phone number and OTP are required.")
+        otp_data = otp_storage.get(phone_number)
+        if not otp_data:
+            raise serializers.ValidationError("OTP not generated for this phone number.")
+        if datetime.now() > otp_data['expires_at']:
+            otp_storage.pop(phone_number, None)
+            raise serializers.ValidationError("OTP has expired.")
+        if otp_data['otp'] != otp:
+            raise serializers.ValidationError("Invalid OTP.")
+        try:
+            user = User.objects.get(customer_profile__phone_number=phone_number)
+            if not user.is_active:
+                raise serializers.ValidationError("User account is disabled.")
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User does not exist. Please register first.")
+        # Clear all OTP data from otp_storage
+        otp_storage.clear()
+        return {'user': user}
+
+
+
+class LoginView_OTP(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = LoginSerializer_OTP(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            refresh = RefreshToken.for_user(user)
+            access_token = refresh.access_token
+            expiration_time = datetime.fromtimestamp(access_token['exp'])
+            return Response(
+                {
+                    "status": 1,
+                    "user": {
+                        "id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                    },
+                    "refresh": str(refresh),
+                    "access": str(access_token),
+                    "token_expires_in": expiration_time.strftime('%Y-%m-%d %H:%M:%S'),
+                    "message": "Login successful",
+                },
+                status=status.HTTP_200_OK,
+            )
+        else:
+            error_messages = list(serializer.errors.values())[0][0] if serializer.errors else "Invalid input."
+            return Response({"status": 0, "message": error_messages}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class SocialLogin(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        provider_id = request.data.get('provider_id')
+        fcm_token = request.data.get('fcm_token')
+        phone_number = request.data.get('phone_number', None)
+        email = request.data.get('email', None)
+        if not provider_id or not fcm_token:
+            return Response({"error": "provider_id and fcm_token are required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = None
+            customer = admin_models.Customer.objects.filter(user__username=provider_id).first()
+            if customer:
+                user = customer.user
+                self.save_customer_detail(request.data, customer)
+            elif phone_number:
+                customer = admin_models.Customer.objects.filter(phone_number=phone_number).first()
+                if customer:
+                    user = customer.user
+                    self.save_customer_detail(request.data, customer)
+                else:
+                    user_type = self.determine_user_type(request.data)
+                    user = self.create_user(request.data, user_type)
+            elif email:
+                user = get_user_model().objects.filter(email=email).first()
+                if user:
+                    self.save_customer_detail(request.data, user.customer_profile)
+                else:
+                    user_type = self.determine_user_type(request.data)
+                    user = self.create_user(request.data, user_type)
+            else:
+                user_type = self.determine_user_type(request.data)
+                user = self.create_user(request.data, user_type)
+
+            refresh = RefreshToken.for_user(user)
+            access_token_expiry = datetime.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+            access_token_expiry_minutes = int(settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds() // 60)
+
+            return Response({
+                'user': user.username,
+                'email': user.email,
+                'profile_picture': user.customer_profile.profile_picture.url if user.customer_profile.profile_picture else None,
+                'access_token': str(refresh.access_token),
+                'access_token_expiry': f"{access_token_expiry_minutes} minutes",
+                'message': 'Login successful',
+                'status': 1
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def save_customer_detail(self, data, customer):
+        customer.customer_name = data.get('customer_name', customer.customer_name)
+        customer.phone_number = data.get('phone_number', customer.phone_number)
+        customer.fcm_token = data.get('fcm_token', customer.fcm_token)
+        customer.save()
+
+    def create_user(self, data, user_type):
+        user_data = {
+            'username': data.get('provider_id'),
+            'email': data.get('email'),
+            'password': '12345678',  # Ideally, this should be randomized or securely set
+            'user_type': user_type  # Store user_type dynamically determined
+        }
+        user = get_user_model().objects.create_user(**user_data)
+
+        # Only include valid fields for the Customer model
+        customer_data = {
+            'user': user,
+            'customer_name': data.get('customer_name'),
+            'phone_number': data.get('phone_number'),
+            'fcm_token': data.get('fcm_token')
+        }
+        admin_models.Customer.objects.create(**customer_data)
+        return user
+
+    def determine_user_type(self, data):
+        return 'customer'
+
+
+# class RegisterView(APIView):
+#     permission_classes = [AllowAny]
+#     def post(self, request):
+#         serializer = API_serializers.RegisterSerializer(data=request.data)
+#         if serializer.is_valid():
+#             customer = serializer.save()
+#             return Response(
+#                 {
+#                     'message': 'Registration successful',
+#                     'email': customer.user.email,
+#                     'customer_name': customer.customer_name,
+#                     'phone_number': customer.phone_number,
+#                 },
+#                 status=status.HTTP_201_CREATED,
+#             )
+#         logger.error("Validation errors: %s", serializer.errors)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        phone_number = request.data.get('phone_number')
+        otp = request.data.get('otp')
+        if not phone_number or not otp:
+            return Response({"status": 0, "message": "Phone number and OTP are required."}, status=status.HTTP_400_BAD_REQUEST)
+        otp_data = otp_storage.get(phone_number)
+        if not otp_data:
+            return Response({"status": 0, "message": "No OTP found for this phone number."}, status=status.HTTP_400_BAD_REQUEST)
+        if otp_data['otp'] != otp:
+            return Response({"status": 0, "message": "Invalid OTP."}, status=status.HTTP_400_BAD_REQUEST)
+        if otp_data['expires_at'] < datetime.now():
+            return Response({"status": 0, "message": "OTP has expired."}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = API_serializers.RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            customer = serializer.save()
+            del otp_storage[phone_number]
+            return Response(
+                {
+                    'status': 1,
+                    'message': 'Registration successful',
+                    'email': customer.user.email,
+                    'customer_name': customer.customer_name,
+                    'phone_number': customer.phone_number,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        return Response({"status": 0, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Login with password
+# class LoginView(APIView):
+#     permission_classes = [AllowAny]
+#     def post(self, request):
+#         serializer = API_serializers.LoginSerializer(data=request.data)
+#         if serializer.is_valid():
+#             user = serializer.validated_data.get('user')
+#             if user:
+#                 refresh = RefreshToken.for_user(user)
+#                 access_token_expiry = datetime.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
+#                 # Calculate expiry time in minutes
+#                 access_token_expiry_minutes = int(settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds() // 60)
+#                 return Response({
+#                     'email': user.email,
+#                     'user_type': user.user_type,
+#                     'access_token': str(refresh.access_token),
+#                     'access_token_expiry': f"{access_token_expiry_minutes} minutes",
+#                     'message': 'Login successful'
+#                 }, status=status.HTTP_200_OK)
+#             else:
+#                 return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
@@ -57,10 +328,9 @@ class LoginView(APIView):
             if user:
                 refresh = RefreshToken.for_user(user)
                 access_token_expiry = datetime.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
-                # Calculate expiry time in minutes
                 access_token_expiry_minutes = int(settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds() // 60)
                 return Response({
-                    'email': user.email,
+                    'phone_number': user.customer_profile.phone_number,
                     'user_type': user.user_type,
                     'access_token': str(refresh.access_token),
                     'access_token_expiry': f"{access_token_expiry_minutes} minutes",
@@ -68,8 +338,7 @@ class LoginView(APIView):
                 }, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)   
 
 '''
 ----------------------------------------------------------------------------------------------------
@@ -81,7 +350,7 @@ class LoginView(APIView):
 def get_hospitals_list_api(request):
     try:
         # Retrieve all hospitals and their associated doctors
-        hospitals = account_models.Hospital.objects.prefetch_related( Prefetch('doctors', queryset=account_models.DoctorDetails.objects.filter(status=1)) ).filter(status=1)
+        hospitals = admin_models.Hospital.objects.prefetch_related( Prefetch('doctors', queryset=admin_models.DoctorDetails.objects.filter(status=1)) ).filter(status=1)
         serializer = API_serializers.HospitalSerializer(hospitals, many=True)
 
         return Response({
@@ -117,10 +386,10 @@ def get_hospital_details(request):
     
     try:
         # Correctly use the related_name for prefetch_related
-        hospital = account_models.Hospital.objects.prefetch_related('facilities', 'services').get(id=hospital_id)
+        hospital = admin_models.Hospital.objects.prefetch_related('facilities', 'services').get(id=hospital_id)
         serializer = API_serializers.HospitalDetailsSerializer(hospital)
         return Response({"result": serializer.data}, status=status.HTTP_200_OK)
-    except account_models.Hospital.DoesNotExist:
+    except admin_models.Hospital.DoesNotExist:
         return Response({"error": "Hospital not found."}, status=status.HTTP_404_NOT_FOUND)
 '''
 ----------------------------------------------------------------------------------------------------
@@ -201,7 +470,7 @@ def get_hospital_wards_api(request):
         return Response({"error": "hospital_id is required."}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        hospital = account_models.Hospital.objects.get(id=hospital_id)
+        hospital = admin_models.Hospital.objects.get(id=hospital_id)
         wards = admin_models.Ward.objects.filter(hospital=hospital, status=1)
         serializer = API_serializers.WardSerializer(wards, many=True)
         return Response({
@@ -210,7 +479,7 @@ def get_hospital_wards_api(request):
             "message": "Success",
             "status": 1
         }, status=status.HTTP_200_OK)
-    except account_models.Hospital.DoesNotExist:
+    except admin_models.Hospital.DoesNotExist:
         return Response({"error": "Hospital not found."}, status=status.HTTP_404_NOT_FOUND)
 
 '''
@@ -283,10 +552,10 @@ def get_blood_group_api(request):
 '''
 # Helper function for validating booking data
 def validate_booking_data(customer_id, hospital_id, **kwargs):
-    customer = account_models.Customer.objects.filter(pk=customer_id, status=1).first()
+    customer = admin_models.Customer.objects.filter(pk=customer_id, status=1).first()
     if not customer:
         raise ValidationError(f"Customer with ID {customer_id} does not exist or is inactive.")
-    hospital = account_models.Hospital.objects.filter(pk=hospital_id, status=1).first()
+    hospital = admin_models.Hospital.objects.filter(pk=hospital_id, status=1).first()
     if not hospital:
         raise ValidationError(f"Hospital with ID {hospital_id} does not exist or is inactive.")
 
@@ -384,7 +653,7 @@ def get_doctors_api(request):
         clinic_category_id = payload.get('clinic_category_id')
 
         # Base queryset
-        doctors = account_models.DoctorDetails.objects.prefetch_related('specialist').filter(status=1)
+        doctors = admin_models.DoctorDetails.objects.prefetch_related('specialist').filter(status=1)
 
         # Apply filters dynamically
         if is_recommended is not None:
@@ -434,7 +703,7 @@ def get_doctors_details(request):
         if not dr_id:
             return Response({ "message": "doctor_id is required.", "status": 0 }, status=status.HTTP_400_BAD_REQUEST)
 
-        doctor = account_models.DoctorDetails.objects.prefetch_related('specialist').get(id=dr_id)
+        doctor = admin_models.DoctorDetails.objects.prefetch_related('specialist').get(id=dr_id)
         serializer = API_serializers.DoctorDetailsSerializer(doctor, context={'request': request})
         # Return the doctor data
         return Response({
@@ -443,7 +712,7 @@ def get_doctors_details(request):
             "status": 1
         }, status=status.HTTP_200_OK)
 
-    except account_models.DoctorDetails.DoesNotExist:
+    except admin_models.DoctorDetails.DoesNotExist:
         return Response({
             "result": None,
             "message": "Doctor not found.",
@@ -493,8 +762,8 @@ def getHospitalDoctors(request):
 
     # Fetch the hospital and validate its existence
     try:
-        hospital = account_models.Hospital.objects.get(id=hospital_id)
-    except account_models.Hospital.DoesNotExist:
+        hospital = admin_models.Hospital.objects.get(id=hospital_id)
+    except admin_models.Hospital.DoesNotExist:
         return Response({"message": "Hospital not found."}, status=404)
 
     # Fetch doctors linked to the hospital
@@ -552,8 +821,8 @@ def getDoctorclinics(request):
 
         # Fetch the doctor
         try:
-            doctor = account_models.DoctorDetails.objects.get(id=doctor_id)
-        except account_models.DoctorDetails.DoesNotExist:
+            doctor = admin_models.DoctorDetails.objects.get(id=doctor_id)
+        except admin_models.DoctorDetails.DoesNotExist:
             return JsonResponse({"message": "Doctor not found", "status": 0}, status=404)
 
         # Fetch clinics for the doctor
@@ -664,7 +933,7 @@ def getDoctorBanners(request):
             return Response({"message": "Invalid position value, it should be 'T' or 'B'.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            doctor = account_models.DoctorDetails.objects.get(id=doctor_id)
+            doctor = admin_models.DoctorDetails.objects.get(id=doctor_id)
         except ObjectDoesNotExist:
             return Response({"message": "Doctor not found", "status": 0}, status=status.HTTP_404_NOT_FOUND)
 
@@ -738,7 +1007,7 @@ def getRecommendedHospitals(request):
             )
         latitude = float(latitude)
         longitude = float(longitude)
-        hospitals = account_models.Hospital.objects.filter(is_recommended=1, status=1)
+        hospitals = admin_models.Hospital.objects.filter(is_recommended=1, status=1)
         nearby_hospitals = []
         for hospital in hospitals:
             if hospital.latitude and hospital.longitude:
@@ -899,8 +1168,8 @@ def sendQuery(request):
     # Validate customer ID
     if customer_id:
         try:
-            customer = account_models.Customer.objects.get(id=customer_id)
-        except account_models.Customer.DoesNotExist:
+            customer = admin_models.Customer.objects.get(id=customer_id)
+        except admin_models.Customer.DoesNotExist:
             return Response(
                 {
                     "success": False,
@@ -1003,10 +1272,10 @@ def getReminders(request):
 @authentication_classes([JWTAuthentication])
 def get_counts(request):
     try:
-        users_count = account_models.User.objects.filter(user_type='customer').count()
-        doctors_count = account_models.User.objects.filter(user_type='doctor').count()
-        hospitals_count = account_models.User.objects.filter(user_type='hospital').count()
-        labs_count = account_models.User.objects.filter(user_type='lab').count()
+        users_count = admin_models.User.objects.filter(user_type='customer').count()
+        doctors_count = admin_models.User.objects.filter(user_type='doctor').count()
+        hospitals_count = admin_models.User.objects.filter(user_type='hospital').count()
+        labs_count = admin_models.User.objects.filter(user_type='lab').count()
 
         data = {
             "users": users_count,
@@ -1300,8 +1569,8 @@ def addFeedback(request):
             )
 
         # Fetch related objects
-        hospital = account_models.Hospital.objects.filter(id=hospital_id).first() if hospital_id else None
-        doctor = account_models.DoctorDetails.objects.filter(id=doctor_id).first() if doctor_id else None
+        hospital = admin_models.Hospital.objects.filter(id=hospital_id).first() if hospital_id else None
+        doctor = admin_models.DoctorDetails.objects.filter(id=doctor_id).first() if doctor_id else None
 
         if hospital_id and not hospital:
             return Response(
@@ -1477,7 +1746,7 @@ def mark_As_Done_Reminder(request):
 @permission_classes([IsAuthenticated])
 def getTopCities(request):
     try:
-        top_cities = account_models.Hospital.objects.values('city').annotate(hospital_count=Count('id')).order_by('-hospital_count')
+        top_cities = admin_models.Hospital.objects.values('city').annotate(hospital_count=Count('id')).order_by('-hospital_count')
         # Format the results to return city and hospital count
         result = [{'city': city['city'], 'hospital_count': city['hospital_count']} for city in top_cities]
         return Response({'result': result,'message': 'Success','status': 1}, status=status.HTTP_200_OK)
@@ -1494,7 +1763,7 @@ def getTopCities(request):
 @permission_classes([IsAuthenticated])
 def addCustomerInsurance(request):
     customer_id = request.data.get('customer_id')
-    customer = get_object_or_404(account_models.Customer, id=customer_id)
+    customer = get_object_or_404(admin_models.Customer, id=customer_id)
 
     serializer = API_serializers.CustomerInsuranceSerializer(data=request.data)
     if serializer.is_valid():
@@ -1531,7 +1800,7 @@ def delete_Customer_Insurance(request):
 
     if not customer_id or not insurance_id:
         return Response({"error": "Both customer_id and insurance_id are required."}, status=status.HTTP_400_BAD_REQUEST)
-    customer = get_object_or_404(account_models.Customer, id=customer_id)
+    customer = get_object_or_404(admin_models.Customer, id=customer_id)
     try:
         insurance = admin_models.CustomerInsurance.objects.get(id=insurance_id, customer=customer)
     except admin_models.CustomerInsurance.DoesNotExist:
@@ -1840,7 +2109,7 @@ def fetchFamilyMemberDetails(request, member_id):
 @permission_classes([IsAuthenticated])
 def labLists(request):
     try:
-        labs = account_models.Laboratory.objects.filter(status=1)
+        labs = admin_models.Laboratory.objects.filter(status=1)
         serialized_data = API_serializers.LaboratorySerializer(labs, many=True).data
         return Response(
             {
@@ -1919,12 +2188,12 @@ def labDetails(request):
     try:
         lab_id = request.GET.get('lab_id')
         if lab_id:
-            lab = account_models.Laboratory.objects.filter(id=lab_id, status=1).first()
+            lab = admin_models.Laboratory.objects.filter(id=lab_id, status=1).first()
             if not lab:
                 return Response({"message": "Lab not found or inactive.", "status": 0}, status=404)
             data = API_serializers.LaboratoryDetailsSerializer(lab, context={'request': request}).data
         else:
-            labs = account_models.Laboratory.objects.filter(status=1)
+            labs = admin_models.Laboratory.objects.filter(status=1)
             data = API_serializers.LaboratoryDetailsSerializer(labs, many=True, context={'request': request}).data
 
         return Response({"result": data, "message": "Success", "status": 1}, status=200)
@@ -1975,8 +2244,8 @@ def addAddress(request):
         data = request.data
         customer_id = data.get('customer_id')
         try:
-            customer = account_models.Customer.objects.get(id=customer_id)
-        except account_models.Customer.DoesNotExist:
+            customer = admin_models.Customer.objects.get(id=customer_id)
+        except admin_models.Customer.DoesNotExist:
             return Response(
                 {"message": "Customer not found with the provided customer ID.", "status": 0}, 
                 status=status.HTTP_400_BAD_REQUEST
@@ -2034,8 +2303,8 @@ def updateAddress(request):
         if not all([address_id, customer_id, address, landmark, lat, lng]):
             return Response({"message": "All fields (id, customer_id, address, landmark, lat, lng) are required.", "status": 0},status=status.HTTP_400_BAD_REQUEST)
         try:
-            customer = account_models.Customer.objects.get(id=customer_id)
-        except account_models.Customer.DoesNotExist:
+            customer = admin_models.Customer.objects.get(id=customer_id)
+        except admin_models.Customer.DoesNotExist:
             return Response({"message": "Customer not found with the provided customer ID.", "status": 0},status=status.HTTP_400_BAD_REQUEST)
         try:
             address_obj = admin_models.Address.objects.get(id=address_id, customer=customer)
@@ -2076,8 +2345,8 @@ def editAddress(request):
             return Response({"message": "field ID is required.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
         user = request.user
         try:
-            customer = account_models.Customer.objects.get(user=user)
-        except account_models.Customer.DoesNotExist:
+            customer = admin_models.Customer.objects.get(user=user)
+        except admin_models.Customer.DoesNotExist:
             return Response({"message": "Customer not found for the logged-in user.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -2128,8 +2397,8 @@ def listCustomerAddresses(request):
         if not customer_id:
             return Response({"message": "Customer ID is required.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            customer = account_models.Customer.objects.get(id=customer_id)
-        except account_models.Customer.DoesNotExist:
+            customer = admin_models.Customer.objects.get(id=customer_id)
+        except admin_models.Customer.DoesNotExist:
             return Response({"message": "Customer not found.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
         addresses = admin_models.Address.objects.filter(customer=customer)
         if not addresses:
@@ -2179,8 +2448,8 @@ def deleteAddresses(request):
         if not address_id or not customer_id:
             return Response({"message": "Both address_id and customer_id are required.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            customer = account_models.Customer.objects.get(id=customer_id)
-        except account_models.Customer.DoesNotExist:
+            customer = admin_models.Customer.objects.get(id=customer_id)
+        except admin_models.Customer.DoesNotExist:
             return Response({"message": "Customer not found.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
         try:
             address_obj = admin_models.Address.objects.get(id=address_id, customer=customer)
@@ -2208,8 +2477,8 @@ def addWalletAmount(request):
         message = data.get('message')
         amount = data.get('amount')
         try:
-            customer = account_models.Customer.objects.get(id=customer_id)
-        except account_models.Customer.DoesNotExist:
+            customer = admin_models.Customer.objects.get(id=customer_id)
+        except admin_models.Customer.DoesNotExist:
             return Response({"message": "Customer not found with the provided customer ID.", "status": 0},status=status.HTTP_400_BAD_REQUEST)
         
         if not all([transaction_type, message, amount,transaction_type_chioce,]):
@@ -2551,7 +2820,7 @@ def addDoctorBooking(request):
         return Response({"message": "Customer profile is required for the logged-in user.", "status": 0}, status=status.HTTP_400_BAD_REQUEST)
     customer_id = customer.id
     try:
-        doctor = account_models.DoctorDetails.objects.get(id=data.get('doctor_id'))
+        doctor = admin_models.DoctorDetails.objects.get(id=data.get('doctor_id'))
     except ObjectDoesNotExist:
         return JsonResponse({"success": False,"message": "Doctor not found","doctor_id": data.get('doctor_id')}, status=404)
 
@@ -2561,7 +2830,7 @@ def addDoctorBooking(request):
         return JsonResponse({"success": False, "message": "Clinic not found", "clinic_id": data.get('clinic_id')}, status=404)
 
     try:
-        customer = account_models.Customer.objects.get(id=customer_id)
+        customer = admin_models.Customer.objects.get(id=customer_id)
     except ObjectDoesNotExist:
         return JsonResponse({"success": False,"message": "Customer not found","customer_id": customer_id}, status=404)
     

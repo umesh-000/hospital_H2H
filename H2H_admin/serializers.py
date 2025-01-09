@@ -1,21 +1,22 @@
 from django.contrib.auth.hashers import make_password
-from accounts import models as account_models
+
 from H2H_admin import models as admin_models
 from django.contrib.auth import authenticate
 from rest_framework import serializers
-from accounts.models import User
+from H2H_admin.models import User
 import datetime
 
+# Register with OTP
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
     customer_name = serializers.CharField(required=True)
     phone_number = serializers.CharField(required=True)
     dob = serializers.DateField(format='%Y-%m-%d', input_formats=['%Y-%m-%d'], required=False)
-    gender = serializers.ChoiceField(choices=account_models.GENDER_CHOICES, required=False)
+    gender = serializers.ChoiceField(choices=admin_models.GENDER_CHOICES, required=False)
 
     class Meta:
-        model = account_models.Customer
+        model = admin_models.Customer
         fields = ['email', 'password', 'customer_name', 'phone_number', 'dob', 'gender']
 
     def validate_email(self, value):
@@ -24,32 +25,113 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def validate_phone_number(self, value):
-        if account_models.Customer.objects.filter(phone_number=value).exists():
+        if admin_models.Customer.objects.filter(phone_number=value).exists():
             raise serializers.ValidationError("A user with this phone number already exists.")
         return value
 
     def create(self, validated_data):
         user = User.objects.create( username=validated_data['email'], email=validated_data['email'], user_type='customer', password=make_password(validated_data['password']), )
-        customer = account_models.Customer.objects.create( user=user, customer_name=validated_data['customer_name'], phone_number=validated_data['phone_number'], dob=validated_data.get('dob'), gender=validated_data.get('gender') )
+        customer = admin_models.Customer.objects.create( user=user, customer_name=validated_data['customer_name'], phone_number=validated_data['phone_number'], dob=validated_data.get('dob'), gender=validated_data.get('gender') )
         return customer
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    phone_number = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        email = data.get('email')
+        phone_number = data.get('phone_number')
         password = data.get('password')
 
-        if email and password:
-            user = authenticate(username=email, password=password)
-            if user:
-                if not user.is_active:
-                    raise serializers.ValidationError("User account is disabled.")
-                return {'user': user}
-            else:
-                raise serializers.ValidationError("Invalid email or password.")
-        raise serializers.ValidationError("Email and password are required.")
+        if phone_number and password:
+            try:
+                user = User.objects.get(customer_profile__phone_number=phone_number)  # Fetch user by phone number
+                if user.check_password(password):  # Check password
+                    if not user.is_active:
+                        raise serializers.ValidationError("User account is disabled.")
+                    return {'user': user}
+                else:
+                    raise serializers.ValidationError("Invalid phone number or password.")
+            except User.DoesNotExist:
+                raise serializers.ValidationError("Invalid phone number or password.")
+        raise serializers.ValidationError("Phone number and password are required.")
+
+
+
+class SocialLoginSerializer(serializers.Serializer):
+    provider_id = serializers.CharField(required=True)
+    fcm_token = serializers.CharField(required=True)
+    phone_number = serializers.CharField(allow_blank=True)
+    email = serializers.EmailField(allow_blank=True)
+    customer_name = serializers.CharField(allow_blank=True)
+
+
+# class RegisterSerializer(serializers.ModelSerializer):
+#     email = serializers.EmailField(required=True)
+#     password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+#     customer_name = serializers.CharField(required=True)
+#     phone_number = serializers.CharField(required=True)
+#     dob = serializers.DateField(format='%Y-%m-%d', input_formats=['%Y-%m-%d'], required=False)
+#     gender = serializers.ChoiceField(choices=admin_models.GENDER_CHOICES, required=False)
+
+#     class Meta:
+#         model = admin_models.Customer
+#         fields = ['email', 'password', 'customer_name', 'phone_number', 'dob', 'gender']
+
+#     def validate_email(self, value):
+#         if User.objects.filter(email=value).exists():
+#             raise serializers.ValidationError("A user with this email already exists.")
+#         return value
+
+#     def validate_phone_number(self, value):
+#         if admin_models.Customer.objects.filter(phone_number=value).exists():
+#             raise serializers.ValidationError("A user with this phone number already exists.")
+#         return value
+
+#     def create(self, validated_data):
+#         user = User.objects.create( username=validated_data['email'], email=validated_data['email'], user_type='customer', password=make_password(validated_data['password']), )
+#         customer = admin_models.Customer.objects.create( user=user, customer_name=validated_data['customer_name'], phone_number=validated_data['phone_number'], dob=validated_data.get('dob'), gender=validated_data.get('gender') )
+#         return customer
+
+# Login with password
+# class LoginSerializer(serializers.Serializer):
+#     email = serializers.EmailField()
+#     password = serializers.CharField(write_only=True)
+
+#     def validate(self, data):
+#         email = data.get('email')
+#         password = data.get('password')
+
+#         if email and password:
+#             user = authenticate(username=email, password=password)
+#             if user:
+#                 if not user.is_active:
+#                     raise serializers.ValidationError("User account is disabled.")
+#                 return {'user': user}
+#             else:
+#                 raise serializers.ValidationError("Invalid email or password.")
+#         raise serializers.ValidationError("Email and password are required.")
+
+# Login with OTP
+# class LoginSerializer(serializers.Serializer):
+#     phone_number = serializers.CharField()
+#     password = serializers.CharField(write_only=True)
+
+#     def validate(self, data):
+#         phone_number = data.get('phone_number')
+#         password = data.get('password')
+
+#         if phone_number and password:
+#             try:
+#                 user = User.objects.get(customer_profile__phone_number=phone_number)  # Fetch user by phone number
+#                 if user.check_password(password):  # Check password
+#                     if not user.is_active:
+#                         raise serializers.ValidationError("User account is disabled.")
+#                     return {'user': user}
+#                 else:
+#                     raise serializers.ValidationError("Invalid phone number or password.")
+#             except User.DoesNotExist:
+#                 raise serializers.ValidationError("Invalid phone number or password.")
+#         raise serializers.ValidationError("Phone number and password are required.")
     
 '''
 ------------------------------------------------------------------------------------------------------------
@@ -66,7 +148,7 @@ class DoctorDetailsSerializer(serializers.ModelSerializer):
     specialist = DoctorSpecialistCategorySerializer(read_only=True)
 
     class Meta:
-        model = account_models.DoctorDetails
+        model = admin_models.DoctorDetails
         fields = [ 'id', 'dr_name', 'qualification', 'profile_img',  'gender', 'phone', 'experience' ,'profile_status', 'consultation_fee', 'rating', 'online_status', 'is_recommended','additional_qualification', 'medical_license', 'institution', 'graduation_year', 'dob', 'description', 'resume', 'medical_license_doc', 'certification', 'other', 'join_date', 'specialist' ]
 
 
@@ -84,7 +166,7 @@ class HospitalSerializer(serializers.ModelSerializer):
     hospital_doctors = HospitalDoctorsSerializer(many=True, read_only=True)
 
     class Meta:
-        model = account_models.Hospital
+        model = admin_models.Hospital
         fields = [ 'id', 'hospital_name', 'phone_number', 'website_url', 'address', 'latitude', 'longitude', 'open_time',  'close_time', 'description', 'overall_ratings', 'no_of_ratings', 'type', 'is_recommended', 'city', 'hospital_logo', 'hospital_image',  'hospital_doctors']
 
 
@@ -105,7 +187,7 @@ class HospitalServicesSerializer(serializers.ModelSerializer):
 
 class HospitalImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = account_models.HospitalImage
+        model = admin_models.HospitalImage
         fields = ['image']
 
 class HospitalDetailsSerializer(serializers.ModelSerializer):
@@ -114,7 +196,7 @@ class HospitalDetailsSerializer(serializers.ModelSerializer):
     images = HospitalImageSerializer(source='images.all', many=True, read_only=True)
 
     class Meta:
-        model = account_models.Hospital
+        model = admin_models.Hospital
         fields = [ 'id', 'hospital_name', 'phone_number', 'website_url', 'address', 'latitude', 'longitude', 'open_time', 'close_time', 'description', 'overall_ratings','no_of_ratings', 'type', 'is_recommended', 'city', 'hospital_logo', 'hospital_image','facilities', 'services', 'images']
 '''
 ---------------------------------------------------------------------------------------------
@@ -249,7 +331,7 @@ class DoctorBookingSerializer(serializers.ModelSerializer):
 
 class HospitalBedSerializer(serializers.ModelSerializer):
     class Meta:
-        model = account_models.Hospital
+        model = admin_models.Hospital
         fields = '__all__'
 
 class BedStatusSerializer(serializers.ModelSerializer):
@@ -277,27 +359,6 @@ class NotificationSerializer(serializers.ModelSerializer):
 ---------------------------------------------------------------------------------------------
 '''
 
-# class FeedbackCustomerSerializer(serializers.ModelSerializer):
-#     profile_picture_url = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = account_models.Customer
-#         fields = ['id', 'customer_name', 'profile_picture', 'profile_picture_url']
-
-#     def get_profile_picture_url(self, obj):
-#         request = self.context.get('request')
-#         if obj.profile_picture:
-#             return request.build_absolute_uri(obj.profile_picture.url)
-#         return None
-
-
-# class FeedbackSerializer(serializers.ModelSerializer):
-#     customer = FeedbackCustomerSerializer()
-
-#     class Meta:
-#         model = account_models.Feedback
-#         fields = ['id', 'customer_id', 'hospital_id', 'doctor_id', 'rating', 'feedback', 'lab_id', 'date', 'customer']
-
 
 class DoctorSerializer(serializers.ModelSerializer):
     speciality = SpecialistCategorySerializer(source='specialist', read_only=True)
@@ -305,7 +366,7 @@ class DoctorSerializer(serializers.ModelSerializer):
     # feedbacks = FeedbackSerializer(many=True, read_only=True)
 
     class Meta:
-        model = account_models.DoctorDetails
+        model = admin_models.DoctorDetails
         fields = [
             'id', 'hospital_id', 'dr_name', 'qualification', 'profile_img', 'phone', 'gender', 
             'experience', 'rating', 'overall_ratings', 'profile_status', 'online_status', 'description', 'consultation_fee',  'speciality',
@@ -334,7 +395,7 @@ class ClinicCategorySerializer(serializers.ModelSerializer):
 
 class HospitalDoctorDetailsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = account_models.DoctorDetails
+        model = admin_models.DoctorDetails
         fields = ['id', 'dr_name', 'dr_unique_code', 'qualification', 'phone', 'gender', 'experience', 'consultation_fee', 'profile_img', 'status', 'rating', 'online_status', 'description','join_date']
 
 '''
@@ -402,7 +463,7 @@ class RecommentedHospitalImageSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
 
     class Meta:
-        model = account_models.HospitalImage
+        model = admin_models.HospitalImage
         fields = ['image', 'image_url']
 
     def get_image_url(self, obj):
@@ -417,7 +478,7 @@ class RecommentedHospitalSerializer(serializers.ModelSerializer):
     hospital_logo_url = serializers.SerializerMethodField()
 
     class Meta:
-        model = account_models.Hospital
+        model = admin_models.Hospital
         fields = ['id', 'hospital_name', 'phone_number', 'latitude', 'longitude',  'type', 'address', 'city', 'description', 'hospital_image_url',  'hospital_logo_url', 'overall_ratings', 'no_of_ratings', 'is_recommended', 'images']
 
     def get_hospital_image_url(self, obj):
@@ -499,7 +560,7 @@ class HelpDeskQuerySerializer(serializers.ModelSerializer):
 '''
 class CustomerProfileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = account_models.Customer
+        model = admin_models.Customer
         fields = ['id', 'customer_name', 'phone_number', 'profile_picture','pre_existing_disease', 'blood_group', 'gender', 'wallet','overall_ratings', 'no_of_ratings', 
         'status', 'dob', 'age','height', 'weight', 'emergency_contact_no', 'allergies','current_medications']
 
@@ -572,7 +633,7 @@ class LaboratorySerializer(serializers.ModelSerializer):
         return None
 
     class Meta:
-        model = account_models.Laboratory
+        model = admin_models.Laboratory
         fields = [
             'id', 'admin_user_id', 'lab_name', 'description', 'address', 'lab_image', 'username', 'email', 'phone_number', 'password', 'latitude', 'longitude',
             'state', 'city', 'postal_code', 'rating', 'created_at', 'updated_at' ]
@@ -597,7 +658,7 @@ class LaboratoryDetailsSerializer(serializers.ModelSerializer):
         return None
 
     class Meta:
-        model = account_models.Laboratory
+        model = admin_models.Laboratory
         fields = [ 'id', 'admin_user_id','lab_name','username', 'email', 'address', 'contact_number', 'description', 'lab_image', 'city', 'postal_code', 'state_province', 'alternate_number', 'website', 
             'operating_hours', 'specializations', 'insurance_accepted', 'payment_methods', 'emergency_services', 'home_sample_collection', 'report_delivery_options', 
             'accreditations_certifications', 'latitude', 'longitude', 'lab_commission', 'promote','created_at','updated_at']
@@ -648,8 +709,8 @@ class AddressSerializer(serializers.ModelSerializer):
     
     def validate(self, data):
         try:
-            account_models.Customer.objects.get(id=data['customer'].id)
-        except account_models.Customer.DoesNotExist:
+            admin_models.Customer.objects.get(id=data['customer'].id)
+        except admin_models.Customer.DoesNotExist:
             raise serializers.ValidationError("Customer with the given ID does not exist.")
         return data
 

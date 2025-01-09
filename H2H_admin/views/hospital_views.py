@@ -4,15 +4,11 @@ from django.contrib.auth.hashers import make_password
 from django.core.files.storage import default_storage
 from django.views.decorators.http import require_POST
 from django.core.files.base import ContentFile
-from accounts import models as account_module
 from django.core.paginator import Paginator
 from H2H_admin import models as adminModel
 from django.http import JsonResponse
 from django.contrib import messages
-from django.db import transaction
 from django.conf import settings
-from H2H_admin import utils
-import traceback
 import logging
 import json
 import os
@@ -23,7 +19,7 @@ logger = logging.getLogger(__name__)
 # Hospital
 @login_required
 def hospital_list(request):
-    hospitals = account_module.Hospital.objects.select_related('user').all()
+    hospitals = adminModel.Hospital.objects.select_related('user').all()
     paginator = Paginator(hospitals, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -41,15 +37,15 @@ def hospital_create(request):
         password = request.POST.get('password')
 
         # Check if username or email already exists
-        if account_module.User.objects.filter(username=user_name).exists():
+        if adminModel.User.objects.filter(username=user_name).exists():
             messages.error(request, "Username already exists!")
             return redirect('hospital_create')
-        if account_module.User.objects.filter(email=email).exists():
+        if adminModel.User.objects.filter(email=email).exists():
             messages.error(request, "Email already exists!")
             return redirect('hospital_create')
 
         # Create User
-        user = account_module.User.objects.create(
+        user = adminModel.User.objects.create(
             username=user_name,
             email=email,
             password=make_password(password),
@@ -76,7 +72,7 @@ def hospital_create(request):
         hospital_logo = request.FILES.get('hospital_logo')
 
         # Create Hospital instance
-        hospital = account_module.Hospital.objects.create(
+        hospital = adminModel.Hospital.objects.create(
             user=user,
             hospital_name=hospital_name,
             phone_number=phone_number,
@@ -97,7 +93,7 @@ def hospital_create(request):
 
         # Save additional images
         for image_file in hospital_image_files:
-            account_module.HospitalImage.objects.create(hospital=hospital, image=image_file)
+            adminModel.HospitalImage.objects.create(hospital=hospital, image=image_file)
 
         messages.success(request, "Hospital created successfully!")
         return redirect('hospital_list')
@@ -106,7 +102,7 @@ def hospital_create(request):
     
 @login_required    
 def hospital_edit(request, id):
-    hospital = get_object_or_404(account_module.Hospital, id=id)
+    hospital = get_object_or_404(adminModel.Hospital, id=id)
     
     if request.method == "GET":
         # Render the form with existing hospital details
@@ -144,7 +140,7 @@ def hospital_edit(request, id):
             # Save additional images
             hospital_image_files = request.FILES.getlist('hospital_images')
             for image_file in hospital_image_files:
-                account_module.HospitalImage.objects.create(hospital=hospital, image=image_file)
+                adminModel.HospitalImage.objects.create(hospital=hospital, image=image_file)
 
             messages.success(request, 'Hospital details updated successfully!')
         except Exception as e:
@@ -156,7 +152,7 @@ def hospital_edit(request, id):
 def hospital_delete(request, id):
     if request.method == 'POST':
         try:
-            hospital = get_object_or_404(account_module.Hospital, id=id)
+            hospital = get_object_or_404(adminModel.Hospital, id=id)
             user = hospital.user
             user.delete()
             hospital.delete()
@@ -184,7 +180,7 @@ def ward_list(request):
 @login_required
 def ward_create(request):
     if request.method == "GET":
-        hospitals = account_module.Hospital.objects.all()
+        hospitals = adminModel.Hospital.objects.all()
         context ={
             "hospitals":hospitals,
         }
@@ -195,7 +191,7 @@ def ward_create(request):
         hospital_id = request.POST.get('hospital_id')
         ward_name = request.POST.get('ward_name')
         status = request.POST.get('status')
-        hospital = account_module.Hospital.objects.get(id=hospital_id)
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)
         ward = adminModel.Ward(hospital=hospital,ward_name=ward_name,status=status)
         ward.save()
         messages.success(request, 'Ward Created successfully!')
@@ -204,7 +200,7 @@ def ward_create(request):
 @login_required
 def ward_edit(request,id):
     ward = get_object_or_404(adminModel.Ward, id=id)
-    hospitals = account_module.Hospital.objects.all()
+    hospitals = adminModel.Hospital.objects.all()
     if request.method=="GET":
         return render(request, 'admin/hospital//edit_ward.html', {'ward': ward,"hospitals":hospitals})
 
@@ -212,7 +208,7 @@ def ward_edit(request,id):
         hospital_id = request.POST.get('hospital_id')
         ward_name = request.POST.get('ward_name')
         status = request.POST.get('status')
-        hospital = get_object_or_404(account_module.Hospital, id=hospital_id)
+        hospital = get_object_or_404(adminModel.Hospital, id=hospital_id)
         ward.hospital = hospital
         ward.ward_name = ward_name
         ward.status = int(status)
@@ -250,7 +246,7 @@ def bed_list(request):
 @login_required
 def bed_create(request):
     if request.method == "GET":
-        hospitals = account_module.Hospital.objects.all()
+        hospitals = adminModel.Hospital.objects.all()
         wards = adminModel.Ward.objects.all()
         context = {
             "hospitals": hospitals,
@@ -266,7 +262,7 @@ def bed_create(request):
         sale_price = request.POST.get('sale_price')
         sale_bed_price = request.POST.get('sale_bed_price')
         status = request.POST.get('status')
-        hospital = account_module.Hospital.objects.get(id=hospital_id)
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)
         ward = adminModel.Ward.objects.get(id=ward_id)
         # Creating a new Bed object
         bed = adminModel.Bed(
@@ -282,7 +278,7 @@ def bed_create(request):
 def bed_edit(request, id):
     bed = get_object_or_404(adminModel.Bed, id=id)
     if request.method == "GET":
-        hospitals = account_module.Hospital.objects.all()
+        hospitals = adminModel.Hospital.objects.all()
         wards = adminModel.Ward.objects.all()
         context = {
             'bed': bed,
@@ -300,7 +296,7 @@ def bed_edit(request, id):
         sale_bed_price = request.POST.get('sale_bed_price')
         status = request.POST.get('status')
 
-        hospital = account_module.Hospital.objects.get(id=hospital_id)
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)
         ward = adminModel.Ward.objects.get(id=ward_id)
         # Update the bed object with the new data
         bed.hospital = hospital
@@ -346,7 +342,7 @@ def bed_status_create(request):
         hospital_id = request.POST.get('hospital_id')
         bed_id = request.POST.get('bed_id')
         status = request.POST.get('status')
-        hospital = account_module.Hospital.objects.get(id=hospital_id)
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)
         bed = adminModel.Bed.objects.get(id=bed_id)
         # Creating a new Bed object
         bed_status = adminModel.BedStatus(hospital=hospital,bed=bed,status=status)
@@ -354,7 +350,7 @@ def bed_status_create(request):
         messages.success(request, 'Bed Status Added Successfully!')
         return redirect('bed_status_list')
     if request.method == "GET":
-        hospitals = account_module.Hospital.objects.all()
+        hospitals = adminModel.Hospital.objects.all()
         beds = adminModel.Bed.objects.all()
         context = {
             "hospitals": hospitals,
@@ -371,7 +367,7 @@ def bed_status_edit(request, id):
         hospital_id = request.POST.get('hospital_id')
         bed_id = request.POST.get('bed_id')
         status = request.POST.get('status')
-        hospital = account_module.Hospital.objects.get(id=hospital_id)
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)
         bed = adminModel.Bed.objects.get(id=bed_id)
         bed_status.hospital = hospital
         bed_status.bed = bed
@@ -381,7 +377,7 @@ def bed_status_edit(request, id):
         return redirect('bed_status_list')
 
     else:
-        hospitals = account_module.Hospital.objects.all()
+        hospitals = adminModel.Hospital.objects.all()
         beds = adminModel.Bed.objects.all()
         context = {"hospitals": hospitals,"beds": beds,"bed_status": bed_status}
         return render(request, 'admin/hospital/bed_status_update.html', context)
@@ -414,7 +410,7 @@ def hospital_service_list(request):
 @login_required
 def hospital_service_create(request):
     if request.method == "GET":
-        hospitals = account_module.Hospital.objects.all()
+        hospitals = adminModel.Hospital.objects.all()
         context ={"hospitals":hospitals,}
         return render(request,"admin/hospital/hospital_services_create.html",context)
 
@@ -428,7 +424,7 @@ def hospital_service_create(request):
             with open(default_image_path, 'rb') as f:
                 service_icon = default_storage.save('service_icons/default_image.png', f)
 
-        hospital = account_module.Hospital.objects.get(id=hospital_id)          
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)          
         hospital_service = adminModel.HospitalService(
             hospital=hospital,
             service_name=service_name,
@@ -444,7 +440,7 @@ def hospital_service_edit(request, id):
     service = get_object_or_404(adminModel.HospitalService, id=id)
 
     if request.method == 'GET':
-        hospitals = account_module.Hospital.objects.all()
+        hospitals = adminModel.Hospital.objects.all()
         context = {
             'service': service,
             'hospitals': hospitals,
@@ -466,7 +462,7 @@ def hospital_service_edit(request, id):
                 with open(default_image_path, 'rb') as f:
                     service_icon = default_storage.save('service_icons/default_image.png', f)
 
-        hospital = account_module.Hospital.objects.get(id=hospital_id)
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)
         service.hospital = hospital
         service.service_name = service_name
         service.starting_from = starting_from
@@ -503,7 +499,7 @@ def hospital_department_list(request):
 @login_required
 def hospital_department_create(request):
     if request.method == "GET":
-        hospitals = account_module.Hospital.objects.all()
+        hospitals = adminModel.Hospital.objects.all()
         context = {
             "hospitals": hospitals,
         }
@@ -533,7 +529,7 @@ def hospital_department_create(request):
 @login_required
 def hospital_department_edit(request, id):
     department = get_object_or_404(adminModel.HospitalDepartment, id=id)
-    hospitals = account_module.Hospital.objects.all()
+    hospitals = adminModel.Hospital.objects.all()
     if request.method == "GET":
         context = {
             "hospitals": hospitals,
@@ -548,7 +544,7 @@ def hospital_department_edit(request, id):
         image = request.FILES.get('image')
         if not image:
             image = department.image
-        hospital = account_module.Hospital.objects.get(id=hospital_id)
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)
         department.hospital=hospital
         department.department_name = department_name
         department.description = description
@@ -585,7 +581,7 @@ def hospital_facilities_list(request):
 @login_required
 def hospital_facility_create(request):
     if request.method == "GET":
-        hospitals = account_module.Hospital.objects.all()
+        hospitals = adminModel.Hospital.objects.all()
         context = {
             "hospitals": hospitals,
         }
@@ -602,7 +598,7 @@ def hospital_facility_create(request):
                     icon = ContentFile(f.read(), 'default_icon.png')
             else:
                 icon = None
-        hospital = account_module.Hospital.objects.get(id=hospital_id)
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)
         hospital_facility = adminModel.HospitalFacility(hospital=hospital,facility=facility_name,icon=facility_icon,)
         hospital_facility.save()
         messages.success(request, 'Added Successfully!')
@@ -611,7 +607,7 @@ def hospital_facility_create(request):
 @login_required
 def hospital_facility_edit(request, id):
     facility = get_object_or_404(adminModel.HospitalFacility, id=id)
-    hospitals = account_module.Hospital.objects.all()
+    hospitals = adminModel.Hospital.objects.all()
     if request.method == "GET":
         context = {
             "hospitals": hospitals,
@@ -625,7 +621,7 @@ def hospital_facility_edit(request, id):
         icon = request.FILES.get('facility_icon')
         if not icon:
             icon = facility.icon
-        hospital = account_module.Hospital.objects.get(id=hospital_id)
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)
         facility.hospital = hospital
         facility.facility = facility_name
         facility.icon = icon
@@ -661,8 +657,8 @@ def hospital_doctors_list(request):
 @login_required
 def hospital_doctor_create(request):
     if request.method == "GET":
-        hospitals = account_module.Hospital.objects.all()
-        doctors = account_module.DoctorDetails.objects.all()
+        hospitals = adminModel.Hospital.objects.all()
+        doctors = adminModel.DoctorDetails.objects.all()
         context = {
             "hospitals": hospitals,
             "doctors": doctors,
@@ -675,8 +671,8 @@ def hospital_doctor_create(request):
         join_date = request.POST.get('join_date')
         status = request.POST.get('status')
 
-        hospital = account_module.Hospital.objects.get(id=hospital_id)
-        doctor = account_module.DoctorDetails.objects.get(id=doctor_id)
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)
+        doctor = adminModel.DoctorDetails.objects.get(id=doctor_id)
         adminModel.HospitalDoctors.objects.create(hospital=hospital,doctor=doctor,unique_code=doctor.dr_unique_code,join_date=join_date,status=status,)
         messages.success(request, 'Added Successfully!')
         return redirect('hospital_doctors_list')
@@ -686,8 +682,8 @@ def hospital_doctor_edit(request, id):
     doctor_assignment = get_object_or_404(adminModel.HospitalDoctors, id=id)
 
     if request.method == 'GET':
-        hospitals = account_module.Hospital.objects.all()
-        doctors = account_module.DoctorDetails.objects.all()
+        hospitals = adminModel.Hospital.objects.all()
+        doctors = adminModel.DoctorDetails.objects.all()
         context = {
             'doctor_assignment': doctor_assignment,
             'hospitals': hospitals,
@@ -701,8 +697,8 @@ def hospital_doctor_edit(request, id):
         join_date = request.POST.get('join_date')
         status = request.POST.get('status')
 
-        doctor = account_module.DoctorDetails.objects.get(id=doctor_id)
-        hospital = account_module.Hospital.objects.get(id=hospital_id)
+        doctor = adminModel.DoctorDetails.objects.get(id=doctor_id)
+        hospital = adminModel.Hospital.objects.get(id=hospital_id)
         # Updating the HospitalDoctors object
         doctor_assignment.hospital = hospital
         doctor_assignment.doctor = doctor

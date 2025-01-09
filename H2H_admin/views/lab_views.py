@@ -1,27 +1,13 @@
-from django.contrib.auth.hashers import make_password,check_password
+from django.contrib.auth.hashers import make_password
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import FileSystemStorage
-from django.core.files.storage import default_storage
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse,JsonResponse
-from django.core.files.base import ContentFile
-from accounts import models as account_module
+from django.http import JsonResponse
 from django.core.paginator import Paginator
 from H2H_admin import models as adminModel
-import doctor.models as doctor_module
 from django.contrib import messages
 from django.db import transaction
-from django.utils import timezone
-from django.conf import settings
-from hospital import models
-import traceback
-import datetime
 import logging
-import json
-import os
-from H2H_admin import utils
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +15,7 @@ logger = logging.getLogger(__name__)
 # Lab 
 @login_required
 def laboratories(request):
-    laboratories = account_module.Laboratory.objects.all()
+    laboratories = adminModel.Laboratory.objects.all()
     paginator = Paginator(laboratories, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -48,7 +34,7 @@ def laboratories_create(request):
         try:
             print("POST")
             with transaction.atomic():
-                user = account_module.User.objects.create( username=request.POST.get('username'), email=request.POST.get('email'), user_type='lab', password=make_password(request.POST.get('password')))
+                user = adminModel.User.objects.create( username=request.POST.get('username'), email=request.POST.get('email'), user_type='lab', password=make_password(request.POST.get('password')))
                 print("LABuser")
                 lab_image = request.FILES.get('lab_image')
                 lab_image_url = None
@@ -58,7 +44,7 @@ def laboratories_create(request):
 
                 # Create the lab profile
                 print("LAB")
-                account_module.Laboratory.objects.create(
+                adminModel.Laboratory.objects.create(
                     user=user,
                     lab_name=request.POST.get('lab_name'), address=request.POST.get('address'), city=request.POST.get('city'),
                     state_province=request.POST.get('state_province'), postal_code=request.POST.get('postal_code'),
@@ -80,7 +66,7 @@ def laboratories_create(request):
 
 @login_required
 def laboratories_edit(request, id):
-    lab = get_object_or_404(account_module.Laboratory, id=id)
+    lab = get_object_or_404(adminModel.Laboratory, id=id)
 
     if request.method == "GET":
         return render(request, "admin/lab/laboratories_edit.html", {'lab': lab})
@@ -129,7 +115,7 @@ def laboratories_edit(request, id):
 def laboratories_delete(request, id):
     if request.method == 'POST':
         try:
-            laboratory = get_object_or_404(account_module.Laboratory, id=id)
+            laboratory = get_object_or_404(adminModel.Laboratory, id=id)
             laboratory.delete()
             laboratory.user.delete()
             messages.success(request, 'Deleted Successfully!')
@@ -252,13 +238,13 @@ def lab_services_create(request):
         lab_id = request.POST.get('lab_id')
         service_id = request.POST.get('service_id')
         status = request.POST.get('status')
-        lab = get_object_or_404(account_module.Laboratory, id=lab_id)
+        lab = get_object_or_404(adminModel.Laboratory, id=lab_id)
         service = get_object_or_404(adminModel.Service, id=service_id)
         adminModel.LabService.objects.create(laboratory=lab,service=service,status=status)
         messages.success(request, 'Lab service created successfully!')
         return redirect('lab_services_list')
 
-    labs = account_module.Laboratory.objects.all()
+    labs = adminModel.Laboratory.objects.all()
     services = adminModel.Service.objects.all()
     context = {
         'labs': labs,
@@ -270,7 +256,7 @@ def lab_services_create(request):
 def lab_services_edit(request, id):
     lab_service = get_object_or_404(adminModel.LabService, id=id)
     if request.method == 'POST':
-        lab = get_object_or_404(account_module.Laboratory, id=request.POST.get('lab_id'))
+        lab = get_object_or_404(adminModel.Laboratory, id=request.POST.get('lab_id'))
         service = get_object_or_404(adminModel.Service, id=request.POST.get('service_id'))
         lab_service.laboratory = lab
         lab_service.service = service
@@ -281,7 +267,7 @@ def lab_services_edit(request, id):
         return redirect('lab_services_list')
 
     # Get labs and services to display in the form
-    labs = account_module.Laboratory.objects.all()
+    labs = adminModel.Laboratory.objects.all()
     services = adminModel.Service.objects.all()
     context = {
         'lab_service': lab_service,
@@ -319,12 +305,12 @@ def lab_banners_create(request):
         link = request.POST.get('link')
         banner = request.FILES.get('banner')
         status = request.POST.get('status')
-        lab = get_object_or_404(account_module.Laboratory, id=lab_id)
+        lab = get_object_or_404(adminModel.Laboratory, id=lab_id)
         lab_banner = adminModel.LabBanner( laboratory=lab, link=link, banner=banner, status=status, )
         lab_banner.save()
         messages.success(request, 'Lab banner created successfully!')
         return redirect('lab_banners_list')
-    laboratories = account_module.Laboratory.objects.all()
+    laboratories = adminModel.Laboratory.objects.all()
     context = { 'laboratories': laboratories, }
     return render(request, 'admin/lab/lab_banners_create.html', context)
 
@@ -332,7 +318,7 @@ def lab_banners_create(request):
 def lab_banners_edit(request, id):
     lab_banner = get_object_or_404(adminModel.LabBanner, id=id)
     if request.method == 'POST':
-        lab = get_object_or_404(account_module.Laboratory, id=request.POST.get('laboratory_id'))
+        lab = get_object_or_404(adminModel.Laboratory, id=request.POST.get('laboratory_id'))
         lab_banner.laboratory = lab
         lab_banner.link = request.POST.get('link')
         if request.FILES.get('banner'):
@@ -341,7 +327,7 @@ def lab_banners_edit(request, id):
         lab_banner.save()
         messages.success(request, 'Lab banner updated successfully!')
         return redirect('lab_banners_list')
-    laboratories = account_module.Laboratory.objects.all()
+    laboratories = adminModel.Laboratory.objects.all()
     context = { 'lab_banner': lab_banner, 'laboratories': laboratories, }
     return render(request, 'admin/lab/lab_banners_edit.html', context)
 
@@ -587,4 +573,4 @@ def lab_orders_delete(request, id):
             return JsonResponse({'success': True, 'message': 'Lab order deleted successfully!'})
         except Exception as e:
             return JsonResponse({'success': False, 'message': str(e)})
-    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})       

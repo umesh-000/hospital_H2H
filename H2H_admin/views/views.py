@@ -4,21 +4,19 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect, render
 from django.core.paginator import Paginator
-import accounts.models as accountModels
 import H2H_admin.models as admin_models
 from django.contrib import messages
 from django.http import JsonResponse
 import datetime
-import json
 
 
 @login_required
 def admin_dashboard(request):
-    doctors_count = accountModels.DoctorDetails.objects.count()
-    customers_count = accountModels.Customer.objects.count()
-    labs_count = accountModels.Laboratory.objects.count()
-    hospitals_count = accountModels.Hospital.objects.count()
-    total_users = accountModels.User.objects.exclude(user_type='admin').count()
+    doctors_count = admin_models.DoctorDetails.objects.count()
+    customers_count = admin_models.Customer.objects.count()
+    labs_count = admin_models.Laboratory.objects.count()
+    hospitals_count = admin_models.Hospital.objects.count()
+    total_users = admin_models.User.objects.exclude(user_type='admin').count()
     lab_orders = admin_models.LabOrders.objects.select_related('customer', 'lab').prefetch_related('lab_order_items').all()
     lab_orders_count = lab_orders.count()
     context = {
@@ -334,19 +332,19 @@ def expert_talks_list(request):
 @login_required
 def expert_talks_create(request):
     if request.method == "GET":
-        doctors = accountModels.DoctorDetails.objects.all()
+        doctors = admin_models.DoctorDetails.objects.all()
 
     if request.method == "POST":
         doctor_id = request.POST.get('doctor')
         comment = request.POST.get('comment')
 
         try:
-            doctor = get_object_or_404(accountModels.DoctorDetails, id=doctor_id)
+            doctor = get_object_or_404(admin_models.DoctorDetails, id=doctor_id)
             expert_talk = admin_models.ExpertTalk(doctor=doctor, comment=comment)
             expert_talk.save()
             messages.success(request, 'Expert Talk created successfully!')
             return redirect('expert_talks_list')
-        except accountModels.DoctorDetails.DoesNotExist:
+        except admin_models.DoctorDetails.DoesNotExist:
             messages.error(request, 'Doctor not found')
             return redirect('expert_talks_create')
     
@@ -357,7 +355,7 @@ def expert_talks_create(request):
 @login_required
 def expert_talks_edit(request, id):
     expert_talk = get_object_or_404(admin_models.ExpertTalk, id=id)
-    doctors = accountModels.DoctorDetails.objects.all()
+    doctors = admin_models.DoctorDetails.objects.all()
 
 
     if request.method == "POST":
@@ -365,13 +363,13 @@ def expert_talks_edit(request, id):
         comment = request.POST.get('comment')
 
         try:
-            doctor = get_object_or_404(accountModels.DoctorDetails, id=doctor_id)
+            doctor = get_object_or_404(admin_models.DoctorDetails, id=doctor_id)
             expert_talk.doctor = doctor
             expert_talk.comment = comment
             expert_talk.save()
             messages.success(request, 'Expert Talk updated successfully!')
             return redirect('expert_talks_list')
-        except accountModels.DoctorDetails.DoesNotExist:
+        except admin_models.DoctorDetails.DoesNotExist:
             messages.error(request, 'Doctor not found')
             return redirect('expert_talks_edit', id=id)
 
@@ -400,7 +398,7 @@ def users(request):
     all_users = []
 
     # Add Admin users
-    admins = accountModels.Admin.objects.select_related('user').all()
+    admins = admin_models.Admin.objects.select_related('user').all()
     for admin in admins:
         all_users.append({
             "user_id": admin.user.id,
@@ -411,7 +409,7 @@ def users(request):
         })
 
     # Add Customer users
-    customers = accountModels.Customer.objects.select_related('user').all()
+    customers = admin_models.Customer.objects.select_related('user').all()
     for customer in customers:
         all_users.append({
             "user_id": customer.user.id,
@@ -422,7 +420,7 @@ def users(request):
         })
 
     # Add Hospital users
-    hospitals = accountModels.Hospital.objects.select_related('user').all()
+    hospitals = admin_models.Hospital.objects.select_related('user').all()
     for hospital in hospitals:
         all_users.append({
             "user_id": hospital.user.id,
@@ -433,7 +431,7 @@ def users(request):
         })
 
     # Add Laboratory users
-    labs = accountModels.Laboratory.objects.select_related('user').all()
+    labs = admin_models.Laboratory.objects.select_related('user').all()
     for lab in labs:
         all_users.append({
             "user_id": lab.user.id,
@@ -444,7 +442,7 @@ def users(request):
         })
 
     # Add Doctor users
-    doctors = accountModels.DoctorDetails.objects.select_related('user').all()
+    doctors = admin_models.DoctorDetails.objects.select_related('user').all()
     for doctor in doctors:
         all_users.append({
             "user_id": doctor.user.id,
@@ -465,12 +463,12 @@ def users(request):
 
 @login_required
 def show_user(request, id):
-    user = get_object_or_404(accountModels.User, id=id)
+    user = get_object_or_404(admin_models.User, id=id)
     return render(request, 'admin/user_show.html', {'user': user})
 
 @login_required
 def edit_user(request, id):
-    user = get_object_or_404(accountModels.User, id=id)
+    user = get_object_or_404(admin_models.User, id=id)
     if request.method=="GET":
         return render(request, 'admin/user_edit.html', {'user': user})
     if request.method=="POST":
@@ -485,7 +483,7 @@ def edit_user(request, id):
 def delete_user(request, id):
     if request.method == 'POST':
         try:
-            user = get_object_or_404(accountModels.User, id=id)
+            user = get_object_or_404(admin_models.User, id=id)
             user.delete()
             messages.success(request, 'Expert Talk deleted successfully!')
             return JsonResponse({'success': True, 'message': 'Expert Talk deleted successfully!'})
@@ -496,7 +494,7 @@ def delete_user(request, id):
 
 @login_required
 def admin_profile(request, id):
-    admin_instance = get_object_or_404(accountModels.Admin, user_id=id)
+    admin_instance = get_object_or_404(admin_models.Admin, user_id=id)
 
     if request.method=="POST":
         pass
@@ -509,7 +507,7 @@ def admin_profile(request, id):
 
 @login_required
 def admin_profile(request, id):
-    admin_instance = get_object_or_404(accountModels.Admin, user_id=id)
+    admin_instance = get_object_or_404(admin_models.Admin, user_id=id)
     if request.method == "POST":
         profile_image = request.FILES.get('profile_image')
         if profile_image:
@@ -528,7 +526,7 @@ def admin_profile(request, id):
 def admin_change_password(request, id):
     if not request.user.is_authenticated:
         return redirect('login')
-    admin_profile = get_object_or_404(accountModels.Admin, id=id)
+    admin_profile = get_object_or_404(admin_models.Admin, id=id)
     if request.method == 'POST':
         current_password = request.POST.get('current_password')
         new_password = request.POST.get('new_password')
@@ -552,7 +550,7 @@ def admin_change_password(request, id):
 
 @login_required
 def hospital_profile(request, id):
-    admin_instance = get_object_or_404(accountModels.Hospital, user_id=id)
+    admin_instance = get_object_or_404(admin_models.Hospital, user_id=id)
     if request.method == "POST":
         profile_image = request.FILES.get('profile_image')
         if profile_image:
@@ -572,7 +570,7 @@ def hospital_profile(request, id):
 def hospital_change_password(request, id):
     if not request.user.is_authenticated:
         return redirect('login')
-    admin_profile = get_object_or_404(accountModels.Hospital, user_id=id)
+    admin_profile = get_object_or_404(admin_models.Hospital, user_id=id)
     if request.method == 'POST':
         current_password = request.POST.get('current_password')
         new_password = request.POST.get('new_password')
@@ -596,7 +594,7 @@ def hospital_change_password(request, id):
 
 @login_required
 def doctor_profile(request, id):
-    admin_instance = get_object_or_404(accountModels.DoctorDetails, user_id=id)
+    admin_instance = get_object_or_404(admin_models.DoctorDetails, user_id=id)
     if request.method == "POST":
         profile_image = request.FILES.get('profile_image')
         if profile_image:
@@ -616,7 +614,7 @@ def doctor_profile(request, id):
 def doctor_change_password(request, id):
     if not request.user.is_authenticated:
         return redirect('login')
-    admin_profile = get_object_or_404(accountModels.DoctorDetails, user_id=id)
+    admin_profile = get_object_or_404(admin_models.DoctorDetails, user_id=id)
     if request.method == 'POST':
         current_password = request.POST.get('current_password')
         new_password = request.POST.get('new_password')
@@ -641,7 +639,7 @@ def doctor_change_password(request, id):
 
 @login_required
 def lab_profile(request, id):
-    admin_instance = get_object_or_404(accountModels.Laboratory, user_id=id)
+    admin_instance = get_object_or_404(admin_models.Laboratory, user_id=id)
     if request.method == "POST":
         profile_image = request.FILES.get('profile_image')
         if profile_image:
@@ -661,7 +659,7 @@ def lab_profile(request, id):
 def lab_change_password(request, id):
     if not request.user.is_authenticated:
         return redirect('login')
-    admin_profile = get_object_or_404(accountModels.Laboratory, user_id=id)
+    admin_profile = get_object_or_404(admin_models.Laboratory, user_id=id)
     if request.method == 'POST':
         current_password = request.POST.get('current_password')
         new_password = request.POST.get('new_password')

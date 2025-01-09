@@ -23,14 +23,26 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'django.contrib.sites',
+    'rest_framework_social_oauth2',
+    'allauth.socialaccount.providers.google',
+    'dj_rest_auth.registration',
     'rest_framework.authtoken',
+    'allauth.socialaccount',
+    'allauth.account',
+    'oauth2_provider',
     'rest_framework',
+    'social_django',
+    'dj_rest_auth',
     'corsheaders',
+    'allauth',
+    
+    # my apps
     'accounts',
     'H2H_admin',
-    'hospital',
-    'doctor',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -41,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'my_hospital.urls'
@@ -56,6 +69,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
+                # social login
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -67,13 +84,10 @@ WSGI_APPLICATION = 'my_hospital.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'my_hospital',
-        'USER': 'root',
-        'PASSWORD': '12345',
+        'NAME': 'my_hospital',  
+        'USER': 'my_hospital',        # my_hospital     \\ root
+        'PASSWORD': 'my_hospital',    # my_hospital@123 \\ 12345
         'HOST': 'localhost',
-        # 'USER': 'admin',
-        # 'PASSWORD': 'Admin199377',
-        # 'HOST': 'h2hhospital.c3imaguk6ro4.ap-south-1.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
@@ -96,12 +110,20 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'my_hospital.authentication.EmailBackend'
+    'my_hospital.authentication.EmailBackend',
+    # social login
+    'social_core.backends.google.GoogleOAuth2',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        
+        # social login
+        'rest_framework_social_oauth2.authentication.SocialAuthentication',
+
+        'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -109,22 +131,41 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': False,  
     'BLACKLIST_AFTER_ROTATION': False,
+    # 'ROTATE_REFRESH_TOKENS': True,
+    # 'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'JWK_URL': None,
     'AUTH_HEADER_TYPES': ('Bearer',),
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
 }
 
-
-# AUTH_USER_MODEL = 'hospital.Customer'
-AUTH_USER_MODEL = 'accounts.User'
+SITE_ID = 1
+AUTH_USER_MODEL = 'H2H_admin.User'
 LOGIN_URL = reverse_lazy('login')
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+        'OAUTH_PKCE_ENABLED': True,
+    }
+}
+
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '716556423547-0l427oko5htp19s23fg7ht62bk3u0h56.apps.googleusercontent.com'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+SOCIAL_AUTH_GOOGLE_OAUTH2_REDIRECT_URI = 'http://localhost:8000/admin/'
+# Google OAuth settings
+
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
@@ -162,3 +203,9 @@ LOGGING = {
         'level': 'DEBUG',
     },
 }
+
+MSG91_AUTH_KEY='Put_your_key'
+MSG91_TEMPLATE_ID='Put_your_id'
+MSG91_BASE_URL='https://control.msg91.com/api/v5/otp'
+MSG91_SENDER_ID='sender_id'
+MODE='Development'

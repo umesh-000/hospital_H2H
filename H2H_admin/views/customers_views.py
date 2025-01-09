@@ -1,22 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import make_password
-from django.core.files.storage import default_storage
-from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-from django.core.files.base import ContentFile
-from accounts import models as account_module
 from django.core.paginator import Paginator
 from H2H_admin import models as adminModel
 from django.http import JsonResponse
 from django.contrib import messages
-from django.db import transaction
-from django.conf import settings
-from H2H_admin import utils
-import traceback
 import logging
 import json
-import os
 
 
 logger = logging.getLogger(__name__)
@@ -24,7 +14,7 @@ logger = logging.getLogger(__name__)
 # Hospital
 @login_required
 def customers_list(request):
-    customers = account_module.Customer.objects.select_related('user').all()
+    customers = adminModel.Customer.objects.select_related('user').all()
     paginator = Paginator(customers, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -32,7 +22,7 @@ def customers_list(request):
 
 @login_required
 def customers_edit(request, id):
-    customer = get_object_or_404(account_module.Customer, id=id)
+    customer = get_object_or_404(adminModel.Customer, id=id)
     if request.method == 'POST':
         try:
             customer_name = request.POST.get('name')
@@ -59,14 +49,14 @@ def customers_edit(request, id):
 
 @login_required
 def customers_show(request, id):
-    customer = get_object_or_404(account_module.Customer, id=id)
+    customer = get_object_or_404(adminModel.Customer, id=id)
     return render(request, 'admin/customers/customer_show.html', {'customer': customer})
 
 @login_required
 def customers_delete(request, id):
     if request.method == 'POST':
         try:
-            customer = get_object_or_404(account_module.Customer, id=id)
+            customer = get_object_or_404(adminModel.Customer, id=id)
             user = customer.user
             user.delete() 
             customer.delete()
@@ -94,13 +84,13 @@ def customer_wallet_histories_create(request):
         transaction_type_choices = request.POST.get('transaction_type_choices')
         amount = request.POST.get('amount')
 
-        customer = get_object_or_404(account_module.Customer, id=customer_id)
+        customer = get_object_or_404(adminModel.Customer, id=customer_id)
         adminModel.CustomerWalletHistory.objects.create(customer=customer,message=message,transaction_type=transaction_type,transaction_type_choices=transaction_type_choices,amount=amount,)
         messages.success(request, 'Wallet History created successfully!')
         return redirect('customer_wallet_histories_list')
 
     # On GET request, render the form
-    customers = account_module.Customer.objects.all()
+    customers = adminModel.Customer.objects.all()
     context = {
         'customers': customers,
         'type_choices': adminModel.CustomerWalletHistory._meta.get_field('transaction_type').choices,
@@ -169,10 +159,10 @@ def feedbacks(request):
 @login_required
 def feedbacks_edit(request, id):
     feedback = get_object_or_404(adminModel.Feedback, id=id)
-    customers = account_module.Customer.objects.all()
-    labs = account_module.Laboratory.objects.all()
-    doctors = account_module.DoctorDetails.objects.all()
-    hospitals = account_module.Hospital.objects.all()
+    customers = adminModel.Customer.objects.all()
+    labs = adminModel.Laboratory.objects.all()
+    doctors = adminModel.DoctorDetails.objects.all()
+    hospitals = adminModel.Hospital.objects.all()
     if request.method == 'POST':
         try:
             customer_id = request.POST.get('customer_id')
@@ -184,7 +174,7 @@ def feedbacks_edit(request, id):
             if not customer_id:
                 messages.error(request, "Customer must be selected.")
                 return redirect('feedbacks_edit', id=id)
-            customer = get_object_or_404(account_module.Customer, id=customer_id)
+            customer = get_object_or_404(adminModel.Customer, id=customer_id)
             entities = [doctor_id, hospital_id, lab_id]
             selected_entities = [entity for entity in entities if entity]
             if len(selected_entities) > 1:
@@ -206,9 +196,9 @@ def feedbacks_edit(request, id):
                 return redirect('feedbacks_edit', id=id)
 
             feedback.customer = customer
-            feedback.doctor = account_module.DoctorDetails.objects.filter(id=doctor_id).first() if doctor_id else None
-            feedback.hospital = account_module.Hospital.objects.filter(id=hospital_id).first() if hospital_id else None
-            feedback.lab = account_module.Laboratory.objects.filter(id=lab_id).first() if lab_id else None
+            feedback.doctor = adminModel.DoctorDetails.objects.filter(id=doctor_id).first() if doctor_id else None
+            feedback.hospital = adminModel.Hospital.objects.filter(id=hospital_id).first() if hospital_id else None
+            feedback.lab = adminModel.Laboratory.objects.filter(id=lab_id).first() if lab_id else None
             feedback.feedback = feedback_text
             feedback.rating = rating_value
             feedback.save()
