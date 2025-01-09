@@ -13,7 +13,9 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-4#pqfeua2ryn6f73ii6
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
 DEBUG = True
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = ["hospital.ionenergyinfra.com","www.hospital.ionenergyinfra.com"]
+
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -87,6 +89,9 @@ DATABASES = {
         'NAME': 'my_hospital',  
         'USER': 'my_hospital',        # my_hospital     \\ root
         'PASSWORD': 'my_hospital',    # my_hospital@123 \\ 12345
+        'NAME': 'my_hospital',
+        'USER': 'my_hospital',
+        'PASSWORD': 'my_hospital@123',
         'HOST': 'localhost',
         'PORT': '3306',
     }
